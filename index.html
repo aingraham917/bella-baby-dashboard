@@ -1,0 +1,3867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bella Baby QC Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            display: flex;
+            min-height: 100vh;
+            background: #fff;
+        }
+
+        .dashboard-wrapper {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Login Screen */
+        .auth-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f7f7f8;
+            min-height: 100vh;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-card.hidden {
+            display: none;
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-img {
+            width: 100px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        .auth-card h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .auth-card p {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4ba8a8;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: #4ba8a8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .login-btn:hover {
+            background: #3d8a8a;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+        }
+
+        .dashboard.active {
+            display: flex;
+        }
+
+        .dashboard-header {
+            background: white;
+            padding: 25px 30px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .top-bar {
+            background: #f8f8f8;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 8px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 13px;
+        }
+
+        .top-bar-middle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .top-bar-middle button {
+            padding: 6px 14px;
+            font-size: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #e8f5f5;
+            color: #4ba8a8;
+            transition: background 0.2s;
+        }
+
+        .top-bar-middle button:hover {
+            background: #d0e8e8;
+        }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .top-bar-right button {
+            padding: 6px 16px;
+            font-size: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #e8f5f5;
+            color: #4ba8a8;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .top-bar-right button:hover {
+            background: #d0e8e8;
+        }
+
+        .header-logo {
+            display: inline-block;
+            max-width: 150px;
+            height: auto;
+            border-radius: 12px;
+            object-fit: contain;
+            margin: 20px 0 20px 0;
+        }
+
+        .auth-logo {
+            max-width: 150px;
+            height: auto;
+            border-radius: 12px;
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
+
+        .dashboard-header h1 {
+            color: #333;
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+
+        .dashboard-header p {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .dashboard-content {
+            display: flex;
+            flex: 1;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 25px 30px;
+            overflow-y: auto;
+        }
+
+        .sidebar {
+            width: 320px;
+            background: white;
+            padding: 30px;
+            border-left: 1px solid #e0e0e0;
+            overflow-y: auto;
+        }
+
+        .controls-section {
+            margin-bottom: 30px;
+        }
+
+        .controls-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 10px;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4ba8a8;
+        }
+
+        .sort-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 10px;
+            background: #f0f0f0;
+            color: #333;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.3s;
+            margin-top: 20px;
+        }
+
+        .logout-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            padding: 10px;
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .filter-btn.active {
+            background: #4ba8a8;
+            color: white;
+            border-color: #4ba8a8;
+        }
+
+        .info-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+
+        .info-section h3 {
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .info-section p {
+            color: #666;
+            font-size: 12px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .scale-explanation {
+            margin-top: 20px;
+        }
+
+        .scale-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .scale-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: white;
+            margin-right: 8px;
+            font-size: 11px;
+        }
+
+        .scale-badge.score-1 { background: #ff6b6b; }
+        .scale-badge.score-2 { background: #ffd93d; color: #333; }
+        .scale-badge.score-3 { background: #4ba8a8; }
+        .scale-badge.score-4 { background: #89c84b; }
+
+        .scale-label {
+            font-weight: 600;
+            color: #333;
+            min-width: 80px;
+        }
+
+        .scale-description {
+            color: #666;
+        }
+
+        .rubric-link-btn {
+            transition: all 0.2s ease !important;
+        }
+
+        .rubric-link-btn:hover {
+            background: #3a8787 !important;
+            box-shadow: 0 2px 8px rgba(75, 168, 168, 0.3);
+            transform: translateY(-1px);
+        }
+
+        /* Photographer Cards */
+        .photographers-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .photographer-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .photographer-header {
+            padding: 20px;
+            background: #fafafa;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .photographer-header:hover {
+            background: #f0f0f0;
+        }
+
+        .photographer-left {
+            flex: 1;
+        }
+
+        .photographer-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .photographer-meta {
+            color: #999;
+            font-size: 13px;
+        }
+
+        .photographer-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .score-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 16px;
+            background: #e8f5f5;
+            border-radius: 6px;
+        }
+
+        .score-badge-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .score-badge-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #4ba8a8;
+        }
+
+        .expand-icon {
+            color: #999;
+            font-size: 18px;
+            transition: transform 0.3s;
+        }
+
+        .photographer-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .nested-records {
+            background: white;
+            display: none;
+        }
+
+        .nested-records.show {
+            display: block;
+        }
+
+        .nested-record {
+            padding: 15px 20px;
+            border-top: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nested-record:hover {
+            background: #f9f9f9;
+        }
+
+        .nested-record-left {
+            flex: 1;
+        }
+
+        .nested-record-date {
+            color: #999;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .nested-record-determination {
+            color: #333;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .nested-record-score {
+            background: #4ba8a8;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .no-records {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+            font-size: 14px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 1200px;
+            max-height: 90vh;
+            margin: auto;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            border: none;
+            background: none;
+            padding: 0;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .modal h2 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .modal-meta {
+            color: #999;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .detail-row {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .detail-value {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .gallery-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .gallery-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+
+        .gallery-scores {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+            min-width: 500px;
+        }
+
+        .gallery-score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .gallery-score-label {
+            color: #666;
+        }
+
+        .gallery-score-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .gallery-feedback {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #4ba8a8;
+            font-size: 14px;
+        }
+
+        .password-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+
+        .password-modal.active {
+            display: flex;
+        }
+
+        .password-modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .password-modal-close {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            border: none;
+            background: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+
+        .password-modal-close:hover {
+            color: #333;
+        }
+
+        .password-modal h2 {
+            color: #333;
+            margin-bottom: 20px;
+            clear: both;
+        }
+
+        .password-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+        .password-error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+        .print-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .print-btn {
+            flex: 1;
+            padding: 10px;
+            background: #4ba8a8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .print-btn:hover {
+            background: #3d8a8a;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-content,
+            .print-content * {
+                visibility: visible;
+            }
+            .print-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white;
+            }
+        }
+
+        .admin-report {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            overflow-y: auto;
+        }
+
+        .admin-report.active {
+            display: flex;
+        }
+
+        .admin-report-content {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 800px;
+            max-height: 90vh;
+            margin: auto;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .admin-report-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            border: none;
+            background: none;
+            padding: 0;
+        }
+
+        .admin-report-close:hover {
+            color: #333;
+        }
+
+        .admin-report h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .user-sync-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .user-sync-table th,
+        .user-sync-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+        }
+
+        .user-sync-table th {
+            background: #f5f5f5;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .user-sync-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .invite-btn-small {
+            padding: 6px 12px;
+            background: #4ba8a8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .invite-btn-small:hover {
+            background: #3d8a8a;
+        }
+
+        .batch-invite-btn {
+            padding: 12px 24px;
+            background: #4ba8a8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .batch-invite-btn:hover {
+            background: #3d8a8a;
+        }
+
+        .batch-invite-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .sync-status {
+            padding: 12px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+
+        .sync-status.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .sync-status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .sync-status.loading {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .admin-tab-btn {
+            padding: 10px 16px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: #666;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .admin-tab-btn.active {
+            color: #4ba8a8;
+            border-bottom-color: #4ba8a8;
+        }
+
+        .admin-tab {
+            display: none;
+        }
+
+        .admin-tab.active {
+            display: block;
+        }
+
+        .role-select {
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            background: white;
+        }
+
+        .role-select:hover {
+            border-color: #4ba8a8;
+        }
+
+        .save-role-btn {
+            padding: 6px 12px;
+            background: #4ba8a8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .save-role-btn:hover {
+            background: #3d8a8a;
+        }
+
+        .save-role-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- LOGIN SCREEN -->
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="logo-section">
+                    <img src="https://i.ibb.co/39k5ZmTb/Bella-Baby-Logo.png" alt="Bella Baby" class="auth-logo">
+                    <h1>Bella Baby</h1>
+                    <p>Professional Development Hub</p>
+                </div>
+
+                <form id="loginForm">
+                    <div id="loginError" class="error"></div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" placeholder="your@email.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" placeholder="••••••••" required>
+                    </div>
+
+                    <button type="submit" class="login-btn">Sign In</button>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <a href="#" id="forgotPasswordLink" style="color: #4ba8a8; text-decoration: none; font-size: 13px;">Forgot password?</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- DASHBOARD SCREEN -->
+        <div class="dashboard" id="dashboard">
+            <div class="dashboard-wrapper">
+            <div class="dashboard-header">
+                <img src="https://i.ibb.co/39k5ZmTb/Bella-Baby-Logo.png" alt="Bella Baby" class="header-logo">
+                <h1>Professional Development Hub</h1>
+                <p id="headerTagline">Review and manage photographer quality assessments</p>
+            </div>
+
+            <div class="top-bar">
+                <div class="top-bar-left">
+                    <span>Logged in as <strong id="userEmail"></strong></span>
+                </div>
+                <div class="top-bar-middle">
+                    <button id="pendingReviewsBtn" style="display: none;">📋 Pending Reviews</button>
+                    <button id="chartsPageBtn" style="display: none;">📊 Charts</button>
+                    <button id="adminReportBtn" style="display: none;">Admin Reports</button>
+                </div>
+                <div class="top-bar-right">
+                    <button id="changePasswordBtn">Change Password</button>
+                    <button class="logout-btn" id="logoutBtn" style="background: #c92a2a; color: white; margin: 0; padding: 6px 14px; font-size: 12px;">Log Out</button>
+                </div>
+            </div>
+
+            <div class="dashboard-content">
+                <div class="main-content">
+                    <div class="photographers-list" id="recordsContainer">
+                        <div class="loading">Loading records...</div>
+                    </div>
+                </div>
+
+                <div class="sidebar">
+                    <div class="controls-section">
+                        <div class="controls-title">Search</div>
+                        <input type="text" id="searchInput" class="search-input" placeholder="Enter photographer name...">
+                    </div>
+
+                    <div class="controls-section">
+                        <div class="controls-title">Filter by Type</div>
+                        <div class="filter-buttons">
+                            <button type="button" class="filter-btn active" data-filter="all">All Records</button>
+                            <button type="button" class="filter-btn" data-filter="growth_assessment">Growth Assessments</button>
+                            <button type="button" class="filter-btn" data-filter="legacy">Legacy</button>
+                        </div>
+                    </div>
+
+                    <div class="controls-section">
+                        <div class="controls-title">Sort</div>
+                        <select id="sortSelect" class="sort-select">
+                            <option value="a-z">A - Z</option>
+                            <option value="z-a">Z - A</option>
+                            <option value="score-high">Score High to Low</option>
+                            <option value="score-low">Score Low to High</option>
+                        </select>
+                    </div>
+
+                    <div class="controls-section" style="border-top: 1px solid #e0e0e0; padding-top: 15px; margin-top: 15px;">
+                        <button type="button" id="submitGABtn" class="logout-btn" style="background: #4ba8a8; color: white; width: 100%; margin-top: 0; display: none;">➕ Submit Growth Assessment</button>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>How to Understand Your QC</h3>
+                        <p><strong>General Info:</strong> Please review the notes provided by your reviewer, and focus on categories with a score of 1 before those with a 2 or higher.</p>
+                        
+                        <div class="scale-explanation">
+                            <div class="scale-item">
+                                <span class="scale-badge score-1">1</span>
+                                <div>
+                                    <div class="scale-label">Below Standards</div>
+                                    <div class="scale-description">Category didn't meet minimum standards.</div>
+                                </div>
+                            </div>
+                            <div class="scale-item">
+                                <span class="scale-badge score-2">2</span>
+                                <div>
+                                    <div class="scale-label">Needs Improvement</div>
+                                    <div class="scale-description">Consistency or technique needs work.</div>
+                                </div>
+                            </div>
+                            <div class="scale-item">
+                                <span class="scale-badge score-3">3</span>
+                                <div>
+                                    <div class="scale-label">Proficient</div>
+                                    <div class="scale-description">Solid work that meets expectations.</div>
+                                </div>
+                            </div>
+                            <div class="scale-item">
+                                <span class="scale-badge score-4">4</span>
+                                <div>
+                                    <div class="scale-label">Master</div>
+                                    <div class="scale-description">Confident, consistent, polished execution.</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <a href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view?usp=sharing" target="_blank" class="rubric-link-btn" style="display: inline-block; background: #4ba8a8; color: white; padding: 10px 16px; border-radius: 4px; text-decoration: none; font-size: 13px; font-weight: 500; transition: background 0.2s;">
+                                📋 Growth Assessment Rubric
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GROWTH ASSESSMENT SUBMISSION FORM -->
+    <div class="admin-report" id="gaFormModal">
+        <div class="admin-report-content" style="max-width: 700px;">
+            <button class="admin-report-close" id="closeGAForm" type="button">&times;</button>
+            <h2>Submit Growth Assessment</h2>
+            
+            <form id="gaSubmissionForm" style="margin-top: 20px;">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px;">Photographer Name *</label>
+                    <input type="text" id="gaPhotographerName" placeholder="Select or enter photographer name" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px;">Photographer Email *</label>
+                    <input type="email" id="gaPhotographerEmail" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px;">Assessment Date *</label>
+                    <input type="date" id="gaDate" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px;">PSS Reviewer Name *</label>
+                    <input type="text" id="gaPSSReviewer" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+
+                <h4 style="margin: 25px 0 15px 0; font-size: 13px; color: #333;">Gallery #1</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 5px;">Core Skills (1-4) *</label>
+                        <input type="number" id="gaG1CoreSkills" min="1" max="4" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 5px;">Subject and Posing (1-4) *</label>
+                        <input type="number" id="gaG1Subject" min="1" max="4" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 5px;">Composition & Variety (1-4) *</label>
+                        <input type="number" id="gaG1Composition" min="1" max="4" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 5px;">Editing / Standards (1-4) *</label>
+                        <input type="number" id="gaG1Editing" min="1" max="4" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px;">Gallery #1 Feedback</label>
+                    <textarea id="gaG1Feedback" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 80px;"></textarea>
+                </div>
+
+                <h4 style="margin: 25px 0 15px 0; font-size: 13px; color: #333;">Gallery #2</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 5px;">Core Skills (1-4) *</label>
+                        <input type="number" id="gaG2CoreSkills" min="1" max="4" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 5px;">Subject and Posing (1-4) *</label>
+                        <input type="number" id="gaG2Subject" min="1" max="4" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 5px;">Composition & Variety (1-4) *</label>
+                        <input type="number" id="gaG2Composition" min="1" max="4" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 5px;">Editing / Standards (1-4) *</label>
+                        <input type="number" id="gaG2Editing" min="1" max="4" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px;">Gallery #2 Feedback</label>
+                    <textarea id="gaG2Feedback" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 80px;"></textarea>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px;">Technical Notes</label>
+                    <textarea id="gaTechnicalNotes" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;"></textarea>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 25px;">
+                    <button type="submit" class="logout-btn" style="background: #4ba8a8; color: white; flex: 1; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">Submit for Review</button>
+                    <button type="button" id="cancelGAForm" class="logout-btn" style="background: #ddd; color: #333; flex: 1; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PENDING REVIEWS MODAL -->
+    <div class="admin-report" id="pendingReviewsModal">
+        <div class="admin-report-content" style="max-width: 900px;">
+            <button class="admin-report-close" id="closePendingReviews" type="button">&times;</button>
+            <h2>📋 Pending Growth Assessments</h2>
+            
+            <div id="pendingReviewsList" style="margin-top: 20px;">Loading...</div>
+        </div>
+    </div>
+
+    </div>
+    <div class="admin-report" id="chartsModal">
+        <div class="admin-report-content" style="max-width: 1000px;">
+            <button class="admin-report-close" id="closeChartsModal" type="button">&times;</button>
+            <h2>📊 Charts & Analytics</h2>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 25px;">
+                <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0;">
+                    <h3 style="margin: 0 0 15px 0; font-size: 15px; color: #333;">Photographers by Level</h3>
+                    <canvas id="photographersByLevelChart" style="max-height: 300px;"></canvas>
+                </div>
+                
+                <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0;">
+                    <h3 style="margin: 0 0 15px 0; font-size: 15px; color: #333;">Growth Assessment Distribution</h3>
+                    <canvas id="assessmentDistChart" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+
+            <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; margin-top: 30px;">
+                <h3 style="margin: 0 0 15px 0; font-size: 15px; color: #333;">Average Scores by Level</h3>
+                <canvas id="scoresByLevelChart" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN REPORT MODAL -->
+    <div class="admin-report" id="adminReportModal">
+        <div class="admin-report-content">
+            <button class="admin-report-close" id="closeAdminReport" type="button">&times;</button>
+            <h2>Admin Reports</h2>
+            
+            <!-- Tabs for different admin functions -->
+            <div style="display: flex; gap: 10px; margin: 20px 0; border-bottom: 1px solid #e0e0e0;">
+                <button class="admin-tab-btn active" onclick="switchAdminTab('sync', this)">User Sync</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('roles', this)" id="rolesTabBtn" style="display: none;">Manage Roles</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('amreport', this)" id="amreportTabBtn" style="display: none;">AM Report</button>
+                <button class="admin-tab-btn" onclick="switchAdminTab('archive', this)" id="archiveTabBtn" style="display: none;">Archive</button>
+            </div>
+
+            <!-- User Sync Tab -->
+            <div id="syncTab" class="admin-tab active">
+                <p style="color: #666; font-size: 13px; margin-bottom: 15px;">Photographers not yet invited as system users</p>
+                <div id="syncStatus"></div>
+                <table class="user-sync-table" id="userSyncTable">
+                    <thead>
+                        <tr>
+                            <th>Photographer Name</th>
+                            <th>Email</th>
+                            <th>Level</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="syncTableBody">
+                        <tr><td colspan="4" style="text-align: center; color: #999;">Loading...</td></tr>
+                    </tbody>
+                </table>
+                <button class="batch-invite-btn" id="batchInviteBtn">Invite All Missing Users</button>
+            </div>
+
+            <!-- Role Management Tab (Super Admin Only) -->
+            <div id="rolesTab" class="admin-tab">
+                <p style="color: #666; font-size: 13px; margin-bottom: 15px;">Assign roles to system users</p>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
+                    <label style="font-weight: 500; color: #333;">Filter by role:</label>
+                    <select id="roleFilter" class="role-select" onchange="filterRolesList(this.value)" style="flex: 1; max-width: 200px;">
+                        <option value="">All Roles</option>
+                        <option value="super_admin">Super Admin</option>
+                        <option value="admin">Admin</option>
+                        <option value="trainer">Trainer</option>
+                        <option value="am">Area Manager</option>
+                        <option value="user">Photographer</option>
+                    </select>
+                </div>
+                <div id="roleStatus"></div>
+                <table class="user-sync-table" id="rolesTable">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Current Role</th>
+                            <th>Change Role</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rolesTableBody">
+                        <tr><td colspan="3" style="text-align: center; color: #999;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- AM Report Tab (Super Admin Only) -->
+            <div id="amreportTab" class="admin-tab">
+                <p style="color: #666; font-size: 13px; margin-bottom: 15px;">Area Manager photographer levels and average scores</p>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <button class="save-role-btn" onclick="generateAMReport(3)">Last 3 Months</button>
+                    <button class="save-role-btn" onclick="generateAMReport(6)">Last 6 Months</button>
+                    <button class="save-role-btn" onclick="generateAMReport(12)">Last 12 Months</button>
+                    <button class="save-role-btn" onclick="downloadAMReportCSV()" style="background: #89c84b; margin-left: auto;">📥 Download CSV</button>
+                </div>
+                
+                <div id="amReportStatus"></div>
+                <div id="amReportContent" style="margin-top: 20px;"></div>
+            </div>
+
+            <!-- Archive Tab (AMs and Super Admin Only) -->
+            <div id="archiveTab" class="admin-tab">
+                <p style="color: #666; font-size: 13px; margin-bottom: 15px;">Archive or restore photographer records</p>
+                
+                <div style="margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 10px;">Term a Photographer</h4>
+                    <p style="color: #666; font-size: 12px; margin-bottom: 10px;">Enter photographer email to archive all their records</p>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="email" id="archivePhotogEmail" placeholder="photographer@email.com" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <button class="save-role-btn" onclick="archivePhotographer()" style="background: #ff6b6b;">Archive Photographer</button>
+                    </div>
+                    <div id="archiveStatus" style="margin-top: 10px;"></div>
+                </div>
+
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid #e0e0e0;">
+
+                <div>
+                    <h4 style="margin-bottom: 10px;">Archived Photographers</h4>
+                    <div id="archivedPhotogList" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL FOR RECORD DETAILS -->
+    <div class="modal" id="recordModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose" type="button">&times;</button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- FORGOT PASSWORD MODAL -->
+    <div class="password-modal" id="forgotPasswordModal">
+        <div class="password-modal-content">
+            <button class="password-modal-close" id="closeForgotPassword" type="button">&times;</button>
+            <h2>Reset Password</h2>
+            <div id="forgotPasswordMessage"></div>
+            <form id="forgotPasswordForm">
+                <div class="form-group">
+                    <label for="resetEmail">Email</label>
+                    <input type="email" id="resetEmail" placeholder="your@email.com" required>
+                </div>
+                <button type="submit" class="login-btn">Send Reset Link</button>
+            </form>
+            <p style="text-align: center; color: #999; font-size: 12px; margin-top: 15px;">We'll send you a link to reset your password</p>
+        </div>
+    </div>
+
+    <!-- CHANGE PASSWORD MODAL -->
+    <div class="password-modal" id="changePasswordModal">
+        <div class="password-modal-content">
+            <button class="password-modal-close" id="closeChangePassword" type="button">&times;</button>
+            <h2>Change Password</h2>
+            <div id="changePasswordMessage"></div>
+            <form id="changePasswordForm">
+                <div class="form-group">
+                    <label for="currentPassword">Current Password</label>
+                    <input type="password" id="currentPassword" placeholder="••••••••" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">New Password</label>
+                    <input type="password" id="newPassword" placeholder="••••••••" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm New Password</label>
+                    <input type="password" id="confirmPassword" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="login-btn">Update Password</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURATION
+        const SUPABASE_URL = 'https://hlfoaynyuzfexhqydesl.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_k2yrsTdzgIVgXbQqxbZNbw_ASPVbSks';
+        
+        // Admin emails who can access admin reports
+        const ADMIN_EMAILS = [
+            'aingraham@bellababy.co',
+            'costreko@bellababy.co',
+            'jlaski@bellababy.co'
+        ];
+
+        const { createClient } = window.supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // STATE
+        let currentUser = null;
+        let currentUserRole = null;
+        let currentAMTeam = []; // Photographer emails assigned to current AM
+        let amViewMode = 'team'; // 'team' or 'all' for AMs
+        let currentFilter = 'all';
+        let currentSort = 'a-z';
+        let searchQuery = '';
+        let allRecords = [];
+        let allUserRoles = {};
+        let allAMAssignments = {}; // Photographer email -> AM email mapping
+
+        // DOM ELEMENTS
+        const authContainer = document.querySelector('.auth-container');
+        const dashboard = document.getElementById('dashboard');
+        const loginForm = document.getElementById('loginForm');
+        const loginError = document.getElementById('loginError');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userEmail = document.getElementById('userEmail');
+        const recordsContainer = document.getElementById('recordsContainer');
+        const recordModal = document.getElementById('recordModal');
+        const modalClose = document.getElementById('modalClose');
+        const modalBody = document.getElementById('modalBody');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+
+        // INITIALIZE
+        // PASSWORD FUNCTIONS
+        function openForgotPasswordModal() {
+            document.getElementById('forgotPasswordModal').classList.add('active');
+            document.getElementById('forgotPasswordMessage').innerHTML = '';
+        }
+
+        function closeForgotPasswordModal() {
+            document.getElementById('forgotPasswordModal').classList.remove('active');
+            document.getElementById('forgotPasswordForm').reset();
+        }
+
+        async function handleForgotPassword(e) {
+            e.preventDefault();
+            const email = document.getElementById('resetEmail').value;
+            const messageDiv = document.getElementById('forgotPasswordMessage');
+
+            try {
+                const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}${window.location.pathname}?type=recovery`,
+                });
+
+                if (error) throw error;
+
+                messageDiv.innerHTML = '<div class="password-success">✓ Password reset link sent! Check your email.</div>';
+                setTimeout(closeForgotPasswordModal, 2000);
+            } catch (error) {
+                messageDiv.innerHTML = `<div class="password-error">Error: ${error.message}</div>`;
+            }
+        }
+
+        function openChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.add('active');
+            document.getElementById('changePasswordMessage').innerHTML = '';
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.remove('active');
+            document.getElementById('changePasswordForm').reset();
+        }
+
+        async function handleChangePassword(e) {
+            e.preventDefault();
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const messageDiv = document.getElementById('changePasswordMessage');
+
+            if (newPassword !== confirmPassword) {
+                messageDiv.innerHTML = '<div class="password-error">Passwords do not match</div>';
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                messageDiv.innerHTML = '<div class="password-error">Password must be at least 6 characters</div>';
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient.auth.updateUser({
+                    password: newPassword
+                });
+
+                if (error) throw error;
+
+                messageDiv.innerHTML = '<div class="password-success">✓ Password updated successfully!</div>';
+                setTimeout(closeChangePasswordModal, 2000);
+            } catch (error) {
+                messageDiv.innerHTML = `<div class="password-error">Error: ${error.message}</div>`;
+            }
+        }
+
+        // ADMIN REPORT FUNCTIONS
+        async function loadUserRoles() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('user_roles')
+                    .select('*');
+
+                if (error) throw error;
+
+                allUserRoles = {};
+                data.forEach(row => {
+                    allUserRoles[row.user_email.toLowerCase()] = row.role;
+                });
+            } catch (error) {
+                console.log('Could not load user roles (table may not exist yet)', error);
+            }
+
+            // Load AM-photographer mappings
+            try {
+                const { data, error } = await supabaseClient
+                    .from('am_photographer_mapping')
+                    .select('*');
+
+                if (error) throw error;
+
+                allAMAssignments = {};
+                data.forEach(row => {
+                    allAMAssignments[row["Photographer Email"].toLowerCase()] = row["AM Email"].toLowerCase();
+                });
+            } catch (error) {
+                console.log('Could not load AM assignments (table may not exist yet)', error);
+            }
+        }
+
+        function getCurrentUserRole() {
+            if (!currentUser) return 'user';
+            return allUserRoles[currentUser.email.toLowerCase()] || 'user';
+        }
+
+        function canEdit() {
+            return getCurrentUserRole() === 'super_admin';
+        }
+
+        function canViewReports() {
+            const role = getCurrentUserRole();
+            return role === 'super_admin' || role === 'admin' || role === 'trainer';
+        }
+
+        function canManageRoles() {
+            return getCurrentUserRole() === 'super_admin';
+        }
+
+        function isAM() {
+            return getCurrentUserRole() === 'am';
+        }
+
+        function getAMTeamPhotographers() {
+            if (!isAM()) return [];
+            // Find all photographers assigned to this AM
+            const team = [];
+            Object.entries(allAMAssignments).forEach(([photogEmail, amEmail]) => {
+                if (amEmail === currentUser.email.toLowerCase()) {
+                    team.push(photogEmail);
+                }
+            });
+            return team;
+        }
+
+        function shouldShowPhotographer(photographerEmail) {
+            const role = getCurrentUserRole();
+            const email = photographerEmail.toLowerCase();
+
+            // Super admin, admin, trainer see all
+            if (['super_admin', 'admin', 'trainer'].includes(role)) return true;
+
+            // AM sees only their team (unless in 'all' view mode)
+            if (role === 'am') {
+                if (amViewMode === 'team') {
+                    return currentAMTeam.includes(email);
+                }
+                return true; // 'all' mode shows everyone
+            }
+
+            // Regular user sees only themselves
+            if (role === 'user') {
+                return email === currentUser.email.toLowerCase();
+            }
+
+            return false;
+        }
+
+        // ADMIN REPORT FUNCTIONS
+        async function openAdminReport() {
+            document.getElementById('adminReportModal').classList.add('active');
+            
+            // Show role management and AM report tabs only for super admins
+            const rolesTabBtn = document.getElementById('rolesTabBtn');
+            const amreportTabBtn = document.getElementById('amreportTabBtn');
+            const archiveTabBtn = document.getElementById('archiveTabBtn');
+            
+            if (canManageRoles()) {
+                rolesTabBtn.style.display = 'block';
+                amreportTabBtn.style.display = 'block';
+            }
+            
+            // Show archive tab for AMs and Super Admins
+            const role = getCurrentUserRole();
+            if (role === 'super_admin' || role === 'area_manager') {
+                archiveTabBtn.style.display = 'block';
+                loadArchivedPhotographers();
+            }
+            
+            await loadUserSyncReport();
+        }
+
+        function switchAdminTab(tab, btn) {
+            console.log('switchAdminTab called with tab:', tab);
+            
+            // Hide all tabs
+            document.getElementById('syncTab').classList.remove('active');
+            document.getElementById('rolesTab').classList.remove('active');
+            document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+            
+            // Show selected tab
+            const targetTab = document.getElementById(tab + 'Tab');
+            console.log('Target tab element:', targetTab);
+            targetTab.classList.add('active');
+            console.log('After adding active class, rolesTab classes:', document.getElementById('rolesTab').classList);
+            
+            if (btn) {
+                btn.classList.add('active');
+            }
+            
+            // Load roles if switching to roles tab
+            if (tab === 'roles') {
+                console.log('Loading roles table...');
+                loadRolesTable();
+            }
+        }
+
+        // Store all roles for filtering
+        let allRolesData = [];
+
+        async function loadRolesTable() {
+            const rolesTableBody = document.getElementById('rolesTableBody');
+            const roleStatus = document.getElementById('roleStatus');
+            rolesTableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #999;">Loading...</td></tr>';
+
+            try {
+                console.log('Loading roles table...');
+                
+                // Get all current roles from the database
+                const { data: roles, error: rolesError } = await supabaseClient
+                    .from('user_roles')
+                    .select('*')
+                    .order('user_email', { ascending: true });
+                
+                console.log('Roles query result:', { roles, rolesError, rolesCount: roles ? roles.length : 0 });
+                
+                if (rolesError) {
+                    console.error('Roles query error:', rolesError);
+                    throw rolesError;
+                }
+
+                if (!roles || roles.length === 0) {
+                    console.log('No roles returned from query');
+                    rolesTableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #999;">No users assigned yet - check database</td></tr>';
+                    roleStatus.innerHTML = '<div class="sync-status loading">No roles found in database. Run setup_roles_final.sql if not done yet.</div>';
+                    return;
+                }
+
+                console.log('Rendering all roles:', roles);
+                
+                // Store all roles for filtering
+                allRolesData = roles;
+                
+                // Reset filter
+                const filterDropdown = document.getElementById('roleFilter');
+                if (filterDropdown) {
+                    filterDropdown.value = '';
+                }
+                
+                // Display all users
+                displayRolesTable(roles, roles.length);
+                
+            } catch (error) {
+                console.error('Error loading roles:', error);
+                roleStatus.innerHTML = `<div class="sync-status error">Error: ${error.message}</div>`;
+            }
+        }
+
+        function filterRolesList(selectedRole) {
+            if (!selectedRole) {
+                // Show all
+                displayRolesTable(allRolesData, allRolesData.length);
+            } else {
+                // Filter by selected role
+                const filtered = allRolesData.filter(r => r.role === selectedRole);
+                displayRolesTable(filtered, filtered.length);
+            }
+        }
+
+        function displayRolesTable(rolesToDisplay, totalCount) {
+            const rolesTableBody = document.getElementById('rolesTableBody');
+            const roleStatus = document.getElementById('roleStatus');
+            
+            console.log('displayRolesTable called with:', { rolesToDisplay: rolesToDisplay.length, totalCount });
+            
+            if (!rolesToDisplay || rolesToDisplay.length === 0) {
+                console.log('No roles to display');
+                rolesTableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #999;">No users with this role</td></tr>';
+                roleStatus.innerHTML = `<div class="sync-status loading">No users assigned to this role</div>`;
+                return;
+            }
+
+            // Create HTML string first
+            let htmlContent = '';
+            rolesToDisplay.forEach(roleRecord => {
+                const email = roleRecord.user_email;
+                const currentRole = roleRecord.role;
+                const safeEmail = email.replace(/'/g, "\\'");
+                
+                htmlContent += `
+                    <tr>
+                        <td>${email}</td>
+                        <td><strong>${currentRole}</strong></td>
+                        <td>
+                            <select class="role-select" id="role_${email}" onchange="markRoleChanged('${safeEmail}')">
+                                <option value="super_admin" ${currentRole === 'super_admin' ? 'selected' : ''}>Super Admin</option>
+                                <option value="admin" ${currentRole === 'admin' ? 'selected' : ''}>Admin</option>
+                                <option value="trainer" ${currentRole === 'trainer' ? 'selected' : ''}>Trainer</option>
+                                <option value="am" ${currentRole === 'am' ? 'selected' : ''}>Area Manager</option>
+                                <option value="user" ${currentRole === 'user' ? 'selected' : ''}>Photographer</option>
+                            </select>
+                            <button class="save-role-btn" id="save_${email}" onclick="saveUserRole('${safeEmail}')" disabled>Save</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            console.log('Setting innerHTML with', rolesToDisplay.length, 'rows');
+            rolesTableBody.innerHTML = htmlContent;
+
+            roleStatus.innerHTML = `<div class="sync-status success">✓ Showing ${rolesToDisplay.length} of ${totalCount} user(s)</div>`;
+            console.log('displayRolesTable complete');
+        }
+
+        function markRoleChanged(email) {
+            const saveBtn = document.getElementById('save_' + email);
+            saveBtn.disabled = false;
+        }
+
+        async function saveUserRole(email) {
+            const roleSelect = document.getElementById('role_' + email);
+            const newRole = roleSelect.value;
+            const saveBtn = document.getElementById('save_' + email);
+            
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+
+            try {
+                // Check if role exists for this email
+                const existingRole = allUserRoles[email.toLowerCase()];
+
+                if (existingRole) {
+                    // Update existing role
+                    const { error } = await supabaseClient
+                        .from('user_roles')
+                        .update({ role: newRole })
+                        .eq('user_email', email);
+                    
+                    if (error) throw error;
+                } else {
+                    // Insert new role
+                    const { error } = await supabaseClient
+                        .from('user_roles')
+                        .insert({ user_email: email, role: newRole });
+                    
+                    if (error) throw error;
+                }
+
+                // Update local cache
+                allUserRoles[email.toLowerCase()] = newRole;
+                
+                saveBtn.textContent = 'Saved!';
+                setTimeout(() => {
+                    saveBtn.textContent = 'Save';
+                }, 2000);
+            } catch (error) {
+                alert('Error saving role: ' + error.message);
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save';
+            }
+        }
+
+        async function generateAMReport(months) {
+            const statusDiv = document.getElementById('amReportStatus');
+            const contentDiv = document.getElementById('amReportContent');
+            
+            statusDiv.innerHTML = '<div class="sync-status loading">Generating report...</div>';
+            contentDiv.innerHTML = '';
+            
+            try {
+                if (!months || ![3, 6, 12].includes(months)) {
+                    statusDiv.innerHTML = '<div class="sync-status error">Invalid time period</div>';
+                    return;
+                }
+                
+                // Calculate date range
+                const endDate = new Date();
+                const startDate = new Date();
+                startDate.setMonth(startDate.getMonth() - months);
+                
+                const startDateStr = startDate.toLocaleDateString();
+                const endDateStr = endDate.toLocaleDateString();
+                
+                console.log('Generating AM report for', months, 'months:', startDateStr, 'to', endDateStr);
+                console.log('Total records:', allRecords.length);
+                console.log('AM Assignments sample:', Object.entries(allAMAssignments).slice(0, 5));
+                
+                // Filter records by date range
+                const filteredRecords = allRecords.filter(record => {
+                    const recordDate = new Date(record.Date);
+                    return recordDate >= startDate && recordDate <= endDate;
+                });
+                
+                console.log('Filtered records:', filteredRecords.length);
+                
+                if (filteredRecords.length === 0) {
+                    statusDiv.innerHTML = '<div class="sync-status loading">No records found in the last ' + months + ' months</div>';
+                    return;
+                }
+                
+                // Build AM report data - organized by AM email
+                const amData = {};
+                
+                // Initialize all AMs from the mapping
+                const uniqueAMs = new Set();
+                Object.values(allAMAssignments).forEach(amEmail => {
+                    uniqueAMs.add(amEmail.toLowerCase());
+                });
+                
+                uniqueAMs.forEach(amEmail => {
+                    amData[amEmail] = {
+                        amEmail: amEmail,
+                        levels: {}
+                    };
+                });
+                
+                console.log('Initialized AMs:', Array.from(uniqueAMs));
+                
+                // Process records
+                filteredRecords.forEach(record => {
+                    const photogEmail = record['Photographer Email'].toLowerCase();
+                    const photogLevel = record['Photographer Level'];
+                    const avgScore = parseFloat(record['Average Gallery Score']);
+                    
+                    // Find which AM this photographer belongs to
+                    const amEmail = allAMAssignments[photogEmail];
+                    
+                    if (amEmail && amData[amEmail.toLowerCase()]) {
+                        const am = amData[amEmail.toLowerCase()];
+                        const levelKey = photogLevel ? photogLevel.toLowerCase() : 'unknown';
+                        
+                        if (!am.levels[levelKey]) {
+                            am.levels[levelKey] = {
+                                scores: [],
+                                photographers: new Set()
+                            };
+                        }
+                        
+                        am.levels[levelKey].scores.push(avgScore);
+                        am.levels[levelKey].photographers.add(photogEmail);
+                    }
+                });
+                
+                // Calculate counts and averages
+                const reportData = [];
+                Object.entries(amData).forEach(([amEmail, data]) => {
+                    const levelSummary = {};
+                    
+                    Object.entries(data.levels).forEach(([levelKey, levelData]) => {
+                        const uniquePhotogCount = levelData.photographers.size;
+                        const avgScore = levelData.scores.reduce((a, b) => a + b, 0) / levelData.scores.length;
+                        
+                        levelSummary[levelKey] = {
+                            count: uniquePhotogCount,
+                            avgScore: avgScore.toFixed(1)
+                        };
+                    });
+                    
+                    reportData.push({
+                        amEmail: amEmail,
+                        levels: levelSummary
+                    });
+                });
+                
+                // Sort by AM email
+                reportData.sort((a, b) => a.amEmail.localeCompare(b.amEmail));
+                
+                console.log('Report data:', reportData);
+                
+                // Build HTML table
+                let html = `<table class="user-sync-table" style="margin-top: 15px;">
+                    <thead>
+                        <tr>
+                            <th>Area Manager</th>
+                            <th>Pre-Foundation (Count)</th>
+                            <th>Pre-Foundation (Avg Score)</th>
+                            <th>Foundation (Count)</th>
+                            <th>Foundation (Avg Score)</th>
+                            <th>Ambassador (Count)</th>
+                            <th>Ambassador (Avg Score)</th>
+                            <th>Advanced Ambassador (Count)</th>
+                            <th>Advanced Ambassador (Avg Score)</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                
+                reportData.forEach(am => {
+                    const levels = ['pre-foundation', 'foundation', 'ambassador', 'advanced ambassador'];
+                    let row = `<tr><td><strong>${am.amEmail}</strong></td>`;
+                    
+                    levels.forEach(level => {
+                        const data = am.levels[level];
+                        if (data) {
+                            row += `<td>${data.count}</td><td>${data.avgScore}</td>`;
+                        } else {
+                            row += `<td>0</td><td>-</td>`;
+                        }
+                    });
+                    
+                    row += `</tr>`;
+                    html += row;
+                });
+                
+                html += `</tbody></table>`;
+                
+                statusDiv.innerHTML = `<div class="sync-status success">✓ Report for last ${months} months (${startDateStr} - ${endDateStr})</div>`;
+                contentDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error generating AM report:', error);
+                statusDiv.innerHTML = `<div class="sync-status error">Error: ${error.message}</div>`;
+            }
+        }
+
+        function downloadAMReportCSV() {
+            // Get the AM report content div and find the table within it
+            const contentDiv = document.getElementById('amReportContent');
+            const table = contentDiv.querySelector('table');
+            
+            if (!table) {
+                alert('Please generate a report first before downloading.');
+                return;
+            }
+
+            // Extract data from table
+            const rows = [];
+            const headerCells = table.querySelectorAll('thead th');
+            const headers = Array.from(headerCells).map(th => th.textContent);
+            rows.push(headers);
+
+            const bodyCells = table.querySelectorAll('tbody tr');
+            bodyCells.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const rowData = Array.from(cells).map(td => {
+                    const text = td.textContent.trim();
+                    // Escape quotes in CSV
+                    return `"${text.replace(/"/g, '""')}"`;
+                });
+                rows.push(rowData);
+            });
+
+            // Convert to CSV format
+            const csvContent = rows.map(row => row.join(',')).join('\n');
+
+            // Create blob and download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `AM_Report_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        async function archivePhotographer() {
+            const email = document.getElementById('archivePhotogEmail').value.trim().toLowerCase();
+            const statusDiv = document.getElementById('archiveStatus');
+            
+            if (!email) {
+                statusDiv.innerHTML = '<div class="sync-status error">Please enter a photographer email</div>';
+                return;
+            }
+            
+            statusDiv.innerHTML = '<div class="sync-status loading">Archiving records...</div>';
+            
+            try {
+                // Check if already termed
+                const { data: existing } = await supabaseClient
+                    .from('termed_photographers')
+                    .select('*')
+                    .eq('photographer_email', email);
+                
+                if (existing && existing.length > 0) {
+                    statusDiv.innerHTML = '<div class="sync-status error">This photographer is already archived</div>';
+                    return;
+                }
+                
+                // Get all records for this photographer
+                const { data: records, error: fetchError } = await supabaseClient
+                    .from('qc_records')
+                    .select('*')
+                    .eq('Photographer Email', email);
+                
+                if (fetchError) throw fetchError;
+                
+                if (!records || records.length === 0) {
+                    statusDiv.innerHTML = '<div class="sync-status error">No records found for this photographer</div>';
+                    return;
+                }
+                
+                // Copy records to archived_records table, excluding id to generate new ones
+                const archiveData = records.map(r => {
+                    const { id, ...rest } = r;
+                    return {
+                        ...rest,
+                        archived_by: currentUser.email
+                    };
+                });
+                
+                const { error: archiveError } = await supabaseClient
+                    .from('archived_records')
+                    .insert(archiveData);
+                
+                if (archiveError) throw archiveError;
+                
+                // Add to termed_photographers table
+                const { error: termError } = await supabaseClient
+                    .from('termed_photographers')
+                    .insert({
+                        photographer_email: email,
+                        photographer_name: records[0]['Photographer Name'],
+                        termed_by: currentUser.email
+                    });
+                
+                if (termError) throw termError;
+                
+                // Disable user account
+                const { error: disableError } = await supabaseClient
+                    .from('user_roles')
+                    .update({ disabled: true })
+                    .eq('user_email', email);
+                
+                if (disableError) throw disableError;
+                
+                // Delete from active records
+                const { error: deleteError } = await supabaseClient
+                    .from('qc_records')
+                    .delete()
+                    .eq('Photographer Email', email);
+                
+                if (deleteError) throw deleteError;
+                
+                statusDiv.innerHTML = `<div class="sync-status success">✓ Successfully archived ${records.length} records and disabled login for ${email}</div>`;
+                document.getElementById('archivePhotogEmail').value = '';
+                
+                // Reload data
+                loadArchivedPhotographers();
+                await loadRecords();
+                
+            } catch (error) {
+                console.error('Archive error:', error);
+                statusDiv.innerHTML = `<div class="sync-status error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadArchivedPhotographers() {
+            const listDiv = document.getElementById('archivedPhotogList');
+            listDiv.innerHTML = '<div class="sync-status loading">Loading archived photographers...</div>';
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('termed_photographers')
+                    .select('*')
+                    .order('termed_date', { ascending: false });
+                
+                if (error) throw error;
+                
+                if (!data || data.length === 0) {
+                    listDiv.innerHTML = '<p style="color: #999;">No archived photographers</p>';
+                    return;
+                }
+                
+                let html = '<table style="width: 100%; border-collapse: collapse; font-size: 13px;">';
+                html += '<thead><tr style="background: #f5f5f5;"><th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Photographer</th><th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Email</th><th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Termed Date</th><th style="padding: 8px; text-align: center; border-bottom: 1px solid #ddd;">Action</th></tr></thead>';
+                html += '<tbody>';
+                
+                data.forEach(photog => {
+                    const termedDate = photog.termed_date || new Date(photog.created_at).toLocaleDateString();
+                    html += `<tr style="border-bottom: 1px solid #e0e0e0;">
+                        <td style="padding: 8px;">${photog.photographer_name || '-'}</td>
+                        <td style="padding: 8px;">${photog.photographer_email}</td>
+                        <td style="padding: 8px;">${termedDate}</td>
+                        <td style="padding: 8px; text-align: center;">
+                            <button onclick="restorePhotographer('${photog.photographer_email}')" style="background: #89c84b; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 12px;">Restore</button>
+                        </td>
+                    </tr>`;
+                });
+                
+                html += '</tbody></table>';
+                listDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading archived photographers:', error);
+                listDiv.innerHTML = `<div class="sync-status error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function restorePhotographer(email) {
+            if (!confirm(`Are you sure you want to restore records for ${email}?`)) return;
+            
+            const statusDiv = document.getElementById('archiveStatus');
+            statusDiv.innerHTML = '<div class="sync-status loading">Restoring records...</div>';
+            
+            try {
+                // Get archived records
+                const { data: archivedRecords, error: fetchError } = await supabaseClient
+                    .from('archived_records')
+                    .select('*')
+                    .eq('Photographer Email', email);
+                
+                if (fetchError) throw fetchError;
+                
+                if (!archivedRecords || archivedRecords.length === 0) {
+                    statusDiv.innerHTML = '<div class="sync-status error">No archived records found</div>';
+                    return;
+                }
+                
+                // Remove id, archived_at and archived_by before inserting back
+                const restoredData = archivedRecords.map(r => {
+                    const { id, archived_at, archived_by, ...rest } = r;
+                    return rest;
+                });
+                
+                // Insert back to qc_records
+                const { error: restoreError } = await supabaseClient
+                    .from('qc_records')
+                    .insert(restoredData);
+                
+                if (restoreError) throw restoreError;
+                
+                // Delete from archived_records
+                const { error: deleteArchiveError } = await supabaseClient
+                    .from('archived_records')
+                    .delete()
+                    .eq('Photographer Email', email);
+                
+                if (deleteArchiveError) throw deleteArchiveError;
+                
+                // Remove from termed_photographers
+                const { error: deleteTermError } = await supabaseClient
+                    .from('termed_photographers')
+                    .delete()
+                    .eq('photographer_email', email);
+                
+                if (deleteTermError) throw deleteTermError;
+                
+                // Re-enable user account
+                const { error: enableError } = await supabaseClient
+                    .from('user_roles')
+                    .update({ disabled: false })
+                    .eq('user_email', email);
+                
+                if (enableError) throw enableError;
+                
+                statusDiv.innerHTML = `<div class="sync-status success">✓ Successfully restored ${archivedRecords.length} records and re-enabled login for ${email}</div>`;
+                
+                // Reload
+                loadArchivedPhotographers();
+                await loadRecords();
+                
+            } catch (error) {
+                console.error('Restore error:', error);
+                statusDiv.innerHTML = `<div class="sync-status error">Error: ${error.message}</div>`;
+            }
+        }
+
+        function closeAdminReport() {
+            document.getElementById('adminReportModal').classList.remove('active');
+        }
+
+        async function loadUserSyncReport() {
+            const syncTableBody = document.getElementById('syncTableBody');
+            const syncStatus = document.getElementById('syncStatus');
+            syncStatus.innerHTML = '<div class="sync-status loading">Loading data...</div>';
+            syncTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">Loading...</td></tr>';
+
+            try {
+                // Get all unique photographer emails from QC records
+                const photographerEmails = {};
+                allRecords.forEach(record => {
+                    const email = record['Photographer Email'];
+                    const name = record['Photographer Name'];
+                    const level = record['Photographer Level'];
+                    
+                    if (email && !photographerEmails[email.toLowerCase()]) {
+                        photographerEmails[email.toLowerCase()] = { email, name, level };
+                    }
+                });
+
+                // Get all emails that have roles assigned (meaning they've been invited)
+                const { data: roles, error: rolesError } = await supabaseClient
+                    .from('user_roles')
+                    .select('user_email');
+
+                if (rolesError) throw rolesError;
+
+                const invitedEmails = new Set(roles.map(r => r.user_email.toLowerCase()));
+
+                // Find photographers not yet invited
+                const missingUsers = Object.values(photographerEmails).filter(
+                    p => !invitedEmails.has(p.email.toLowerCase())
+                );
+
+                if (missingUsers.length === 0) {
+                    syncStatus.innerHTML = '<div class="sync-status success">✓ All photographers are invited!</div>';
+                    syncTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">No missing users</td></tr>';
+                    document.getElementById('batchInviteBtn').disabled = true;
+                    return;
+                }
+
+                syncStatus.innerHTML = `<div class="sync-status loading">${missingUsers.length} photographer(s) need to be invited</div>`;
+
+                // Populate table
+                syncTableBody.innerHTML = missingUsers.map(user => `
+                    <tr>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td>${user.level || 'N/A'}</td>
+                        <td><button class="invite-btn-small" onclick="inviteSingleUser('${user.email}', '${user.name.replace(/'/g, "\\'")}')">Invite</button></td>
+                    </tr>
+                `).join('');
+
+                document.getElementById('batchInviteBtn').disabled = false;
+            } catch (error) {
+                syncStatus.innerHTML = `<div class="sync-status error">Error: ${error.message}</div>`;
+                console.error('User sync error:', error);
+            }
+        }
+
+        async function inviteSingleUser(email, name) {
+            try {
+                const { error } = await supabaseClient.auth.admin.inviteUserByEmail(email);
+                
+                if (error) throw error;
+
+                // Automatically assign 'user' role to newly invited user
+                await supabaseClient
+                    .from('user_roles')
+                    .upsert({ user_email: email, role: 'user' }, { onConflict: 'user_email' });
+
+                alert(`Invitation sent to ${name} (${email}) - assigned as User`);
+                await loadUserSyncReport();
+            } catch (error) {
+                alert(`Error inviting ${name}: ${error.message}`);
+            }
+        }
+
+        async function handleBatchInvite() {
+            const btn = document.getElementById('batchInviteBtn');
+            btn.disabled = true;
+            btn.textContent = 'Sending invitations...';
+
+            try {
+                // Get all rows from the table
+                const rows = document.querySelectorAll('#syncTableBody tr');
+                let successCount = 0;
+                let errorCount = 0;
+
+                for (const row of rows) {
+                    const email = row.cells[1].textContent.trim();
+                    
+                    try {
+                        const { error } = await supabaseClient.auth.admin.inviteUserByEmail(email);
+                        if (!error) {
+                            // Automatically assign 'user' role to newly invited user
+                            await supabaseClient
+                                .from('user_roles')
+                                .upsert({ user_email: email, role: 'user' }, { onConflict: 'user_email' });
+                            successCount++;
+                        } else {
+                            errorCount++;
+                        }
+                    } catch (err) {
+                        errorCount++;
+                    }
+
+                    // Small delay between invitations
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+
+                alert(`Invitations sent! Success: ${successCount}, Errors: ${errorCount}`);
+                await loadUserSyncReport();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                btn.disabled = false;
+                btn.textContent = 'Invite All Missing Users';
+            }
+        }
+
+        async function init() {
+            // Load roles first
+            await loadUserRoles();
+            
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            
+            if (session) {
+                currentUser = session.user;
+                showDashboard();
+                loadRecords();
+            } else {
+                showAuth();
+            }
+
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                if (session) {
+                    currentUser = session.user;
+                    showDashboard();
+                    loadRecords();
+                } else {
+                    currentUser = null;
+                    showAuth();
+                }
+            });
+
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            loginForm.addEventListener('submit', handleLogin);
+            logoutBtn.addEventListener('click', handleLogout);
+            modalClose.addEventListener('click', closeModal);
+            
+            // Password reset
+            document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                openForgotPasswordModal();
+            });
+            
+            document.getElementById('closeForgotPassword').addEventListener('click', closeForgotPasswordModal);
+            document.getElementById('forgotPasswordForm').addEventListener('submit', handleForgotPassword);
+            
+            // Change password
+            document.getElementById('changePasswordBtn').addEventListener('click', openChangePasswordModal);
+            document.getElementById('closeChangePassword').addEventListener('click', closeChangePasswordModal);
+            document.getElementById('changePasswordForm').addEventListener('submit', handleChangePassword);
+            
+            // Admin reports
+            const adminReportBtn = document.getElementById('adminReportBtn');
+            if (adminReportBtn) {
+                adminReportBtn.addEventListener('click', openAdminReport);
+            }
+            document.getElementById('closeAdminReport').addEventListener('click', closeAdminReport);
+            document.getElementById('batchInviteBtn').addEventListener('click', handleBatchInvite);
+            
+            document.getElementById('adminReportModal').addEventListener('click', (e) => {
+                if (e.target.id === 'adminReportModal') closeAdminReport();
+            });
+            
+            // Close modals on background click
+            document.getElementById('forgotPasswordModal').addEventListener('click', (e) => {
+                if (e.target.id === 'forgotPasswordModal') closeForgotPasswordModal();
+            });
+            
+            document.getElementById('changePasswordModal').addEventListener('click', (e) => {
+                if (e.target.id === 'changePasswordModal') closeChangePasswordModal();
+            });
+            
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentFilter = e.target.dataset.filter;
+                    displayRecords();
+                });
+            });
+
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                searchQuery = e.target.value.toLowerCase();
+                displayRecords();
+            });
+
+            document.getElementById('sortSelect').addEventListener('change', (e) => {
+                currentSort = e.target.value;
+                displayRecords();
+            });
+
+            // Charts page button
+            document.getElementById('chartsPageBtn').addEventListener('click', () => {
+                const chartsModal = document.getElementById('chartsModal');
+                chartsModal.classList.add('active');
+                updateCharts();
+                chartsModal.scrollTop = 0;
+            });
+
+            document.getElementById('closeChartsModal').addEventListener('click', () => {
+                document.getElementById('chartsModal').classList.remove('active');
+            });
+
+            document.getElementById('chartsModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('chartsModal')) {
+                    document.getElementById('chartsModal').classList.remove('active');
+                }
+            });
+
+            // Growth Assessment Form
+            document.getElementById('submitGABtn').addEventListener('click', () => {
+                document.getElementById('gaFormModal').classList.add('active');
+                document.getElementById('gaDate').valueAsDate = new Date();
+            });
+
+            document.getElementById('closeGAForm').addEventListener('click', () => {
+                document.getElementById('gaFormModal').classList.remove('active');
+            });
+
+            document.getElementById('cancelGAForm').addEventListener('click', () => {
+                document.getElementById('gaFormModal').classList.remove('active');
+            });
+
+            document.getElementById('gaFormModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('gaFormModal')) {
+                    document.getElementById('gaFormModal').classList.remove('active');
+                }
+            });
+
+            // Pending Reviews
+            document.getElementById('pendingReviewsBtn').addEventListener('click', async () => {
+                document.getElementById('pendingReviewsModal').classList.add('active');
+                await loadPendingReviews();
+            });
+
+            document.getElementById('closePendingReviews').addEventListener('click', () => {
+                document.getElementById('pendingReviewsModal').classList.remove('active');
+            });
+
+            document.getElementById('pendingReviewsModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('pendingReviewsModal')) {
+                    document.getElementById('pendingReviewsModal').classList.remove('active');
+                }
+            });
+
+            // Submit Form Handler
+            document.getElementById('gaSubmissionForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await submitGrowthAssessment();
+            });
+
+            recordModal.addEventListener('click', (e) => {
+                if (e.target === recordModal) closeModal();
+            });
+        }
+
+        function showAuth() {
+            authContainer.style.display = 'flex';
+            dashboard.classList.remove('active');
+        }
+
+        async function showDashboard() {
+            authContainer.style.display = 'none';
+            dashboard.classList.add('active');
+            userEmail.textContent = currentUser.email;
+            
+            // Reload roles to ensure we have fresh data
+            await loadUserRoles();
+            currentUserRole = getCurrentUserRole();
+            
+            // Auto-create 'user' role if they don't have one yet
+            if (!allUserRoles[currentUser.email.toLowerCase()]) {
+                try {
+                    await supabaseClient
+                        .from('user_roles')
+                        .insert({ user_email: currentUser.email, role: 'user' });
+                    
+                    allUserRoles[currentUser.email.toLowerCase()] = 'user';
+                    currentUserRole = 'user';
+                } catch (error) {
+                    console.log('Could not auto-create user role (may already exist)', error);
+                }
+            }
+            
+            // Set AM team if user is an AM
+            if (isAM()) {
+                currentAMTeam = getAMTeamPhotographers();
+                amViewMode = 'team'; // Always start in 'team' view
+                showAMViewToggle();
+            } else {
+                hideAMViewToggle();
+            }
+            
+            // Show admin button for super admins only
+            const adminBtn = document.getElementById('adminReportBtn');
+            if (canManageRoles()) {
+                adminBtn.style.display = 'block';
+                adminBtn.textContent = 'Admin Reports';
+            } else {
+                adminBtn.style.display = 'none';
+            }
+            
+            // Show charts button for non-photographers (not 'user' role)
+            const chartsPageBtn = document.getElementById('chartsPageBtn');
+            if (currentUserRole !== 'user') {
+                chartsPageBtn.style.display = 'block';
+            } else {
+                chartsPageBtn.style.display = 'none';
+            }
+        }
+
+        function showAMViewToggle() {
+            let toggle = document.getElementById('amViewToggle');
+            if (!toggle) {
+                // Create AM view toggle button
+                const sidebar = document.querySelector('.sidebar');
+                const controlsSection = document.createElement('div');
+                controlsSection.className = 'controls-section';
+                controlsSection.innerHTML = `
+                    <div class="controls-title">View Mode</div>
+                    <div style="display: flex; gap: 8px;">
+                        <button id="teamViewBtn" class="filter-btn active" style="flex: 1;" onclick="switchAMView('team')">My Team</button>
+                        <button id="allViewBtn" class="filter-btn" style="flex: 1;" onclick="switchAMView('all')">View All</button>
+                    </div>
+                `;
+                sidebar.insertBefore(controlsSection, sidebar.querySelector('.info-section'));
+            }
+        }
+
+        function hideAMViewToggle() {
+            const section = document.querySelector('.controls-section:has(#teamViewBtn)');
+            if (section) section.remove();
+        }
+
+        function switchAMView(mode) {
+            amViewMode = mode;
+            document.getElementById('teamViewBtn').classList.toggle('active', mode === 'team');
+            document.getElementById('allViewBtn').classList.toggle('active', mode === 'all');
+            displayRecords();
+        }
+
+        // AUTH
+        async function handleLogin(e) {
+            e.preventDefault();
+            loginError.classList.remove('show');
+            const loginBtn = loginForm.querySelector('button');
+            loginBtn.textContent = 'Signing in...';
+            loginBtn.disabled = true;
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) throw new Error(error.message);
+
+                // Check if user is disabled
+                const { data: userRole } = await supabaseClient
+                    .from('user_roles')
+                    .select('disabled')
+                    .eq('user_email', email.toLowerCase())
+                    .single();
+                
+                if (userRole && userRole.disabled) {
+                    // Sign them out immediately
+                    await supabaseClient.auth.signOut();
+                    throw new Error('This account has been disabled. Please contact your administrator.');
+                }
+
+                currentUser = data.user;
+                showDashboard();
+                loadRecords();
+            } catch (error) {
+                loginError.textContent = error.message || 'Login failed.';
+                loginError.classList.add('show');
+                loginBtn.textContent = 'Sign In';
+                loginBtn.disabled = false;
+            }
+        }
+
+        async function handleLogout() {
+            await supabaseClient.auth.signOut();
+            currentUser = null;
+            allRecords = [];
+            loginForm.reset();
+            
+            // Clear search and filters
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) searchInput.value = '';
+            
+            currentFilter = 'all';
+            currentSort = 'a-z';
+            currentAMView = 'team';
+            
+            showAuth();
+        }
+
+        // DATA
+        async function loadRecords() {
+            recordsContainer.innerHTML = '<div class="loading">Loading records...</div>';
+
+            try {
+                console.log('loadRecords called, querying both tables...');
+                
+                // Load from qc_records
+                let qcQuery = supabaseClient
+                    .from('qc_records')
+                    .select('*')
+                    .order('Date', { ascending: false });
+
+                // Load from growth_assessments - only show approved to photographers, all to admins
+                let gaQuery = supabaseClient
+                    .from('growth_assessments')
+                    .select('*')
+                    .order('Date', { ascending: false });
+
+                const [qcResult, gaResult] = await Promise.all([qcQuery, gaQuery]);
+                
+                console.log('QC Records:', { dataCount: qcResult.data ? qcResult.data.length : 0, error: qcResult.error });
+                console.log('Growth Assessments:', { dataCount: gaResult.data ? gaResult.data.length : 0, error: gaResult.error });
+                
+                if (qcResult.error && gaResult.error) throw qcResult.error;
+
+                // Combine both datasets
+                const qcRecords = qcResult.data || [];
+                let gaRecords = gaResult.data || [];
+                
+                // Filter pending records based on role
+                const isSuperAdmin = ['super_admin', 'admin'].includes(currentUserRole);
+                if (!isSuperAdmin) {
+                    gaRecords = gaRecords.filter(r => r.status !== 'pending' && r.status !== 'rejected');
+                }
+                
+                allRecords = [...qcRecords, ...gaRecords];
+                
+                console.log('Loaded total records:', allRecords.length);
+                
+                // Show/hide form button based on role (PSS reviewers)
+                const submitBtn = document.getElementById('submitGABtn');
+                if (submitBtn) {
+                    submitBtn.style.display = ['super_admin', 'admin', 'trainer', 'area_manager'].includes(currentUserRole) ? 'block' : 'none';
+                }
+                
+                // Show pending reviews button for admins
+                const pendingBtn = document.getElementById('pendingReviewsBtn');
+                if (pendingBtn) {
+                    pendingBtn.style.display = isSuperAdmin ? 'block' : 'none';
+                }
+                
+                displayRecords();
+            } catch (error) {
+                console.error('Error loading records:', error);
+                recordsContainer.innerHTML = `<div style="color: red; padding: 20px;">${error.message}</div>`;
+            }
+        }
+
+        function updateHeaderTagline() {
+            const tagline = document.getElementById('headerTagline');
+            const role = getCurrentUserRole();
+            
+            const taglines = {
+                'super_admin': 'Review, manage, and oversee all quality assessments',
+                'admin': 'Review all photographer quality assessments',
+                'trainer': 'Review and provide training feedback on quality assessments',
+                'area_manager': 'Review and manage your team\'s quality assessments',
+                'user': 'View your quality assessment records'
+            };
+            
+            tagline.textContent = taglines[role] || 'Review and manage photographer quality assessments';
+        }
+
+        function updateCharts() {
+            // Get unique photographers by level
+            const photographersByLevel = {};
+            const scoresByLevel = {};
+            const assessmentLevels = { 'Below Standards': 0, 'Needs Improvement': 0, 'Proficient': 0, 'Master': 0 };
+            
+            // Normalize level names: treat "Advanced" and "Advanced Ambassador" as the same
+            const normalizeLevelName = (level) => {
+                if (level === 'Advanced' || level === 'Advanced Ambassador') {
+                    return 'Advanced Ambassador';
+                }
+                return level;
+            };
+
+            // Normalize assessment level names: treat "Competent" and "Proficient" as the same
+            const normalizeAssessmentLevel = (level) => {
+                if (level === 'Competent' || level === 'Proficient') {
+                    return 'Proficient';
+                }
+                return level;
+            };
+            
+            // Group records by photographer and level
+            const photographersMap = new Map();
+            allRecords.forEach(record => {
+                const name = record['Photographer Name'];
+                let level = record['Photographer Level'];
+                level = normalizeLevelName(level);
+                if (!photographersMap.has(name)) {
+                    photographersMap.set(name, { level: level, records: [] });
+                }
+                photographersMap.get(name).records.push(record);
+            });
+            
+            // Count photographers by level and calculate average scores
+            photographersMap.forEach((data, name) => {
+                const level = data.level;
+                if (!photographersByLevel[level]) photographersByLevel[level] = 0;
+                photographersByLevel[level]++;
+                
+                // Calculate average score for this photographer - separate by type
+                const legacyScores = data.records
+                    .filter(r => !r.record_type || r.record_type.toLowerCase() !== 'growth_assessment')
+                    .map(r => parseFloat(r['Average Gallery Score']))
+                    .filter(s => !isNaN(s));
+                
+                const gaScores = data.records
+                    .filter(r => r.record_type && r.record_type.toLowerCase() === 'growth_assessment')
+                    .map(r => parseFloat(r['Average Gallery Score']))
+                    .filter(s => !isNaN(s));
+                
+                if (legacyScores.length > 0) {
+                    if (!scoresByLevel[level]) scoresByLevel[level] = { legacy: [], growth: [] };
+                    scoresByLevel[level].legacy.push(legacyScores.reduce((a, b) => a + b) / legacyScores.length);
+                }
+                
+                if (gaScores.length > 0) {
+                    if (!scoresByLevel[level]) scoresByLevel[level] = { legacy: [], growth: [] };
+                    scoresByLevel[level].growth.push(gaScores.reduce((a, b) => a + b) / gaScores.length);
+                }
+            });
+            
+            // Count assessment levels from growth assessments
+            let gaCount = 0;
+            allRecords.forEach(record => {
+                if (record.record_type && record.record_type.toLowerCase() === 'growth_assessment') {
+                    gaCount++;
+                    let level = record['Current Assessment Level'];
+                    if (level) {
+                        // Strip out numbers and parentheses: "Below Standards (0-7)" -> "Below Standards"
+                        level = level.replace(/\s*\(\d+[-–]\d+\)\s*$/g, '').trim();
+                        level = normalizeAssessmentLevel(level);
+                        if (assessmentLevels.hasOwnProperty(level)) {
+                            assessmentLevels[level]++;
+                        }
+                    }
+                }
+            });
+            
+            console.log('Growth Assessment Records found:', gaCount);
+            
+            // Calculate total photographers
+            const totalPhotographers = photographersMap.size;
+            
+            // Render Level Breakdown
+            let levelHTML = '';
+            Object.keys(photographersByLevel).sort().forEach(level => {
+                const count = photographersByLevel[level];
+                const percentage = ((count / totalPhotographers) * 100).toFixed(1);
+                levelHTML += `<div style="margin-bottom: 8px;"><strong>${level}:</strong> ${count} (${percentage}%)</div>`;
+            });
+            
+            // Render Scores by Level
+            let scoresHTML = '';
+            Object.keys(scoresByLevel).sort().forEach(level => {
+                const levelData = scoresByLevel[level];
+                let levelScore = '';
+                
+                if (levelData.legacy && levelData.legacy.length > 0) {
+                    const legacyAvg = (levelData.legacy.reduce((a, b) => a + b) / levelData.legacy.length).toFixed(1);
+                    levelScore += `<div style="margin-bottom: 6px;">QC Records: ${legacyAvg}/40 avg</div>`;
+                }
+                
+                if (levelData.growth && levelData.growth.length > 0) {
+                    const growthAvg = (levelData.growth.reduce((a, b) => a + b) / levelData.growth.length).toFixed(1);
+                    levelScore += `<div style="margin-bottom: 6px;">Growth Assessments: ${growthAvg}/16 avg</div>`;
+                }
+                
+                if (levelScore) {
+                    scoresHTML += `<div style="margin-bottom: 12px;"><strong>${level}:</strong><div style="margin-left: 0; font-size: 11px;">${levelScore}</div></div>`;
+                }
+            });
+            
+            // Render Assessment Distribution
+            let assessmentHTML = '';
+            const totalAssessments = Object.values(assessmentLevels).reduce((a, b) => a + b, 0);
+            console.log('Total assessments with level:', totalAssessments, 'GA Count:', gaCount);
+            if (gaCount > 0) {
+                if (totalAssessments > 0) {
+                    Object.keys(assessmentLevels).forEach(level => {
+                        const count = assessmentLevels[level];
+                        const percentage = ((count / gaCount) * 100).toFixed(1);
+                        assessmentHTML += `<div style="margin-bottom: 8px;"><strong>${level}:</strong> ${count} (${percentage}%)</div>`;
+                    });
+                } else {
+                    assessmentHTML = `<div style="margin-bottom: 8px; color: #999;">No assessment levels filled in yet (${gaCount} growth assessments found)</div>`;
+                }
+            } else {
+                assessmentHTML = 'No growth assessments';
+            }
+            
+            // Create visual charts using Chart.js
+            setTimeout(() => {
+                // Photographers by Level - Pie Chart
+                if (document.getElementById('photographersByLevelChart')) {
+                    const ctx1 = document.getElementById('photographersByLevelChart').getContext('2d');
+                    const labels1 = Object.keys(photographersByLevel).sort();
+                    const data1 = labels1.map(level => photographersByLevel[level]);
+                    const colors = ['#4ba8a8', '#89c84b', '#f59e0b', '#ef4444'];
+                    
+                    if (window.photographerChart) window.photographerChart.destroy();
+                    Chart.register(ChartDataLabels);
+                    window.photographerChart = new Chart(ctx1, {
+                        type: 'doughnut',
+                        data: {
+                            labels: labels1,
+                            datasets: [{
+                                data: data1,
+                                backgroundColor: colors.slice(0, labels1.length),
+                                borderColor: '#fff',
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: { position: 'bottom' },
+                                datalabels: {
+                                    color: '#fff',
+                                    font: { weight: 'bold', size: 12 },
+                                    formatter: (value) => value
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Assessment Distribution - Bar Chart
+                if (document.getElementById('assessmentDistChart') && gaCount > 0) {
+                    const ctx2 = document.getElementById('assessmentDistChart').getContext('2d');
+                    const labels2 = ['Below Standards', 'Needs Improvement', 'Proficient', 'Master'];
+                    const data2 = labels2.map(level => assessmentLevels[level] || 0);
+                    const colors2 = ['#ef4444', '#f59e0b', '#89c84b', '#4ba8a8'];
+                    
+                    if (window.assessmentChart) window.assessmentChart.destroy();
+                    window.assessmentChart = new Chart(ctx2, {
+                        type: 'bar',
+                        data: {
+                            labels: labels2,
+                            datasets: [{
+                                label: 'Count',
+                                data: data2,
+                                backgroundColor: colors2,
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: { display: false },
+                                datalabels: {
+                                    color: '#333',
+                                    font: { weight: 'bold', size: 12 },
+                                    anchor: 'end',
+                                    align: 'top'
+                                }
+                            },
+                            scales: {
+                                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                            }
+                        }
+                    });
+                }
+                
+                // Scores by Level - Bar Chart
+                if (document.getElementById('scoresByLevelChart')) {
+                    const ctx3 = document.getElementById('scoresByLevelChart').getContext('2d');
+                    const labels3 = Object.keys(scoresByLevel).sort();
+                    const qcData = labels3.map(level => {
+                        const data = scoresByLevel[level];
+                        if (data.legacy && data.legacy.length > 0) {
+                            return (data.legacy.reduce((a, b) => a + b) / data.legacy.length).toFixed(1);
+                        }
+                        return 0;
+                    });
+                    const gaData = labels3.map(level => {
+                        const data = scoresByLevel[level];
+                        if (data.growth && data.growth.length > 0) {
+                            return (data.growth.reduce((a, b) => a + b) / data.growth.length).toFixed(1);
+                        }
+                        return 0;
+                    });
+                    
+                    if (window.scoresChart) window.scoresChart.destroy();
+                    window.scoresChart = new Chart(ctx3, {
+                        type: 'bar',
+                        data: {
+                            labels: labels3,
+                            datasets: [
+                                {
+                                    label: 'QC Records (out of 40)',
+                                    data: qcData,
+                                    backgroundColor: '#4ba8a8',
+                                    borderRadius: 6
+                                },
+                                {
+                                    label: 'Growth Assessments (out of 16)',
+                                    data: gaData,
+                                    backgroundColor: '#89c84b',
+                                    borderRadius: 6
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: { position: 'bottom' },
+                                datalabels: {
+                                    color: '#333',
+                                    font: { weight: 'bold', size: 11 },
+                                    anchor: 'end',
+                                    align: 'top'
+                                }
+                            },
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
+                }
+            }, 100);
+        }
+
+        async function submitGrowthAssessment() {
+            const photogName = document.getElementById('gaPhotographerName').value.trim();
+            const photogEmail = document.getElementById('gaPhotographerEmail').value.trim();
+            const date = document.getElementById('gaDate').value;
+            const pssReviewer = document.getElementById('gaPSSReviewer').value.trim();
+
+            // Calculate scores and level
+            const g1Core = parseInt(document.getElementById('gaG1CoreSkills').value);
+            const g1Subject = parseInt(document.getElementById('gaG1Subject').value);
+            const g1Composition = parseInt(document.getElementById('gaG1Composition').value);
+            const g1Editing = parseInt(document.getElementById('gaG1Editing').value);
+            
+            const g2Core = parseInt(document.getElementById('gaG2CoreSkills').value);
+            const g2Subject = parseInt(document.getElementById('gaG2Subject').value);
+            const g2Composition = parseInt(document.getElementById('gaG2Composition').value);
+            const g2Editing = parseInt(document.getElementById('gaG2Editing').value);
+
+            const g1Score = g1Core + g1Subject + g1Composition + g1Editing;
+            const g2Score = g2Core + g2Subject + g2Composition + g2Editing;
+            const avgScore = ((g1Score + g2Score) / 2).toFixed(2);
+
+            // Determine level based on average
+            let level = '';
+            if (avgScore < 8) level = 'Below Standards (0-7)';
+            else if (avgScore < 11) level = 'Needs Improvement (8-10)';
+            else if (avgScore < 14) level = 'Proficient (11-13)';
+            else level = 'Master (14-16)';
+
+            const g1Feedback = document.getElementById('gaG1Feedback').value.trim();
+            const g2Feedback = document.getElementById('gaG2Feedback').value.trim();
+            const techNotes = document.getElementById('gaTechnicalNotes').value.trim();
+
+            const gaData = {
+                'Date': date,
+                'record_type': 'growth_assessment',
+                'Photographer Name': photogName,
+                'Photographer Email': photogEmail,
+                'PSS Reviewer Name': pssReviewer,
+                'PSS Email Address': currentUserEmail || '',
+                'Photographer Level': '',
+                'Gallery #1 Access Code:': '',
+                'Core Skills (1)': g1Core.toString(),
+                'Subject and Posing (1)': g1Subject.toString(),
+                'Composition, orientation and variety (1)': g1Composition.toString(),
+                'Editing / Bella Baby Standards (1)': g1Editing.toString(),
+                'Gallery #1 Score:': g1Score.toString(),
+                'Gallery #1 Feedback:': g1Feedback,
+                'Core Skills (2)': g2Core.toString(),
+                'Subject and Posing (2)': g2Subject.toString(),
+                'Composition, orientation and variety (2)': g2Composition.toString(),
+                'Editing / Bella Baby Standards (2)': g2Editing.toString(),
+                'Gallery #2 Score:': g2Score.toString(),
+                'Gallery #2 Feedback:': g2Feedback,
+                'Average Gallery Score': avgScore,
+                'Current Assessment Level': level,
+                'Image Category Flags': '',
+                'Flag: Technical Capture': '',
+                'Flag: Subject and Posing': '',
+                'Flag: Composition orientation and variety': '',
+                'Flag: Editing or Bella Baby Standards': '',
+                'Applied Flags': '',
+                'Technical Flags:': '',
+                'Technical Notes:': techNotes,
+                'Reference Images': '',
+                'status': 'pending',
+                'admin_notes': ''
+            };
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('growth_assessments')
+                    .insert([gaData]);
+
+                if (error) {
+                    alert('Error submitting assessment: ' + error.message);
+                    return;
+                }
+
+                alert('Growth Assessment submitted for review! You will see it in Pending Reviews.');
+                document.getElementById('gaSubmissionForm').reset();
+                document.getElementById('gaFormModal').classList.remove('active');
+                
+                // Reload data
+                await loadRecords();
+            } catch (err) {
+                console.error('Submission error:', err);
+                alert('Error submitting assessment');
+            }
+        }
+
+        async function loadPendingReviews() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('growth_assessments')
+                    .select('*')
+                    .eq('status', 'pending')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    document.getElementById('pendingReviewsList').innerHTML = '<p style="color: #999; text-align: center;">No pending reviews</p>';
+                    return;
+                }
+
+                let html = '<div style="display: grid; gap: 15px;">';
+                data.forEach(record => {
+                    const g1Score = (parseInt(record['Core Skills (1)'] || 0) + 
+                                   parseInt(record['Subject and Posing (1)'] || 0) + 
+                                   parseInt(record['Composition, orientation and variety (1)'] || 0) + 
+                                   parseInt(record['Editing / Bella Baby Standards (1)'] || 0));
+                    
+                    html += `
+                        <div style="background: #f9f9f9; border: 1px solid #ddd; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 4px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                                <div>
+                                    <h4 style="margin: 0 0 5px 0;">${record['Photographer Name']}</h4>
+                                    <p style="margin: 0; font-size: 12px; color: #666;">Reviewed by: ${record['PSS Reviewer Name']} on ${record['Date']}</p>
+                                </div>
+                                <span style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">PENDING</span>
+                            </div>
+                            
+                            <p style="margin: 10px 0; font-size: 13px;"><strong>Gallery #1:</strong> ${record['Gallery #1 Score:']} / 16</p>
+                            <p style="margin: 5px 0; font-size: 13px;"><strong>Gallery #2:</strong> ${record['Gallery #2 Score:']} / 16</p>
+                            ${record['Technical Notes:'] ? `<p style="margin: 5px 0; font-size: 12px; color: #c92a2a;"><strong>⚠️ Technical Notes:</strong> ${record['Technical Notes:']}</p>` : ''}
+                            
+                            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                <button onclick="approvePendingReview('${record.id}')" style="flex: 1; padding: 8px; background: #89c84b; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">✓ Approve</button>
+                                <button onclick="viewPendingReviewDetails('${record.id}')" style="flex: 1; padding: 8px; background: #4ba8a8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">View Details</button>
+                                <button onclick="rejectPendingReview('${record.id}')" style="flex: 1; padding: 8px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">✕ Reject</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                document.getElementById('pendingReviewsList').innerHTML = html;
+            } catch (err) {
+                console.error('Error loading pending reviews:', err);
+                document.getElementById('pendingReviewsList').innerHTML = '<p style="color: #c92a2a;">Error loading pending reviews</p>';
+            }
+        }
+
+        async function approvePendingReview(recordId) {
+            try {
+                const { error } = await supabaseClient
+                    .from('growth_assessments')
+                    .update({ status: 'approved' })
+                    .eq('id', recordId);
+
+                if (error) throw error;
+
+                alert('Assessment approved!');
+                await loadPendingReviews();
+                await loadRecords();
+            } catch (err) {
+                console.error('Error approving:', err);
+                alert('Error approving assessment');
+            }
+        }
+
+        async function rejectPendingReview(recordId) {
+            const reason = prompt('Reason for rejection (optional):');
+            if (reason === null) return;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('growth_assessments')
+                    .update({ status: 'rejected', admin_notes: reason })
+                    .eq('id', recordId);
+
+                if (error) throw error;
+
+                alert('Assessment rejected');
+                await loadPendingReviews();
+            } catch (err) {
+                console.error('Error rejecting:', err);
+                alert('Error rejecting assessment');
+            }
+        }
+
+        function viewPendingReviewDetails(recordId) {
+            // Find the record and show it in the detail modal
+            const record = allRecords.find(r => r.id === recordId);
+            if (record) {
+                showRecordModal(record);
+            }
+        }
+
+        function displayRecords() {
+            updateHeaderTagline();
+            updateCharts();
+            
+            let filtered = allRecords;
+
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(r => r.record_type === currentFilter);
+            }
+
+            // Filter based on user role
+            filtered = filtered.filter(record => {
+                const photogEmail = record['Photographer Email'];
+                return shouldShowPhotographer(photogEmail);
+            });
+
+            if (filtered.length === 0) {
+                recordsContainer.innerHTML = '<div class="no-records">No records found</div>';
+                return;
+            }
+
+            const groupedByPhotographer = {};
+            filtered.forEach(record => {
+                const name = record['Photographer Name'];
+                if (!groupedByPhotographer[name]) {
+                    groupedByPhotographer[name] = [];
+                }
+                groupedByPhotographer[name].push(record);
+            });
+
+            let photographers = Object.entries(groupedByPhotographer);
+            if (searchQuery) {
+                photographers = photographers.filter(([name]) => 
+                    name.toLowerCase().includes(searchQuery)
+                );
+            }
+
+            photographers.sort((a, b) => {
+                if (currentSort === 'a-z') {
+                    return a[0].localeCompare(b[0]);
+                } else if (currentSort === 'z-a') {
+                    return b[0].localeCompare(a[0]);
+                } else if (currentSort === 'score-high') {
+                    const scoreA = parseFloat(calculate6MonthAverage(a[1])) || 0;
+                    const scoreB = parseFloat(calculate6MonthAverage(b[1])) || 0;
+                    return scoreB - scoreA;
+                } else if (currentSort === 'score-low') {
+                    const scoreA = parseFloat(calculate6MonthAverage(a[1])) || 0;
+                    const scoreB = parseFloat(calculate6MonthAverage(b[1])) || 0;
+                    return scoreA - scoreB;
+                } else {
+                    return a[0].localeCompare(b[0]);
+                }
+            });
+
+            if (photographers.length === 0) {
+                recordsContainer.innerHTML = '<div class="no-records">No photographers found</div>';
+                return;
+            }
+
+            recordsContainer.innerHTML = photographers.map(([photographerName, records]) => {
+                const sixMonthAvg = calculate6MonthAverage(records);
+                const expandId = `expand-${photographerName.replace(/\s+/g, '-')}`;
+                const mostRecentDate = formatDate(records[0].Date);
+                
+                // Determine if this is LEGACY or GROWTH based on most recent record
+                const recordType = records[0]?.record_type;
+                const typeLabel = recordType === 'growth_assessment' ? 'GROWTH' : 'LEGACY';
+                const labelColor = '#666';
+                
+                return `
+                    <div class="photographer-card">
+                        <div class="photographer-header" onclick="togglePhotographer('${expandId}')">
+                            <div class="photographer-left">
+                                <div class="photographer-name">${photographerName}</div>
+                                <div class="photographer-meta">QC Count: ${records.length} • Most Recent: ${mostRecentDate}</div>
+                            </div>
+                            <div class="photographer-right">
+                                <div class="score-badge" style="background: ${getScoreBgColor(sixMonthAvg, records[0]?.record_type)}; border-color: ${getScoreColor(sixMonthAvg, records[0]?.record_type)}; border: 2px solid ${getScoreColor(sixMonthAvg, records[0]?.record_type)};">
+                                    <div style="font-size: 11px; font-weight: 700; color: ${labelColor}; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">${typeLabel}</div>
+                                    <div class="score-badge-value" style="color: ${getScoreColor(sixMonthAvg, records[0]?.record_type)}; margin-bottom: 4px;">${sixMonthAvg}</div>
+                                    <div style="font-size: 10px; color: #999; font-weight: 600;">6-MO AVG</div>
+                                </div>
+                                <div class="expand-icon">▼</div>
+                            </div>
+                        </div>
+                        <div class="nested-records" id="${expandId}">
+                            ${records.map((record, idx) => `
+                                <div class="nested-record" onclick="showRecordDetailsForPhoto(${records.findIndex(r => r.id === record.id)}, '${photographerName.replace(/'/g, "\\'")}')">
+                                    <div class="nested-record-left">
+                                        <div class="nested-record-date">${formatDate(record.Date)}</div>
+                                        <div class="nested-record-determination">${record['Quality Check Determination'] || 'Pending'}</div>
+                                        ${record['Technical Flags:'] ? `<div class="nested-record-flags" style="color: #c92a2a; font-size: 12px; margin-top: 4px;"><strong>Flags:</strong> ${record['Technical Flags:']}</div>` : ''}
+                                        ${record['Technical Notes:'] ? `<div class="nested-record-notes" style="color: #666; font-size: 12px; margin-top: 4px;"><strong>Notes:</strong> ${record['Technical Notes:']}</div>` : ''}
+                                    </div>
+                                    <div class="nested-record-score" style="color: ${getScoreColor(record['Average Gallery Score'], record.record_type)}; font-weight: bold; background: ${getScoreBgColor(record['Average Gallery Score'], record.record_type)}; padding: 8px 12px; border-radius: 20px; ${record.record_type === 'growth_assessment' && parseFloat(record['Average Gallery Score']) >= 1 && parseFloat(record['Average Gallery Score']) <= 4 ? 'background: #8b5cf6; color: white;' : ''}">${getNestedRecordDisplayValue(record['Average Gallery Score'], record.record_type)}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function calculate6MonthAverage(records) {
+            const sixMonthsAgo = new Date();
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+            const recentRecords = records.filter(r => {
+                const recordDate = new Date(r.Date);
+                return recordDate >= sixMonthsAgo;
+            });
+
+            if (recentRecords.length === 0) return 'N/A';
+
+            const scores = recentRecords
+                .map(r => parseFloat(r['Average Gallery Score']))
+                .filter(s => !isNaN(s));
+
+            if (scores.length === 0) return 'N/A';
+
+            return (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+        }
+
+        function togglePhotographer(expandId) {
+            const element = document.getElementById(expandId);
+            const card = element.parentElement;
+            element.classList.toggle('show');
+            card.classList.toggle('expanded');
+        }
+
+        function closeModal() {
+            recordModal.classList.remove('active');
+            modalBody.innerHTML = '';
+        }
+
+        let currentRecord = null;
+
+        function showRecordDetailsForPhoto(recordIndex, photographerName) {
+            // Find all records for this photographer
+            const photographerRecords = allRecords.filter(r => r['Photographer Name'] === photographerName);
+            
+            if (recordIndex < 0 || recordIndex >= photographerRecords.length) {
+                modalBody.innerHTML = '<p>Record not found</p>';
+                recordModal.classList.add('active');
+                return;
+            }
+            
+            const record = photographerRecords[recordIndex];
+            showRecordDetails(record);
+        }
+
+        function showRecordDetails(record) {
+            // Clear modal first
+            modalBody.innerHTML = '';
+            
+            // Store current record for print functions
+            currentRecord = record;
+            
+            if (!record) {
+                modalBody.innerHTML = '<p>Record not found</p>';
+                recordModal.classList.add('active');
+                return;
+            }
+
+            let html = `
+                <h2>${record['Photographer Name']}</h2>
+                <div class="modal-meta">
+                    <strong>${record['Photographer Level']}</strong> • ${formatDate(record.Date)}
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">PSS Reviewer</div>
+                    <div class="detail-value">${record['PSS Reviewer Name'] || 'N/A'}</div>
+                </div>
+            `;
+
+            if (record['Technical Flags:']) {
+                html += `
+                    <div class="detail-row">
+                        <div class="detail-label" style="color: #c92a2a;">Technical Flags</div>
+                        <div class="detail-value" style="color: #c92a2a;">${record['Technical Flags:']}</div>
+                    </div>
+                `;
+            }
+
+            if (record['Technical Notes:']) {
+                html += `
+                    <div class="detail-row">
+                        <div class="detail-label">Technical Notes</div>
+                        <div class="detail-value">${record['Technical Notes:']}</div>
+                    </div>
+                `;
+            }
+
+            // Check if this is a Growth Assessment record
+            if (record.record_type === 'growth_assessment') {
+                // Growth Assessment display (4 categories only)
+                const coreSkills1 = record['Core Skills (1)'] ? parseFloat(record['Core Skills (1)']) : null;
+                const coreSkills2 = record['Core Skills (2)'] ? parseFloat(record['Core Skills (2)']) : null;
+                const bothLow = (coreSkills1 === 1 || coreSkills1 === 2) && (coreSkills2 === 1 || coreSkills2 === 2);
+                
+                // Gallery 1
+                if (record['Gallery #1 Score:']) {
+                    html += `
+                        <div class="gallery-section">
+                            <div class="gallery-title">Gallery #1</div>
+                            <div class="gallery-scores">
+                    `;
+                    
+                    // If Core Skills is 1 or 2, only show that score
+                    if (coreSkills1 === 1 || coreSkills1 === 2) {
+                        if (bothLow) {
+                            // Show purple CS badge instead of the number
+                            html += `
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Core Skills</span>
+                                    <span class="gallery-score-value" style="background: #8b5cf6; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">CS</span>
+                                </div>
+                            `;
+                        } else {
+                            html += `
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Core Skills</span>
+                                    <span class="gallery-score-value">${record['Core Skills (1)']}</span>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        // Show all 4 categories
+                        html += `
+                            <div class="gallery-score-item">
+                                <span class="gallery-score-label">Core Skills</span>
+                                <span class="gallery-score-value">${record['Core Skills (1)']}</span>
+                            </div>
+                            <div class="gallery-score-item">
+                                <span class="gallery-score-label">Subject and Posing</span>
+                                <span class="gallery-score-value">${record['Subject and Posing (1)']}</span>
+                            </div>
+                            <div class="gallery-score-item">
+                                <span class="gallery-score-label">Composition, Orientation & Variety</span>
+                                <span class="gallery-score-value">${record['Composition, orientation and variety (1)']}</span>
+                            </div>
+                            <div class="gallery-score-item">
+                                <span class="gallery-score-label">Editing / Bella Baby Standards</span>
+                                <span class="gallery-score-value">${record['Editing / Bella Baby Standards (1)']}</span>
+                            </div>
+                        `;
+                    }
+                    
+                    html += `
+                            </div>
+                            <div style="padding: 12px; background: ${getScoreBgColor(record['Gallery #1 Score:'], 'growth_assessment')}; border-radius: 6px; margin-top: 12px; font-weight: 600; color: ${getScoreColor(record['Gallery #1 Score:'], 'growth_assessment')};">
+                                Score: ${record['Gallery #1 Score:']}
+                            </div>
+                            ${record['Gallery #1 Feedback:'] ? `<div class="gallery-feedback">${record['Gallery #1 Feedback:']}</div>` : ''}
+                        </div>
+                    `;
+                }
+                
+                // Gallery 2
+                if (record['Gallery #2 Score:']) {
+                    html += `
+                        <div class="gallery-section">
+                            <div class="gallery-title">Gallery #2</div>
+                            <div class="gallery-scores">
+                    `;
+                    
+                    // If Core Skills is 1 or 2, only show that score
+                    if (coreSkills2 === 1 || coreSkills2 === 2) {
+                        if (bothLow) {
+                            // Show purple CS badge instead of the number
+                            html += `
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Core Skills</span>
+                                    <span class="gallery-score-value" style="background: #8b5cf6; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">CS</span>
+                                </div>
+                            `;
+                        } else {
+                            html += `
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Core Skills</span>
+                                    <span class="gallery-score-value">${record['Core Skills (2)']}</span>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        // Show all 4 categories
+                        html += `
+                            <div class="gallery-score-item">
+                                <span class="gallery-score-label">Core Skills</span>
+                                <span class="gallery-score-value">${record['Core Skills (2)']}</span>
+                            </div>
+                            <div class="gallery-score-item">
+                                <span class="gallery-score-label">Subject and Posing</span>
+                                <span class="gallery-score-value">${record['Subject and Posing (2)']}</span>
+                            </div>
+                            <div class="gallery-score-item">
+                                <span class="gallery-score-label">Composition, Orientation & Variety</span>
+                                <span class="gallery-score-value">${record['Composition, orientation and variety (2)']}</span>
+                            </div>
+                            <div class="gallery-score-item">
+                                <span class="gallery-score-label">Editing / Bella Baby Standards</span>
+                                <span class="gallery-score-value">${record['Editing / Bella Baby Standards (2)']}</span>
+                            </div>
+                        `;
+                    }
+                    
+                    html += `
+                            </div>
+                            <div style="padding: 12px; background: ${getScoreBgColor(record['Gallery #2 Score:'], 'growth_assessment')}; border-radius: 6px; margin-top: 12px; font-weight: 600; color: ${getScoreColor(record['Gallery #2 Score:'], 'growth_assessment')};">
+                                Score: ${record['Gallery #2 Score:']}
+                            </div>
+                            ${record['Gallery #2 Feedback:'] ? `<div class="gallery-feedback">${record['Gallery #2 Feedback:']}</div>` : ''}
+                        </div>
+                    `;
+                }
+                
+                // Overall Assessment
+                html += `
+                    <div class="detail-row">
+                        <div class="detail-label">Overall Assessment</div>
+                        <div class="detail-value">
+                            <strong>Average Gallery Score:</strong> ${record['Average Gallery Score'] || 'N/A'}<br>
+                            <strong>Current Assessment Level:</strong> ${record['Current Assessment Level'] || 'N/A'}
+                        </div>
+                    </div>
+                `;
+            } else {
+                // QC Records display (10 categories)
+                if (record['Gallery #1 Score:']) {
+                    html += `
+                        <div class="gallery-section">
+                            <div class="gallery-title">Gallery #1</div>
+                            <div class="gallery-scores">
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Theme/Subject</span>
+                                    <span class="gallery-score-value">${record['Gallery #1 Theme/Subject']}</span>
+                                </div>
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Exposure</span>
+                                    <span class="gallery-score-value">${record['Gallery #1 Exposure']}</span>
+                                </div>
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Focus</span>
+                                    <span class="gallery-score-value">${record['Gallery #1 Focus']}</span>
+                                </div>
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">White Balance</span>
+                                    <span class="gallery-score-value">${record['Gallery #1 White Balance']}</span>
+                                </div>
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Posing</span>
+                                    <span class="gallery-score-value">${record['Gallery #1 Posing']}</span>
+                                </div>
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Variety</span>
+                                    <span class="gallery-score-value">${record['Gallery #1 Variety']}</span>
+                                </div>
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Environment</span>
+                                    <span class="gallery-score-value">${record['Gallery #1 Environment']}</span>
+                                </div>
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Editing</span>
+                                    <span class="gallery-score-value">${record['Gallery #1 Editing']}</span>
+                                </div>
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Calming and Soothing</span>
+                                    <span class="gallery-score-value">${record['Gallery #1 Calming and soothing']}</span>
+                                </div>
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Composition/Cropping</span>
+                                    <span class="gallery-score-value">${record['Gallery #1 Composition/Cropping']}</span>
+                                </div>
+                            </div>
+                            <div style="padding: 12px; background: ${getScoreBgColor(record['Gallery #1 Score:'], record.record_type)}; border-radius: 6px; margin-top: 12px; font-weight: 600; color: ${getScoreColor(record['Gallery #1 Score:'], record.record_type)};">
+                                Score: ${record['Gallery #1 Score:']}
+                            </div>
+                            ${record['Gallery #1 Feedback:'] ? `<div class="gallery-feedback">${record['Gallery #1 Feedback:']}</div>` : ''}
+                        </div>
+                    `;
+                }
+
+                if (record['Gallery #2 Score:']) {
+                    html += `
+                        <div class="gallery-section">
+                            <div class="gallery-title">Gallery #2</div>
+                            <div class="gallery-scores">
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Theme/Subject</span>
+                                    <span class="gallery-score-value">${record['Gallery #2 Theme/Subject']}</span>
+                                </div>
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Exposure</span>
+                                    <span class="gallery-score-value">${record['Gallery #2 Exposure']}</span>
+                                </div>
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Focus</span>
+                                    <span class="gallery-score-value">${record['Gallery #2 Focus']}</span>
+                                </div>
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">White Balance</span>
+                                    <span class="gallery-score-value">${record['Gallery #2 White Balance']}</span>
+                                </div>
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Posing</span>
+                                    <span class="gallery-score-value">${record['Gallery #2 Posing']}</span>
+                                </div>
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Variety</span>
+                                    <span class="gallery-score-value">${record['Gallery #2 Variety']}</span>
+                                </div>
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Environment</span>
+                                    <span class="gallery-score-value">${record['Gallery #2 Environment']}</span>
+                                </div>
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Editing</span>
+                                    <span class="gallery-score-value">${record['Gallery #2 Editing']}</span>
+                                </div>
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Calming and Soothing</span>
+                                    <span class="gallery-score-value">${record['Gallery #2 Calming and soothing']}</span>
+                                </div>
+                                <div class="gallery-score-item">
+                                    <span class="gallery-score-label">Composition/Cropping</span>
+                                    <span class="gallery-score-value">${record['Gallery #2 Composition/Cropping']}</span>
+                                </div>
+                            </div>
+                            <div style="padding: 12px; background: ${getScoreBgColor(record['Gallery #2 Score:'], record.record_type)}; border-radius: 6px; margin-top: 12px; font-weight: 600; color: ${getScoreColor(record['Gallery #2 Score:'], record.record_type)};">
+                                Score: ${record['Gallery #2 Score:']}
+                            </div>
+                            ${record['Gallery #2 Feedback:'] ? `<div class="gallery-feedback">${record['Gallery #2 Feedback:']}</div>` : ''}
+                        </div>
+                    `;
+                }
+
+                html += `
+                    <div class="detail-row">
+                        <div class="detail-label">Overall Gallery Review</div>
+                        <div class="detail-value">
+                            <strong>Average Gallery Score:</strong> ${record['Average Gallery Score'] || 'N/A'}<br>
+                            <strong>Quality Check Determination:</strong> ${record['Quality Check Determination'] || 'N/A'}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Add print buttons
+            html += `
+                <div class="print-buttons">
+                    <button type="button" class="print-btn" onclick="printCurrentRecord()">Print This Record</button>
+                    <button type="button" class="print-btn" onclick="printPhotographerRecords('${record['Photographer Name'].replace(/'/g, "\\'")}')">Print All Records</button>
+                </div>
+            `;
+
+            modalBody.innerHTML = html;
+            recordModal.classList.add('active');
+            // Reset scroll to top
+            document.querySelector('.modal-content').scrollTop = 0;
+        }
+
+        function printCurrentRecord() {
+            if (!currentRecord) return;
+            printRecord(currentRecord);
+        }
+
+        function printRecord(record) {
+            let html = `
+                <html>
+                <head>
+                    <title>Growth Assessment - ${record['Photographer Name']}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; max-width: 850px; margin: 0 auto; padding: 20px; }
+                        h1 { color: #4ba8a8; border-bottom: 2px solid #4ba8a8; padding-bottom: 10px; }
+                        h2 { color: #333; margin-top: 25px; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
+                        h3 { color: #333; margin: 15px 0 10px 0; }
+                        .meta { color: #666; font-size: 13px; margin: 10px 0; }
+                        .detail-row { margin: 15px 0; }
+                        .detail-label { font-weight: bold; color: #333; }
+                        .detail-value { color: #666; margin-top: 5px; line-height: 1.6; }
+                        .gallery { background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0; page-break-inside: avoid; }
+                        .gallery-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+                        .score-item { padding: 10px; background: white; border: 1px solid #e0e0e0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+                        .score-label { font-weight: bold; color: #333; }
+                        .score-val { color: #4ba8a8; font-weight: 600; }
+                        .feedback { margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; font-style: italic; font-size: 12px; line-height: 1.5; }
+                        .overall-score { background: #e8f5f5; padding: 10px; border-radius: 4px; margin-top: 10px; font-weight: bold; color: #4ba8a8; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Growth Assessment</h1>
+                    <h2>${record['Photographer Name']}</h2>
+                    <div class="meta">
+                        <strong>Date:</strong> ${formatDate(record.Date)}<br>
+                        <strong>Level:</strong> ${record['Photographer Level'] || 'N/A'}<br>
+                        <strong>Reviewer:</strong> ${record['PSS Reviewer Name'] || 'N/A'}
+                    </div>
+            `;
+
+            if (record['Gallery #1 Score:']) {
+                html += `
+                    <div class="gallery">
+                        <h3>Gallery #1 - Score: ${record['Gallery #1 Score:']}</h3>
+                        <div class="gallery-scores">
+                            <div class="score-item"><span class="score-label">Theme/Subject</span><span class="score-val">${record['Gallery #1 Theme/Subject']}</span></div>
+                            <div class="score-item"><span class="score-label">Exposure</span><span class="score-val">${record['Gallery #1 Exposure']}</span></div>
+                            <div class="score-item"><span class="score-label">Focus</span><span class="score-val">${record['Gallery #1 Focus']}</span></div>
+                            <div class="score-item"><span class="score-label">White Balance</span><span class="score-val">${record['Gallery #1 White Balance']}</span></div>
+                            <div class="score-item"><span class="score-label">Posing</span><span class="score-val">${record['Gallery #1 Posing']}</span></div>
+                            <div class="score-item"><span class="score-label">Variety</span><span class="score-val">${record['Gallery #1 Variety']}</span></div>
+                            <div class="score-item"><span class="score-label">Environment</span><span class="score-val">${record['Gallery #1 Environment']}</span></div>
+                            <div class="score-item"><span class="score-label">Editing</span><span class="score-val">${record['Gallery #1 Editing']}</span></div>
+                            <div class="score-item"><span class="score-label">Calming and Soothing</span><span class="score-val">${record['Gallery #1 Calming and soothing']}</span></div>
+                            <div class="score-item"><span class="score-label">Composition/Cropping</span><span class="score-val">${record['Gallery #1 Composition/Cropping']}</span></div>
+                        </div>
+                        ${record['Gallery #1 Feedback:'] ? `<div class="feedback"><strong>Feedback:</strong> ${record['Gallery #1 Feedback:']}</div>` : ''}
+                    </div>
+                `;
+            }
+
+            if (record['Gallery #2 Score:']) {
+                html += `
+                    <div class="gallery">
+                        <h3>Gallery #2 - Score: ${record['Gallery #2 Score:']}</h3>
+                        <div class="gallery-scores">
+                            <div class="score-item"><span class="score-label">Theme/Subject</span><span class="score-val">${record['Gallery #2 Theme/Subject']}</span></div>
+                            <div class="score-item"><span class="score-label">Exposure</span><span class="score-val">${record['Gallery #2 Exposure']}</span></div>
+                            <div class="score-item"><span class="score-label">Focus</span><span class="score-val">${record['Gallery #2 Focus']}</span></div>
+                            <div class="score-item"><span class="score-label">White Balance</span><span class="score-val">${record['Gallery #2 White Balance']}</span></div>
+                            <div class="score-item"><span class="score-label">Posing</span><span class="score-val">${record['Gallery #2 Posing']}</span></div>
+                            <div class="score-item"><span class="score-label">Variety</span><span class="score-val">${record['Gallery #2 Variety']}</span></div>
+                            <div class="score-item"><span class="score-label">Environment</span><span class="score-val">${record['Gallery #2 Environment']}</span></div>
+                            <div class="score-item"><span class="score-label">Editing</span><span class="score-val">${record['Gallery #2 Editing']}</span></div>
+                            <div class="score-item"><span class="score-label">Calming and Soothing</span><span class="score-val">${record['Gallery #2 Calming and soothing']}</span></div>
+                            <div class="score-item"><span class="score-label">Composition/Cropping</span><span class="score-val">${record['Gallery #2 Composition/Cropping']}</span></div>
+                        </div>
+                        ${record['Gallery #2 Feedback:'] ? `<div class="feedback"><strong>Feedback:</strong> ${record['Gallery #2 Feedback:']}</div>` : ''}
+                    </div>
+                `;
+            }
+
+            html += `
+                    <div class="detail-row">
+                        <div class="detail-label">Overall Review</div>
+                        <div class="detail-value">
+                            Average Score: ${record['Average Gallery Score'] || 'N/A'}<br>
+                            Determination: ${record['Quality Check Determination'] || 'N/A'}
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+
+            const printWindow = window.open('', '', 'height=800,width=900');
+            printWindow.document.write(html);
+            printWindow.document.close();
+            setTimeout(() => printWindow.print(), 250);
+        }
+
+        function printPhotographerRecords(photographerName) {
+            const records = allRecords.filter(r => r['Photographer Name'] === photographerName);
+            
+            let html = `
+                <html>
+                <head>
+                    <title>Growth Assessments - ${photographerName}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; max-width: 850px; margin: 0 auto; padding: 20px; }
+                        h1 { color: #4ba8a8; border-bottom: 2px solid #4ba8a8; padding-bottom: 10px; }
+                        h2 { color: #333; margin-top: 30px; border-bottom: 1px solid #ddd; padding-bottom: 8px; page-break-before: always; }
+                        h3 { color: #333; margin: 15px 0 10px 0; }
+                        .meta { color: #666; font-size: 13px; margin: 10px 0; }
+                        .gallery { background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0; page-break-inside: avoid; }
+                        .gallery-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+                        .score-item { padding: 10px; background: white; border: 1px solid #e0e0e0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+                        .score-label { font-weight: bold; color: #333; }
+                        .score-val { color: #4ba8a8; font-weight: 600; }
+                        .feedback { margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; font-style: italic; font-size: 12px; line-height: 1.5; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Growth Assessments Summary</h1>
+                    <div class="meta">
+                        <strong>Photographer:</strong> ${photographerName}<br>
+                        <strong>Total Assessments:</strong> ${records.length}<br>
+                        <strong>Print Date:</strong> ${new Date().toLocaleDateString()}
+                    </div>
+            `;
+
+            records.forEach((record, index) => {
+                html += `
+                    <h2>Assessment ${index + 1} - ${formatDate(record.Date)}</h2>
+                    <div class="meta">
+                        <strong>Reviewer:</strong> ${record['PSS Reviewer Name'] || 'N/A'} | 
+                        <strong>Overall Score:</strong> ${record['Average Gallery Score'] || 'N/A'} | 
+                        <strong>Determination:</strong> ${record['Quality Check Determination'] || 'N/A'}
+                    </div>
+                `;
+
+                if (record['Gallery #1 Score:']) {
+                    html += `
+                        <div class="gallery">
+                            <h3>Gallery #1 - Score: ${record['Gallery #1 Score:']}</h3>
+                            <div class="gallery-scores">
+                                <div class="score-item"><span class="score-label">Theme/Subject</span><span class="score-val">${record['Gallery #1 Theme/Subject']}</span></div>
+                                <div class="score-item"><span class="score-label">Exposure</span><span class="score-val">${record['Gallery #1 Exposure']}</span></div>
+                                <div class="score-item"><span class="score-label">Focus</span><span class="score-val">${record['Gallery #1 Focus']}</span></div>
+                                <div class="score-item"><span class="score-label">White Balance</span><span class="score-val">${record['Gallery #1 White Balance']}</span></div>
+                                <div class="score-item"><span class="score-label">Posing</span><span class="score-val">${record['Gallery #1 Posing']}</span></div>
+                                <div class="score-item"><span class="score-label">Variety</span><span class="score-val">${record['Gallery #1 Variety']}</span></div>
+                                <div class="score-item"><span class="score-label">Environment</span><span class="score-val">${record['Gallery #1 Environment']}</span></div>
+                                <div class="score-item"><span class="score-label">Editing</span><span class="score-val">${record['Gallery #1 Editing']}</span></div>
+                                <div class="score-item"><span class="score-label">Calming and Soothing</span><span class="score-val">${record['Gallery #1 Calming and soothing']}</span></div>
+                                <div class="score-item"><span class="score-label">Composition/Cropping</span><span class="score-val">${record['Gallery #1 Composition/Cropping']}</span></div>
+                            </div>
+                            ${record['Gallery #1 Feedback:'] ? `<div class="feedback"><strong>Feedback:</strong> ${record['Gallery #1 Feedback:']}</div>` : ''}
+                        </div>
+                    `;
+                }
+
+                if (record['Gallery #2 Score:']) {
+                    html += `
+                        <div class="gallery">
+                            <h3>Gallery #2 - Score: ${record['Gallery #2 Score:']}</h3>
+                            <div class="gallery-scores">
+                                <div class="score-item"><span class="score-label">Theme/Subject</span><span class="score-val">${record['Gallery #2 Theme/Subject']}</span></div>
+                                <div class="score-item"><span class="score-label">Exposure</span><span class="score-val">${record['Gallery #2 Exposure']}</span></div>
+                                <div class="score-item"><span class="score-label">Focus</span><span class="score-val">${record['Gallery #2 Focus']}</span></div>
+                                <div class="score-item"><span class="score-label">White Balance</span><span class="score-val">${record['Gallery #2 White Balance']}</span></div>
+                                <div class="score-item"><span class="score-label">Posing</span><span class="score-val">${record['Gallery #2 Posing']}</span></div>
+                                <div class="score-item"><span class="score-label">Variety</span><span class="score-val">${record['Gallery #2 Variety']}</span></div>
+                                <div class="score-item"><span class="score-label">Environment</span><span class="score-val">${record['Gallery #2 Environment']}</span></div>
+                                <div class="score-item"><span class="score-label">Editing</span><span class="score-val">${record['Gallery #2 Editing']}</span></div>
+                                <div class="score-item"><span class="score-label">Calming and Soothing</span><span class="score-val">${record['Gallery #2 Calming and soothing']}</span></div>
+                                <div class="score-item"><span class="score-label">Composition/Cropping</span><span class="score-val">${record['Gallery #2 Composition/Cropping']}</span></div>
+                            </div>
+                            ${record['Gallery #2 Feedback:'] ? `<div class="feedback"><strong>Feedback:</strong> ${record['Gallery #2 Feedback:']}</div>` : ''}
+                        </div>
+                    `;
+                }
+            });
+
+            html += `</body></html>`;
+
+            const printWindow = window.open('', '', 'height=800,width=900');
+            printWindow.document.write(html);
+            printWindow.document.close();
+            setTimeout(() => printWindow.print(), 250);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/A';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function getScoreColor(score, recordType = null) {
+            const numScore = parseFloat(score);
+            if (isNaN(numScore)) return '#333';
+            
+            // Growth Assessment scoring (0-16 scale)
+            if (recordType === 'growth_assessment') {
+                if (numScore >= 14) return '#003d7a'; // Dark blue (Master 14-16)
+                if (numScore >= 11) return '#2d7a2d'; // Green (Proficient 11-13)
+                if (numScore >= 8) return '#b8860b'; // Gold (Needs Improvement 8-10)
+                return '#d97706'; // Orange (Below Standards 0-7)
+            }
+            
+            // QC Records scoring (0-40 scale)
+            if (numScore >= 36) return '#003d7a'; // Dark blue
+            if (numScore >= 30) return '#2d7a2d'; // Green
+            if (numScore >= 23) return '#b8860b'; // Gold
+            return '#d97706'; // Dark orange
+        }
+
+        function getScoreBgColor(score, recordType = null) {
+            const numScore = parseFloat(score);
+            if (isNaN(numScore)) return '#f5f5f5';
+            
+            // Growth Assessment scoring (0-16 scale)
+            if (recordType === 'growth_assessment') {
+                if (numScore >= 14) return '#e8f0ff'; // Light blue
+                if (numScore >= 11) return '#e8f5e9'; // Light green
+                return '#f0f0f0'; // Light grey for orange/gold
+            }
+            
+            // QC Records scoring (0-40 scale)
+            if (numScore >= 36) return '#e8f0ff'; // Light blue
+            if (numScore >= 30) return '#e8f5e9'; // Light green
+            return '#f0f0f0'; // Light grey
+        }
+
+        function getNestedRecordDisplayValue(score, recordType = null) {
+            const numScore = parseFloat(score);
+            if (isNaN(numScore)) return 'N/A';
+            
+            // For Growth Assessments, if score is 1-4 (below Proficient), show CS
+            if (recordType === 'growth_assessment' && numScore >= 1 && numScore <= 4) {
+                return 'CS';
+            }
+            
+            // Otherwise return the score as-is
+            return score;
+        }
+
+        init();
+    </script>
+</body>
+</html>
