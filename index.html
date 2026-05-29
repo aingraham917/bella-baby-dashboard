@@ -2195,11 +2195,14 @@
                 data.forEach(row => {
                     const amEmail = row["AM Email"].toLowerCase();
                     allAMAssignments[row["Photographer Email"].toLowerCase()] = amEmail;
-                    // Store AM name keyed by email for display purposes
                     if (row["AM"] && !allAMNames[amEmail]) {
                         allAMNames[amEmail] = row["AM"];
                     }
                 });
+                // Rebuild currentAMTeam after assignments load
+                if (isAM()) {
+                    currentAMTeam = getAMTeamPhotographers();
+                }
             } catch (error) {
                 console.log('Could not load AM assignments (table may not exist yet)', error);
             }
@@ -4316,36 +4319,9 @@
         }
 
         function renderAMView(mode, records) {
-            currentPage = 1;
-            let filtered = records;
-            if (mode === 'team') {
-                filtered = records.filter(r =>
-                    currentAMTeam.includes((r['Photographer Email'] || '').toLowerCase())
-                );
-            }
-            if (filtered.length === 0) {
-                recordsContainer.innerHTML = '<div class="no-records">No records found</div>';
-                return;
-            }
-            // Group by photographer
-            const grouped = {};
-            filtered.forEach(r => {
-                const name = r['Photographer Name'];
-                if (!grouped[name]) grouped[name] = [];
-                grouped[name].push(r);
-            });
-            let photographers = Object.entries(grouped);
-            if (searchQuery) {
-                photographers = photographers.filter(([name]) => name.toLowerCase().includes(searchQuery));
-            }
-            photographers.sort((a, b) => a[0].localeCompare(b[0]));
-            const totalPages = Math.ceil(photographers.length / PAGE_SIZE);
-            const pagePhotographers = photographers.slice(0, PAGE_SIZE);
-            // Temporarily set allRecords to filtered so displayRecords renders correctly
-            const _saved = allRecords;
-            allRecords = filtered;
+            // Just set the mode and call displayRecords — shouldShowPhotographer handles the filtering
+            // currentAMTeam is already built, amViewMode is already set by switchAMView
             displayRecords();
-            allRecords = _saved;
         }
 
         // AUTH
@@ -4418,6 +4394,7 @@
 
         // DATA
         async function loadRecords() {
+            _recordsLoading = true;
             recordsContainer.innerHTML = '<div class="loading">Loading records...</div>';
 
             try {
@@ -4490,10 +4467,14 @@
                     adminReportOption.style.display = isSuperAdmin ? 'block' : 'none';
                 }
                 
+                _recordsLoading = false;
+                // Rebuild AM team with fresh assignments
+                if (isAM()) currentAMTeam = getAMTeamPhotographers();
                 displayRecords();
-                // Update charts after records load (not on every displayRecords call)
+                // Update charts after records load
                 setTimeout(updateCharts, 100);
             } catch (error) {
+                _recordsLoading = false;
                 console.error('Error loading records:', error);
                 recordsContainer.innerHTML = `<div style="color: red; padding: 20px;">${error.message}</div>`;
             }
@@ -6459,8 +6440,10 @@
             }
         }
 
+        let _recordsLoading = false; // guard against rendering during reload
+
         function displayRecords() {
-            console.log('displayRecords START');
+            if (_recordsLoading) return; // skip if records are being refreshed
             try { updateHeaderTagline(); } catch(e) { console.error('updateHeaderTagline error:', e); }
             // updateCharts is called separately after loadRecords — skip here to avoid errors
             
