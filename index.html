@@ -3415,6 +3415,17 @@
             `).join('');
         }
 
+        function buildLevelBadges(visibleTo) {
+            const levels = Array.isArray(visibleTo) && visibleTo.length > 0 ? visibleTo : null;
+            if (!levels) {
+                return '<div style="margin-top:4px;"><span style="font-size:10px;color:#aaa;font-style:italic;">All levels</span></div>';
+            }
+            const badges = levels.map(l =>
+                `<span style="font-size:10px;background:#e8f5f5;color:#4ba8a8;border:1px solid #b2dfdb;border-radius:3px;padding:1px 6px;">${l}</span>`
+            ).join('');
+            return `<div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap;">${badges}</div>`;
+        }
+
         function renderVideoCard(v) {
             const embedUrl = driveToEmbedUrl(v.drive_link);
             const isAdmin = canManageRoles();
@@ -3425,9 +3436,7 @@
                         <div>
                             <div style="font-weight:600;font-size:14px;color:#333;">${v.title || 'Untitled'}</div>
                             ${v.description ? `<div style="font-size:12px;color:#999;margin-top:3px;">${v.description}</div>` : ''}
-                            ${isAdmin && v.visible_to && v.visible_to.length > 0
-                                ? `<div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap;">${v.visible_to.map(l => '<span style=\'font-size:10px;background:#e8f5f5;color:#4ba8a8;border:1px solid #b2dfdb;border-radius:3px;padding:1px 6px;\'>' + l + '</span>').join('')}</div>`
-                                : (isAdmin ? '<div style="margin-top:4px;"><span style=\'font-size:10px;color:#999;\'>All levels</span></div>' : '')}
+                            ${isAdmin ? buildLevelBadges(v.visible_to) : ''}
                         </div>
                         <div style="display:flex;align-items:center;gap:10px;">
                             ${isAdmin ? `
