@@ -3126,12 +3126,17 @@
             }
 
             supabaseClient.auth.onAuthStateChange((event, session) => {
-                if (session) {
+                // SIGNED_IN fired by handleLogin directly — skip to avoid double load
+                if (event === 'SIGNED_IN' && _handlingAuth) return;
+                if (session && session.user) {
                     currentUser = session.user;
-                    showDashboard();
-                    loadRecords();
+                    if (!_handlingAuth) {
+                        showDashboard();
+                        loadRecords();
+                    }
                 } else {
                     currentUser = null;
+                    _handlingAuth = false;
                     showAuth();
                 }
             });
@@ -4319,6 +4324,7 @@
             const loginBtn = loginForm.querySelector('button');
             loginBtn.textContent = 'Signing in...';
             loginBtn.disabled = true;
+            _handlingAuth = true;
 
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -4345,9 +4351,11 @@
                 }
 
                 currentUser = data.user;
+                _handlingAuth = false;
                 showDashboard();
                 loadRecords();
             } catch (error) {
+                _handlingAuth = false;
                 loginError.textContent = error.message || 'Login failed.';
                 loginError.classList.add('show');
                 loginBtn.textContent = 'Sign In';
@@ -4356,11 +4364,16 @@
         }
 
         async function handleLogout() {
+            _handlingAuth = false;
             await supabaseClient.auth.signOut();
             currentUser = null;
             allRecords = [];
+            currentPage = 1;
             loginForm.reset();
-            
+
+            // Reset to dashboard page so next login starts fresh
+            showPage('dashboardPage');
+
             // Clear search and filters
             const searchInput = document.getElementById('searchInput');
             if (searchInput) searchInput.value = '';
@@ -4741,6 +4754,7 @@
         // Check if a string looks like an email address
         // Track whether the assessment form has unsaved changes
         let formIsDirty = false;
+        let _handlingAuth = false; // prevents duplicate auth state handling
 
         function markFormDirty() { formIsDirty = true; }
 
