@@ -4305,8 +4305,11 @@
 
         function switchAMView(mode) {
             amViewMode = mode;
-            document.getElementById('teamViewBtn').classList.toggle('active', mode === 'team');
-            document.getElementById('allViewBtn').classList.toggle('active', mode === 'all');
+            currentPage = 1; // reset pagination
+            const teamBtn = document.getElementById('teamViewBtn');
+            const allBtn  = document.getElementById('allViewBtn');
+            if (teamBtn) teamBtn.classList.toggle('active', mode === 'team');
+            if (allBtn)  allBtn.classList.toggle('active', mode === 'all');
             displayRecords();
         }
 
@@ -4389,13 +4392,15 @@
                 let qcQuery = supabaseClient
                     .from('qc_records')
                     .select('*')
-                    .order('Date', { ascending: false });
+                    .order('Date', { ascending: false })
+                    .limit(5000);
 
                 // Load from growth_assessments - only show approved to photographers, all to admins
                 let gaQuery = supabaseClient
                     .from('growth_assessments')
                     .select('*')
-                    .order('Date', { ascending: false });
+                    .order('Date', { ascending: false })
+                    .limit(5000);
 
                 const [qcResult, gaResult] = await Promise.all([qcQuery, gaQuery]);
                 
