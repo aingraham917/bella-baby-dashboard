@@ -6457,6 +6457,8 @@
                 return shouldShowPhotographer(photogEmail);
             });
 
+            console.log('displayRecords: role=', getCurrentUserRole(), 'amViewMode=', amViewMode, 'filtered=', filtered.length, 'currentAMTeam=', currentAMTeam.length);
+
             if (filtered.length === 0) {
                 recordsContainer.innerHTML = '<div class="no-records">No records found</div>';
                 return;
