@@ -1716,6 +1716,17 @@
                             <input type="text" id="tlPassword" class="fi" placeholder="e.g. bellababy2024">
                             <p style="font-size:11px;color:#999;margin:4px 0 0 0;">Password will be displayed below the video so viewers can enter it when prompted.</p>
                         </div>
+                        <div style="margin-bottom:15px;">
+                            <label class="fl">Visible to Levels <span style="font-weight:400;font-size:11px;color:#999;">(admins & trainers always see everything)</span></label>
+                            <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:6px;">
+                                <label class="fcb"><input type="checkbox" name="tlLevel" value="all"> Everyone (All Levels)</label>
+                                <label class="fcb"><input type="checkbox" name="tlLevel" value="Pre-Foundation"> Pre-Foundation</label>
+                                <label class="fcb"><input type="checkbox" name="tlLevel" value="Foundation"> Foundation</label>
+                                <label class="fcb"><input type="checkbox" name="tlLevel" value="Ambassador"> Ambassador</label>
+                                <label class="fcb"><input type="checkbox" name="tlLevel" value="Advanced Ambassador"> Advanced Ambassador</label>
+                            </div>
+                            <p style="font-size:11px;color:#999;margin:5px 0 0 0;">Check all that apply. Leave all unchecked to show to everyone.</p>
+                        </div>
                         <div style="display:flex;gap:10px;">
                             <button onclick="saveTrainingVideo()" style="padding:8px 20px;background:#4ba8a8;color:white;border:none;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600;">💾 Save Video</button>
                             <button onclick="cancelEditVideo()" style="padding:8px 16px;background:#f0f0f0;color:#555;border:none;border-radius:4px;cursor:pointer;font-size:13px;">Cancel</button>
@@ -3276,16 +3287,12 @@
 
             // ── YouTube ──────────────────────────────────────────────────────
             // youtu.be/ID
-const ytShort = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
-if (ytShort) {
-    return `https://www.youtube.com/embed/${ytShort[1]}?rel=0&modestbranding=1&origin=${encodeURIComponent(window.location.origin)}`;
-}
+            const ytShort = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+            if (ytShort) return `https://www.youtube.com/embed/${ytShort[1]}`;
 
-// youtube.com/watch?v=ID
-const ytWatch = url.match(/youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/);
-if (ytWatch) {
-    return `https://www.youtube.com/embed/${ytWatch[1]}?rel=0&modestbranding=1&origin=${encodeURIComponent(window.location.origin)}`;
-}
+            // youtube.com/watch?v=ID
+            const ytWatch = url.match(/youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/);
+            if (ytWatch) return `https://www.youtube.com/embed/${ytWatch[1]}`;
 
             // youtube.com/embed/ID (already embedded)
             if (url.includes('youtube.com/embed/')) return url;
@@ -3344,7 +3351,22 @@ if (ytWatch) {
         function filterTrainingVideos() {
             const search = (document.getElementById('tlSearch')?.value || '').toLowerCase();
             const cat    = document.getElementById('tlCategoryFilter')?.value || '';
+            const role   = getCurrentUserRole();
+            // Admins, super_admins, trainers, AMs see everything
+            const isPrivileged = ['super_admin','admin','trainer','am'].includes(role);
+
             let filtered = tlAllVideos;
+
+            // Level-based filtering for photographers
+            if (!isPrivileged && role === 'user') {
+                // Get the current user's photographer level from their records
+                const userLevel = getUserPhotographerLevel();
+                filtered = filtered.filter(v => {
+                    if (!v.visible_to || v.visible_to.length === 0) return true; // visible to all
+                    return v.visible_to.includes(userLevel) || v.visible_to.includes('all');
+                });
+            }
+
             if (cat)    filtered = filtered.filter(v => v.category === cat);
             if (search) filtered = filtered.filter(v =>
                 (v.title || '').toLowerCase().includes(search) ||
@@ -3352,6 +3374,18 @@ if (ytWatch) {
                 (v.category || '').toLowerCase().includes(search)
             );
             renderTrainingVideos(filtered);
+        }
+
+        function getUserPhotographerLevel() {
+            // Find the current user's photographer level from allRecords
+            if (!currentUser) return '';
+            const userRecords = allRecords.filter(r =>
+                (r['Photographer Email'] || '').toLowerCase() === currentUser.email.toLowerCase()
+            );
+            if (userRecords.length > 0) {
+                return userRecords[0]['Photographer Level'] || '';
+            }
+            return '';
         }
 
         function renderTrainingVideos(videos) {
@@ -3391,6 +3425,9 @@ if (ytWatch) {
                         <div>
                             <div style="font-weight:600;font-size:14px;color:#333;">${v.title || 'Untitled'}</div>
                             ${v.description ? `<div style="font-size:12px;color:#999;margin-top:3px;">${v.description}</div>` : ''}
+                            ${isAdmin && v.visible_to && v.visible_to.length > 0
+                                ? `<div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap;">${v.visible_to.map(l => '<span style=\'font-size:10px;background:#e8f5f5;color:#4ba8a8;border:1px solid #b2dfdb;border-radius:3px;padding:1px 6px;\'>' + l + '</span>').join('')}</div>`
+                                : (isAdmin ? '<div style="margin-top:4px;"><span style=\'font-size:10px;color:#999;\'>All levels</span></div>' : '')}
                         </div>
                         <div style="display:flex;align-items:center;gap:10px;">
                             ${isAdmin ? `
@@ -3404,13 +3441,7 @@ if (ytWatch) {
                     <div id="tlEmbed_${v.id}" style="display:none;border-top:1px solid #e0e0e0;">
                         ${embedUrl
                             ? `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;">
-                                <iframe
-    src="${embedUrl}"
-    style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen
-    referrerpolicy="strict-origin-when-cross-origin">
-</iframe>
+                                <iframe src="${embedUrl}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen allow="autoplay"></iframe>
                                </div>
                                ${v.video_password ? `<div style="padding:10px 15px;background:#fff8e1;border-top:1px solid #ffe082;display:flex;align-items:center;gap:10px;">
                                    <span style="font-size:12px;color:#b45309;">🔒 This video is password protected.</span>
@@ -3438,6 +3469,10 @@ if (ytWatch) {
             document.getElementById('tlDriveLink').value = '';
             document.getElementById('tlDescription').value = '';
             document.getElementById('tlPassword').value = '';
+            // Default to "Everyone" checked
+            document.querySelectorAll('input[name="tlLevel"]').forEach(cb => {
+                cb.checked = cb.value === 'all';
+            });
             document.getElementById('tlSaveStatus').innerHTML = '';
             document.getElementById('tlAdminPanel').style.display = 'block';
             document.getElementById('tlAdminPanel').scrollIntoView({ behavior: 'smooth' });
@@ -3467,7 +3502,10 @@ if (ytWatch) {
             }
 
             const password = document.getElementById('tlPassword').value.trim();
-            const payload = { title, drive_link: link, category: cat || null, description: desc || null, video_password: password || null };
+            const checkedLevels = Array.from(document.querySelectorAll('input[name="tlLevel"]:checked')).map(c => c.value);
+            // If "all" checked or nothing checked, store null (visible to everyone)
+            const visibleTo = (checkedLevels.length === 0 || checkedLevels.includes('all')) ? null : checkedLevels;
+            const payload = { title, drive_link: link, category: cat || null, description: desc || null, video_password: password || null, visible_to: visibleTo };
             try {
                 if (id) {
                     const { error } = await supabaseClient.from('training_videos').update(payload).eq('id', id);
@@ -3495,6 +3533,14 @@ if (ytWatch) {
             document.getElementById('tlDriveLink').value = v.drive_link || '';
             document.getElementById('tlDescription').value = v.description || '';
             document.getElementById('tlPassword').value = v.video_password || '';
+            // Pre-check visible_to level checkboxes
+            document.querySelectorAll('input[name="tlLevel"]').forEach(cb => {
+                if (!v.visible_to || v.visible_to.length === 0) {
+                    cb.checked = cb.value === 'all';
+                } else {
+                    cb.checked = v.visible_to.includes(cb.value);
+                }
+            });
             document.getElementById('tlSaveStatus').innerHTML = '';
             document.getElementById('tlAdminPanel').style.display = 'block';
             document.getElementById('tlAdminPanel').scrollIntoView({ behavior: 'smooth' });
