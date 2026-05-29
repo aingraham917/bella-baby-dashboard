@@ -6676,12 +6676,60 @@
                     <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} style="padding:6px 14px;background:${currentPage === totalPages ? '#f0f0f0' : '#4ba8a8'};color:${currentPage === totalPages ? '#999' : 'white'};border:none;border-radius:4px;cursor:${currentPage === totalPages ? 'default' : 'pointer'};font-size:13px;">Next →</button>
                 </div>` : '';
 
+            // Photographer (user) view: flat list with summary header
+            if (getCurrentUserRole() === 'user' && pagePhotographers.length > 0) {
+                const [photogName, allMyRecords] = pagePhotographers[0];
+                const sixMonthAvg = calculate6MonthAverage(allMyRecords);
+                const totalCount  = allMyRecords.length;
+                const avgColor    = getScoreColor(sixMonthAvg, allMyRecords[0]?.record_type);
+                const avgBg       = getScoreBgColor(sixMonthAvg, allMyRecords[0]?.record_type);
+                const determination = allMyRecords[0] ? (allMyRecords[0]['Quality Check Determination'] || '') : '';
+
+                recordsContainer.innerHTML = `
+                    <!-- Summary header -->
+                    <div style="background:white;border:1px solid #e0e0e0;border-radius:8px;padding:20px 24px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                        <div>
+                            <div style="font-size:20px;font-weight:700;color:#333;">${photogName}</div>
+                            <div style="font-size:13px;color:#999;margin-top:3px;">Total Reviews: ${totalCount}</div>
+                        </div>
+                        <div style="display:flex;gap:16px;align-items:center;">
+                            <div style="text-align:center;background:${avgBg};border:2px solid ${avgColor};border-radius:8px;padding:10px 18px;">
+                                <div style="font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">6-Mo Avg</div>
+                                <div style="font-size:24px;font-weight:700;color:${avgColor};">${sixMonthAvg}</div>
+                                <div style="font-size:11px;color:#999;">${determination}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Flat record list -->
+                    <div style="display:grid;gap:8px;">
+                        ${allMyRecords.map((record, idx) => `
+                            <div onclick="showRecordDetailsForPhoto(${idx}, '${photogName.replace(/'/g, "\'")}')"
+                                 style="background:white;border:1px solid #e8e8e8;border-radius:6px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:border-color 0.15s;"
+                                 onmouseover="this.style.borderColor='#4ba8a8'" onmouseout="this.style.borderColor='#e8e8e8'">
+                                <div>
+                                    <div style="font-size:13px;color:#999;margin-bottom:3px;">${formatDate(record.Date)}</div>
+                                    <div style="font-size:14px;font-weight:600;color:#333;">${record['Quality Check Determination'] || 'Pending'}</div>
+                                    ${record['Delivery Standard Flags:'] ? `<div style="font-size:11px;color:#c92a2a;margin-top:3px;">⚑ ${record['Delivery Standard Flags:']}</div>` : ''}
+                                </div>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div style="background:${getScoreBgColor(record['Average Gallery Score'], record.record_type)};color:${getScoreColor(record['Average Gallery Score'], record.record_type)};font-weight:700;padding:6px 14px;border-radius:20px;font-size:14px;${record.record_type === 'growth_assessment' && parseFloat(record['Average Gallery Score']) >= 1 && parseFloat(record['Average Gallery Score']) <= 4 ? 'background:#8b5cf6;color:white;' : ''}">
+                                        ${getNestedRecordDisplayValue(record['Average Gallery Score'], record.record_type)}
+                                    </div>
+                                    <span style="color:#ccc;font-size:16px;">›</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                return;
+            }
+
+            // Admin/trainer/AM view: grouped nested cards
             recordsContainer.innerHTML = pagePhotographers.map(([photographerName, records]) => {
                 const sixMonthAvg = calculate6MonthAverage(records);
                 const expandId = `expand-${photographerName.replace(/\s+/g, '-')}`;
                 const mostRecentDate = formatDate(records[0].Date);
-                
-                // Determine if this is LEGACY or GROWTH based on most recent record
                 const recordType = records[0]?.record_type;
                 const typeLabel = recordType === 'growth_assessment' ? 'GROWTH' : 'LEGACY';
                 const labelColor = '#666';
