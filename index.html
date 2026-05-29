@@ -1787,8 +1787,53 @@
 
                     <!-- Articles panel -->
                     <div id="rlArticlesPanel" style="display:none;">
+
+                        <!-- Add/Edit Article Panel -->
+                        <div id="rlArticleAdminPanel" style="display:none; background:#f9f9f9; border:1px solid #e0e0e0; border-radius:8px; padding:20px; margin-bottom:20px;">
+                            <h4 style="margin:0 0 15px 0; font-size:14px; color:#333;">➕ Add / Edit Article</h4>
+                            <input type="hidden" id="rlArticleEditId">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                                <div>
+                                    <label class="fl">Title *</label>
+                                    <input type="text" id="rlArticleTitle" class="fi" placeholder="e.g. Lightroom Export Guide">
+                                </div>
+                                <div>
+                                    <label class="fl">Category</label>
+                                    <select id="rlArticleCategory" class="fi">
+                                        <option value="">Select category...</option>
+                                        <option value="Bella Basics">Bella Basics</option>
+                                        <option value="Camera Skills">Camera Skills</option>
+                                        <option value="Connection">Connection</option>
+                                        <option value="Editing">Editing</option>
+                                        <option value="Flash">Flash</option>
+                                        <option value="General Photography">General Photography</option>
+                                        <option value="Lightroom Classic">Lightroom Classic</option>
+                                        <option value="Mindset">Mindset</option>
+                                        <option value="Sales">Sales</option>
+                                        <option value="Technology">Technology</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="margin-bottom:12px;">
+                                <label class="fl">Article Link *</label>
+                                <input type="url" id="rlArticleLink" class="fi" placeholder="https://...">
+                            </div>
+                            <div style="margin-bottom:15px;">
+                                <label class="fl">Description</label>
+                                <textarea id="rlArticleDesc" class="fi" style="min-height:60px;resize:vertical;" placeholder="Brief description of what this article covers..."></textarea>
+                            </div>
+                            <div style="display:flex;gap:10px;">
+                                <button onclick="saveArticle()" style="padding:8px 20px;background:#4ba8a8;color:white;border:none;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600;">💾 Save Article</button>
+                                <button onclick="cancelEditArticle()" style="padding:8px 16px;background:#f0f0f0;color:#555;border:none;border-radius:4px;cursor:pointer;font-size:13px;">Cancel</button>
+                            </div>
+                            <div id="rlArticleSaveStatus" style="margin-top:10px;"></div>
+                        </div>
+
+                        <!-- Filter bar -->
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
                             <p style="font-size:13px;color:#666;margin:0;">Browse training articles and resources.</p>
+                            <button id="rlAddArticleBtn" onclick="showAddArticlePanel()" style="display:none;padding:8px 16px;background:#4ba8a8;color:white;border:none;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600;">+ Add Article</button>
                         </div>
                         <div id="rlArticleStatus" style="margin-bottom:10px;"></div>
                         <div id="rlArticleGrid" style="display:grid;gap:12px;">
@@ -3382,12 +3427,19 @@
             openResourcesLibrary('videos');
         }
 
+        function canAddResources() {
+            return ['super_admin', 'admin', 'trainer', 'am'].includes(getCurrentUserRole());
+        }
+
         function openResourcesLibrary(tab) {
             showPage('trainingLibraryPage');
-            const addBtn = document.getElementById('tlAddBtn');
-            if (addBtn) addBtn.style.display = canManageRoles() ? 'block' : 'none';
+            const canAdd = canAddResources();
+            const addVideoBtn = document.getElementById('tlAddBtn');
+            if (addVideoBtn) addVideoBtn.style.display = canAdd ? 'inline-block' : 'none';
+            const addArticleBtn = document.getElementById('rlAddArticleBtn');
+            if (addArticleBtn) addArticleBtn.style.display = canAdd ? 'inline-block' : 'none';
             const adminPanel = document.getElementById('tlAdminPanel');
-            if (adminPanel && !canManageRoles()) adminPanel.style.display = 'none';
+            if (adminPanel && !canAdd) adminPanel.style.display = 'none';
             switchResourceTab(tab || 'videos');
         }
 
@@ -3412,6 +3464,69 @@
         }
 
         let tlAllArticles = [];
+
+        function showAddArticlePanel() {
+            document.getElementById('rlArticleEditId').value = '';
+            document.getElementById('rlArticleTitle').value = '';
+            document.getElementById('rlArticleLink').value = '';
+            document.getElementById('rlArticleCategory').value = '';
+            document.getElementById('rlArticleDesc').value = '';
+            document.getElementById('rlArticleSaveStatus').innerHTML = '';
+            document.getElementById('rlArticleAdminPanel').style.display = 'block';
+            document.getElementById('rlArticleAdminPanel').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelEditArticle() {
+            document.getElementById('rlArticleAdminPanel').style.display = 'none';
+        }
+
+        function editArticle(id) {
+            const a = tlAllArticles.find(x => x.id === id);
+            if (!a) return;
+            document.getElementById('rlArticleEditId').value = a.id;
+            document.getElementById('rlArticleTitle').value = a.title || '';
+            document.getElementById('rlArticleLink').value = a.articles_link || '';
+            document.getElementById('rlArticleCategory').value = a.category || '';
+            document.getElementById('rlArticleDesc').value = a.description || '';
+            document.getElementById('rlArticleSaveStatus').innerHTML = '';
+            document.getElementById('rlArticleAdminPanel').style.display = 'block';
+            document.getElementById('rlArticleAdminPanel').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function saveArticle() {
+            const id     = document.getElementById('rlArticleEditId').value;
+            const title  = document.getElementById('rlArticleTitle').value.trim();
+            const link   = document.getElementById('rlArticleLink').value.trim();
+            const cat    = document.getElementById('rlArticleCategory').value;
+            const desc   = document.getElementById('rlArticleDesc').value.trim();
+            const status = document.getElementById('rlArticleSaveStatus');
+
+            if (!title || !link) {
+                status.innerHTML = '<div class="sync-status error">Title and Article Link are required.</div>';
+                return;
+            }
+            const payload = { title, articles_link: link, category: cat || null, description: desc || null };
+            try {
+                if (id) {
+                    const { error } = await supabaseClient.from('training_articles').update(payload).eq('id', id);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabaseClient.from('training_articles').insert([payload]);
+                    if (error) throw error;
+                }
+                status.innerHTML = '<div class="sync-status success">✓ Saved!</div>';
+                setTimeout(() => { cancelEditArticle(); loadTrainingArticles(); }, 800);
+            } catch(err) {
+                status.innerHTML = `<div class="sync-status error">Error: ${err.message}</div>`;
+            }
+        }
+
+        async function deleteArticle(id, title) {
+            if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+            const { error } = await supabaseClient.from('training_articles').delete().eq('id', id);
+            if (error) { alert('Error: ' + error.message); return; }
+            loadTrainingArticles();
+        }
 
         async function loadTrainingArticles() {
             const grid   = document.getElementById('rlArticleGrid');
@@ -3467,32 +3582,7 @@
             }
         }
 
-        function editArticle(id) {
-            const a = tlAllArticles.find(x => x.id === id);
-            if (!a) return;
-            const title = prompt('Title:', a.title || '');
-            if (title === null) return;
-            const link = prompt('Article Link:', a.articles_link || '');
-            if (link === null) return;
-            const category = prompt('Category:', a.category || '');
-            if (category === null) return;
-            const description = prompt('Description:', a.description || '');
-            if (description === null) return;
-            supabaseClient.from('training_articles')
-                .update({ title, articles_link: link, category: category || null, description: description || null })
-                .eq('id', id)
-                .then(({ error }) => {
-                    if (error) { alert('Error: ' + error.message); return; }
-                    loadTrainingArticles();
-                });
-        }
 
-        async function deleteArticle(id, title) {
-            if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
-            const { error } = await supabaseClient.from('training_articles').delete().eq('id', id);
-            if (error) { alert('Error: ' + error.message); return; }
-            loadTrainingArticles();
-        }
 
         async function loadTrainingVideos() {
             const grid = document.getElementById('tlVideoGrid');
