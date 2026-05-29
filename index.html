@@ -4462,9 +4462,10 @@
                     });
                 }
                 
-                // Tag QC records as 'legacy' so type filter works
-                const taggedQC = qcRecords.map(r => ({ ...r, record_type: r.record_type || 'legacy' }));
-                allRecords = [...taggedQC, ...gaRecords];
+                // Tag records with correct type — QC = legacy, GA = growth_assessment
+                const taggedQC = qcRecords.map(r => ({ ...r, record_type: 'legacy' }));
+                const taggedGA = gaRecords.map(r => ({ ...r, record_type: 'growth_assessment' }));
+                allRecords = [...taggedQC, ...taggedGA];
                 
                 console.log('Loaded total records:', allRecords.length);
                 
