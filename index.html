@@ -1098,12 +1098,6 @@
                 <!-- DASHBOARD PAGE -->
                 <div id="dashboardPage" class="page-container" style="display: flex; flex-direction: row;">
                     <div class="main-content">
-                        <!-- AM view toggle — shown only for AM role -->
-                        <div id="amViewToggleBar" style="display:none; align-items:center; gap:8px; margin-bottom:12px;">
-                            <span style="font-size:12px; font-weight:600; color:#666;">View:</span>
-                            <button id="teamViewBtn" class="filter-btn active" style="padding:4px 12px; font-size:12px;" onclick="switchAMView('team')">My Team</button>
-                            <button id="allViewBtn" class="filter-btn" style="padding:4px 12px; font-size:12px;" onclick="switchAMView('all')">All</button>
-                        </div>
                         <div class="photographers-list" id="recordsContainer">
                             <div class="loading">Loading records...</div>
                         </div>
@@ -1116,11 +1110,25 @@
                     </div>
 
                     <div class="controls-section">
-                        <div class="controls-title">Filter by Type</div>
+                        <div class="controls-title">Filter</div>
                         <div class="filter-buttons">
                             <button type="button" class="filter-btn active" data-filter="all">All Records</button>
                             <button type="button" class="filter-btn" data-filter="growth_assessment">Growth Assessments</button>
                             <button type="button" class="filter-btn" data-filter="legacy">Legacy</button>
+                        </div>
+                        <div id="amTeamFilterBtns" style="display:none; margin-top:10px;">
+                            <div class="controls-title" style="margin-top:0;">Team View</div>
+                            <div class="filter-buttons">
+                                <button type="button" id="teamViewBtn" class="filter-btn active" onclick="switchAMView('team')">My Team</button>
+                                <button type="button" id="allViewBtn" class="filter-btn" onclick="switchAMView('all')">All</button>
+                            </div>
+                        </div>
+                        <div id="trainerFilterBtns" style="display:none; margin-top:10px;">
+                            <div class="controls-title" style="margin-top:0;">Trainer View</div>
+                            <div class="filter-buttons">
+                                <button type="button" id="trainerAllBtn" class="filter-btn active" onclick="switchTrainerView('all')">All</button>
+                                <button type="button" id="trainerOnlyBtn" class="filter-btn" onclick="switchTrainerView('trainers')">Trainers Only</button>
+                            </div>
                         </div>
                     </div>
 
@@ -2072,6 +2080,7 @@
         let currentUserRole = null;
         let currentAMTeam = []; // Photographer emails assigned to current AM
         let amViewMode = 'team'; // 'team' or 'all' for AMs
+        let trainerViewMode = 'all'; // 'all' or 'trainers' for admins
         let currentFilter = 'all';
         let currentSort = 'a-z';
         let searchQuery = '';
@@ -2246,8 +2255,14 @@
             const role = getCurrentUserRole();
             const email = photographerEmail.toLowerCase();
 
-            // Super admin, admin, trainer see all
-            if (['super_admin', 'admin', 'trainer'].includes(role)) return true;
+            // Super admin, admin, trainer — apply trainer view filter if set
+            if (['super_admin', 'admin', 'trainer'].includes(role)) {
+                if (trainerViewMode === 'trainers') {
+                    // Only show photographers who have the 'trainer' role
+                    return allUserRoles[email] === 'trainer';
+                }
+                return true;
+            }
 
             // AM sees only their team (unless in 'all' view mode)
             if (role === 'am') {
@@ -4280,6 +4295,12 @@
                 hideAMViewToggle();
             }
             
+            // Show Trainer filter for admins/super admins
+            const trainerFilterDiv = document.getElementById('trainerFilterBtns');
+            if (trainerFilterDiv) {
+                trainerFilterDiv.style.display = ['super_admin', 'admin'].includes(currentUserRole) ? 'block' : 'none';
+            }
+
             // Show admin button for super admins only (null-guarded — element may not exist)
             const imageStorageOption = document.getElementById('imageStorageOption');
             if (imageStorageOption) imageStorageOption.style.display = canManageRoles() ? 'block' : 'none';
@@ -4298,13 +4319,13 @@
         }
 
         function showAMViewToggle() {
-            const bar = document.getElementById('amViewToggleBar');
-            if (bar) bar.style.display = 'flex';
+            const div = document.getElementById('amTeamFilterBtns');
+            if (div) div.style.display = 'block';
         }
 
         function hideAMViewToggle() {
-            const bar = document.getElementById('amViewToggleBar');
-            if (bar) bar.style.display = 'none';
+            const div = document.getElementById('amTeamFilterBtns');
+            if (div) div.style.display = 'none';
         }
 
         function switchAMView(mode) {
@@ -4312,16 +4333,26 @@
             currentPage = 1;
             const teamBtn = document.getElementById('teamViewBtn');
             const allBtn  = document.getElementById('allViewBtn');
-            if (teamBtn) teamBtn.classList.toggle('active', mode === 'team');
-            if (allBtn)  allBtn.classList.toggle('active', mode === 'all');
-            // Use a stable snapshot of allRecords to avoid race with loadRecords
-            renderAMView(mode, [...allRecords]);
+            if (teamBtn) { teamBtn.classList.toggle('active', mode === 'team'); }
+            if (allBtn)  { allBtn.classList.toggle('active', mode === 'all'); }
+            // Trigger re-render via the filter button click system (already works)
+            // by dispatching a click on the currently active type filter
+            const activeFilter = document.querySelector('.filter-btn[data-filter].active');
+            if (activeFilter) activeFilter.click();
+            else displayRecords();
         }
 
-        function renderAMView(mode, records) {
-            // Just set the mode and call displayRecords — shouldShowPhotographer handles the filtering
-            // currentAMTeam is already built, amViewMode is already set by switchAMView
-            displayRecords();
+        function switchTrainerView(mode) {
+            trainerViewMode = mode;
+            currentPage = 1;
+            const allBtn     = document.getElementById('trainerAllBtn');
+            const trainersBtn = document.getElementById('trainerOnlyBtn');
+            if (allBtn)      allBtn.classList.toggle('active', mode === 'all');
+            if (trainersBtn) trainersBtn.classList.toggle('active', mode === 'trainers');
+            // Trigger re-render via active type filter (same pattern as AM toggle)
+            const activeFilter = document.querySelector('.filter-btn[data-filter].active');
+            if (activeFilter) activeFilter.click();
+            else displayRecords();
         }
 
         // AUTH
@@ -4376,6 +4407,7 @@
             currentUser = null;
             allRecords = [];
             currentPage = 1;
+            trainerViewMode = 'all';
             loginForm.reset();
 
             // Reset to dashboard page so next login starts fresh
