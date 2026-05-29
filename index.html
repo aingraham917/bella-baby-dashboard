@@ -6679,25 +6679,35 @@
             // Photographer (user) view: flat list with summary header
             if (getCurrentUserRole() === 'user' && pagePhotographers.length > 0) {
                 const [photogName, allMyRecords] = pagePhotographers[0];
-                const sixMonthAvg = calculate6MonthAverage(allMyRecords);
-                const totalCount  = allMyRecords.length;
-                const avgColor    = getScoreColor(sixMonthAvg, allMyRecords[0]?.record_type);
-                const avgBg       = getScoreBgColor(sixMonthAvg, allMyRecords[0]?.record_type);
-                const determination = allMyRecords[0] ? (allMyRecords[0]['Quality Check Determination'] || '') : '';
+                const totalCount = allMyRecords.length;
+
+                // Split records by type for separate averages
+                const legacyRecs = allMyRecords.filter(r => r.record_type === 'legacy');
+                const gaRecs     = allMyRecords.filter(r => r.record_type === 'growth_assessment');
+                const legacyAvg  = calculate6MonthAverage(legacyRecs);
+                const gaAvg      = calculate6MonthAverage(gaRecs);
+
+                const legacyBadge = legacyRecs.length > 0 ? `
+                    <div style="text-align:center;background:${getScoreBgColor(legacyAvg,'legacy')};border:2px solid ${getScoreColor(legacyAvg,'legacy')};border-radius:6px;padding:8px 16px;">
+                        <div style="font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Legacy 6-Mo Avg</div>
+                        <div style="font-size:22px;font-weight:700;color:${getScoreColor(legacyAvg,'legacy')};">${legacyAvg}</div>
+                        <div style="font-size:10px;color:#999;">${legacyRecs.length} review${legacyRecs.length !== 1 ? 's' : ''}</div>
+                    </div>` : '';
+
+                const gaBadge = gaRecs.length > 0 ? `
+                    <div style="text-align:center;background:${getScoreBgColor(gaAvg,'growth_assessment')};border:2px solid ${getScoreColor(gaAvg,'growth_assessment')};border-radius:6px;padding:8px 16px;">
+                        <div style="font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Growth 6-Mo Avg</div>
+                        <div style="font-size:22px;font-weight:700;color:${getScoreColor(gaAvg,'growth_assessment')};">${gaAvg}</div>
+                        <div style="font-size:10px;color:#999;">${gaRecs.length} review${gaRecs.length !== 1 ? 's' : ''}</div>
+                    </div>` : '';
 
                 recordsContainer.innerHTML = `
-                    <!-- Summary header -->
-                    <div style="background:white;border:1px solid #e0e0e0;border-radius:8px;padding:20px 24px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-                        <div>
-                            <div style="font-size:20px;font-weight:700;color:#333;">${photogName}</div>
-                            <div style="font-size:13px;color:#999;margin-top:3px;">Total Reviews: ${totalCount}</div>
-                        </div>
-                        <div style="display:flex;gap:16px;align-items:center;">
-                            <div style="text-align:center;background:${avgBg};border:2px solid ${avgColor};border-radius:8px;padding:10px 18px;">
-                                <div style="font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">6-Mo Avg</div>
-                                <div style="font-size:24px;font-weight:700;color:${avgColor};">${sixMonthAvg}</div>
-                                <div style="font-size:11px;color:#999;">${determination}</div>
-                            </div>
+                    <!-- Summary bar — single compact line -->
+                    <div style="background:white;border:1px solid #e0e0e0;border-radius:8px;padding:14px 20px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+                        <div style="font-size:13px;color:#666;">Total Reviews: <strong style="color:#333;">${totalCount}</strong></div>
+                        <div style="display:flex;gap:10px;align-items:center;">
+                            ${legacyBadge}
+                            ${gaBadge}
                         </div>
                     </div>
 
