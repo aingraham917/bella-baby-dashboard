@@ -3411,6 +3411,8 @@
             }
         }
 
+        let tlAllArticles = [];
+
         async function loadTrainingArticles() {
             const grid   = document.getElementById('rlArticleGrid');
             const status = document.getElementById('rlArticleStatus');
@@ -3422,11 +3424,13 @@
                     .select('*')
                     .order('title', { ascending: true });
                 if (error) throw error;
+                tlAllArticles = data || [];
                 if (!data || data.length === 0) {
                     grid.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">No articles yet.</p>';
                     return;
                 }
                 if (status) status.innerHTML = `<p style="font-size:12px;color:#999;margin:0;">${data.length} article${data.length !== 1 ? 's' : ''}</p>`;
+                const isAdmin = canManageRoles();
                 const groups = {};
                 data.forEach(a => {
                     const cat = a.category || 'General';
@@ -3443,10 +3447,16 @@
                                         <div style="font-weight:600;font-size:14px;color:#333;margin-bottom:3px;">${a.title || 'Untitled'}</div>
                                         ${a.description ? `<div style="font-size:12px;color:#666;line-height:1.5;">${a.description}</div>` : ''}
                                     </div>
-                                    <a href="${a.articles_link}" target="_blank" rel="noopener"
-                                       style="flex-shrink:0;padding:8px 16px;background:#4ba8a8;color:white;border-radius:5px;text-decoration:none;font-size:13px;font-weight:600;white-space:nowrap;">
-                                        📄 Open Article
-                                    </a>
+                                    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+                                        ${isAdmin ? `
+                                        <button onclick="editArticle(${a.id})" style="padding:6px 10px;background:#e3f2fd;color:#1976d2;border:1px solid #90caf9;border-radius:4px;cursor:pointer;font-size:12px;">Edit</button>
+                                        <button onclick="deleteArticle(${a.id},'${(a.title||'').replace(/'/g,"\'")}')" style="padding:6px 10px;background:#fee2e2;color:#ef4444;border:1px solid #fca5a5;border-radius:4px;cursor:pointer;font-size:12px;">Delete</button>
+                                        ` : ''}
+                                        <a href="${a.articles_link}" target="_blank" rel="noopener"
+                                           style="padding:8px 16px;background:#4ba8a8;color:white;border-radius:5px;text-decoration:none;font-size:13px;font-weight:600;white-space:nowrap;">
+                                            📄 Open Article
+                                        </a>
+                                    </div>
                                 </div>
                             `).join('')}
                         </div>
@@ -3455,6 +3465,33 @@
             } catch(err) {
                 grid.innerHTML = `<p style="color:#ef4444;padding:20px;">Error: ${err.message}</p>`;
             }
+        }
+
+        function editArticle(id) {
+            const a = tlAllArticles.find(x => x.id === id);
+            if (!a) return;
+            const title = prompt('Title:', a.title || '');
+            if (title === null) return;
+            const link = prompt('Article Link:', a.articles_link || '');
+            if (link === null) return;
+            const category = prompt('Category:', a.category || '');
+            if (category === null) return;
+            const description = prompt('Description:', a.description || '');
+            if (description === null) return;
+            supabaseClient.from('training_articles')
+                .update({ title, articles_link: link, category: category || null, description: description || null })
+                .eq('id', id)
+                .then(({ error }) => {
+                    if (error) { alert('Error: ' + error.message); return; }
+                    loadTrainingArticles();
+                });
+        }
+
+        async function deleteArticle(id, title) {
+            if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+            const { error } = await supabaseClient.from('training_articles').delete().eq('id', id);
+            if (error) { alert('Error: ' + error.message); return; }
+            loadTrainingArticles();
         }
 
         async function loadTrainingVideos() {
