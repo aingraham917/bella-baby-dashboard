@@ -3362,8 +3362,12 @@
                 // Get the current user's photographer level from their records
                 const userLevel = getUserPhotographerLevel();
                 filtered = filtered.filter(v => {
-                    if (!v.visible_to || v.visible_to.length === 0) return true; // visible to all
-                    return v.visible_to.includes(userLevel) || v.visible_to.includes('all');
+                    if (!v.visible_to) return true; // visible to all
+                    const levels = typeof v.visible_to === 'string'
+                        ? v.visible_to.split(',').map(s => s.trim())
+                        : (Array.isArray(v.visible_to) ? v.visible_to : []);
+                    if (levels.length === 0) return true;
+                    return levels.includes(userLevel) || levels.includes('all');
                 });
             }
 
@@ -3416,7 +3420,9 @@
         }
 
         function buildLevelBadges(visibleTo) {
-            const levels = Array.isArray(visibleTo) && visibleTo.length > 0 ? visibleTo : null;
+            const levels = visibleTo && typeof visibleTo === 'string' && visibleTo.trim()
+                ? visibleTo.split(',').map(s => s.trim()).filter(Boolean)
+                : (Array.isArray(visibleTo) && visibleTo.length > 0 ? visibleTo : null);
             if (!levels) {
                 return '<div style="margin-top:4px;"><span style="font-size:10px;color:#aaa;font-style:italic;">All levels</span></div>';
             }
@@ -3513,7 +3519,7 @@
             const password = document.getElementById('tlPassword').value.trim();
             const checkedLevels = Array.from(document.querySelectorAll('input[name="tlLevel"]:checked')).map(c => c.value);
             // If "all" checked or nothing checked, store null (visible to everyone)
-            const visibleTo = (checkedLevels.length === 0 || checkedLevels.includes('all')) ? null : checkedLevels;
+            const visibleTo = (checkedLevels.length === 0 || checkedLevels.includes('all')) ? null : checkedLevels.join(',');
             const payload = { title, drive_link: link, category: cat || null, description: desc || null, video_password: password || null, visible_to: visibleTo };
             try {
                 if (id) {
@@ -3543,12 +3549,11 @@
             document.getElementById('tlDescription').value = v.description || '';
             document.getElementById('tlPassword').value = v.video_password || '';
             // Pre-check visible_to level checkboxes
+            const savedLevels = v.visible_to
+                ? (typeof v.visible_to === 'string' ? v.visible_to.split(',').map(s => s.trim()) : v.visible_to)
+                : [];
             document.querySelectorAll('input[name="tlLevel"]').forEach(cb => {
-                if (!v.visible_to || v.visible_to.length === 0) {
-                    cb.checked = cb.value === 'all';
-                } else {
-                    cb.checked = v.visible_to.includes(cb.value);
-                }
+                cb.checked = savedLevels.length === 0 ? cb.value === 'all' : savedLevels.includes(cb.value);
             });
             document.getElementById('tlSaveStatus').innerHTML = '';
             document.getElementById('tlAdminPanel').style.display = 'block';
