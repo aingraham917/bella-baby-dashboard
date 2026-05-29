@@ -4336,7 +4336,12 @@
             amViewMode = mode;
             currentPage = 1;
             const teamBtn = document.getElementById('teamViewBtn');
-            if (teamBtn) teamBtn.classList.toggle('active', mode === 'team');
+            if (teamBtn) teamBtn.classList.add('active');
+            // Reset type filter to All Records so no combined filtering
+            currentFilter = 'all';
+            document.querySelectorAll('.type-filter').forEach(b => b.classList.remove('active'));
+            const allRecordsBtn = document.querySelector('.type-filter[data-filter="all"]');
+            if (allRecordsBtn) allRecordsBtn.classList.add('active');
             displayRecords();
         }
 
