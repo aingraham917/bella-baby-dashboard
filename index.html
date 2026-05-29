@@ -1098,6 +1098,12 @@
                 <!-- DASHBOARD PAGE -->
                 <div id="dashboardPage" class="page-container" style="display: flex; flex-direction: row;">
                     <div class="main-content">
+                        <!-- AM view toggle — shown only for AM role -->
+                        <div id="amViewToggleBar" style="display:none; align-items:center; gap:8px; margin-bottom:12px;">
+                            <span style="font-size:12px; font-weight:600; color:#666;">View:</span>
+                            <button id="teamViewBtn" class="filter-btn active" style="padding:4px 12px; font-size:12px;" onclick="switchAMView('team')">My Team</button>
+                            <button id="allViewBtn" class="filter-btn" style="padding:4px 12px; font-size:12px;" onclick="switchAMView('all')">All</button>
+                        </div>
                         <div class="photographers-list" id="recordsContainer">
                             <div class="loading">Loading records...</div>
                         </div>
@@ -4288,26 +4294,13 @@
         }
 
         function showAMViewToggle() {
-            let toggle = document.getElementById('amViewToggle');
-            if (!toggle) {
-                // Create AM view toggle button
-                const sidebar = document.querySelector('.sidebar');
-                const controlsSection = document.createElement('div');
-                controlsSection.className = 'controls-section';
-                controlsSection.innerHTML = `
-                    <div class="controls-title">View Mode</div>
-                    <div style="display: flex; gap: 8px;">
-                        <button id="teamViewBtn" class="filter-btn active" style="flex: 1;" onclick="switchAMView('team')">My Team</button>
-                        <button id="allViewBtn" class="filter-btn" style="flex: 1;" onclick="switchAMView('all')">View All</button>
-                    </div>
-                `;
-                sidebar.insertBefore(controlsSection, sidebar.querySelector('.info-section'));
-            }
+            const bar = document.getElementById('amViewToggleBar');
+            if (bar) bar.style.display = 'flex';
         }
 
         function hideAMViewToggle() {
-            const section = document.querySelector('.controls-section:has(#teamViewBtn)');
-            if (section) section.remove();
+            const bar = document.getElementById('amViewToggleBar');
+            if (bar) bar.style.display = 'none';
         }
 
         function switchAMView(mode) {
