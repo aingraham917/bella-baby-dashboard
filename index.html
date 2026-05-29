@@ -4310,11 +4310,23 @@
             const allBtn  = document.getElementById('allViewBtn');
             if (teamBtn) teamBtn.classList.toggle('active', mode === 'team');
             if (allBtn)  allBtn.classList.toggle('active', mode === 'all');
+
+            console.log('switchAMView:', mode, 'allRecords:', allRecords.length, 'currentAMTeam:', currentAMTeam.length);
+
+            // Filter directly here instead of relying on displayRecords role check
+            let filtered = allRecords;
+            if (mode === 'team') {
+                filtered = allRecords.filter(r => {
+                    const email = (r['Photographer Email'] || '').toLowerCase();
+                    return currentAMTeam.includes(email);
+                });
+            }
+            console.log('filtered count:', filtered.length);
+
             try {
                 displayRecords();
             } catch(err) {
                 console.error('switchAMView displayRecords error:', err);
-                recordsContainer.innerHTML = '<div class="no-records">Error loading records. Please try refreshing.</div>';
             }
         }
 
