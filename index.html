@@ -3132,15 +3132,16 @@
             }
 
             supabaseClient.auth.onAuthStateChange((event, session) => {
-                // SIGNED_IN fired by handleLogin directly — skip to avoid double load
+                // Only handle initial SIGNED_IN and SIGNED_OUT — ignore TOKEN_REFRESHED etc.
                 if (event === 'SIGNED_IN' && _handlingAuth) return;
-                if (session && session.user) {
+                if (event === 'TOKEN_REFRESHED') return; // ignore token refreshes
+                if (event === 'SIGNED_IN' && session && session.user) {
                     currentUser = session.user;
                     if (!_handlingAuth) {
                         showDashboard();
                         loadRecords();
                     }
-                } else {
+                } else if (event === 'SIGNED_OUT') {
                     currentUser = null;
                     _handlingAuth = false;
                     showAuth();
@@ -4310,24 +4311,41 @@
             const allBtn  = document.getElementById('allViewBtn');
             if (teamBtn) teamBtn.classList.toggle('active', mode === 'team');
             if (allBtn)  allBtn.classList.toggle('active', mode === 'all');
+            // Use a stable snapshot of allRecords to avoid race with loadRecords
+            renderAMView(mode, [...allRecords]);
+        }
 
-            console.log('switchAMView:', mode, 'allRecords:', allRecords.length, 'currentAMTeam:', currentAMTeam.length);
-
-            // Filter directly here instead of relying on displayRecords role check
-            let filtered = allRecords;
+        function renderAMView(mode, records) {
+            currentPage = 1;
+            let filtered = records;
             if (mode === 'team') {
-                filtered = allRecords.filter(r => {
-                    const email = (r['Photographer Email'] || '').toLowerCase();
-                    return currentAMTeam.includes(email);
-                });
+                filtered = records.filter(r =>
+                    currentAMTeam.includes((r['Photographer Email'] || '').toLowerCase())
+                );
             }
-            console.log('filtered count:', filtered.length);
-
-            try {
-                displayRecords();
-            } catch(err) {
-                console.error('switchAMView displayRecords error:', err);
+            if (filtered.length === 0) {
+                recordsContainer.innerHTML = '<div class="no-records">No records found</div>';
+                return;
             }
+            // Group by photographer
+            const grouped = {};
+            filtered.forEach(r => {
+                const name = r['Photographer Name'];
+                if (!grouped[name]) grouped[name] = [];
+                grouped[name].push(r);
+            });
+            let photographers = Object.entries(grouped);
+            if (searchQuery) {
+                photographers = photographers.filter(([name]) => name.toLowerCase().includes(searchQuery));
+            }
+            photographers.sort((a, b) => a[0].localeCompare(b[0]));
+            const totalPages = Math.ceil(photographers.length / PAGE_SIZE);
+            const pagePhotographers = photographers.slice(0, PAGE_SIZE);
+            // Temporarily set allRecords to filtered so displayRecords renders correctly
+            const _saved = allRecords;
+            allRecords = filtered;
+            displayRecords();
+            allRecords = _saved;
         }
 
         // AUTH
