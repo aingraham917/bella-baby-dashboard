@@ -4305,12 +4305,17 @@
 
         function switchAMView(mode) {
             amViewMode = mode;
-            currentPage = 1; // reset pagination
+            currentPage = 1;
             const teamBtn = document.getElementById('teamViewBtn');
             const allBtn  = document.getElementById('allViewBtn');
             if (teamBtn) teamBtn.classList.toggle('active', mode === 'team');
             if (allBtn)  allBtn.classList.toggle('active', mode === 'all');
-            displayRecords();
+            try {
+                displayRecords();
+            } catch(err) {
+                console.error('switchAMView displayRecords error:', err);
+                recordsContainer.innerHTML = '<div class="no-records">Error loading records. Please try refreshing.</div>';
+            }
         }
 
         // AUTH
@@ -4456,6 +4461,8 @@
                 }
                 
                 displayRecords();
+                // Update charts after records load (not on every displayRecords call)
+                setTimeout(updateCharts, 100);
             } catch (error) {
                 console.error('Error loading records:', error);
                 recordsContainer.innerHTML = `<div style="color: red; padding: 20px;">${error.message}</div>`;
@@ -6424,7 +6431,7 @@
 
         function displayRecords() {
             updateHeaderTagline();
-            updateCharts();
+            // updateCharts is called separately after loadRecords — skip here to avoid errors
             
             let filtered = allRecords;
 
