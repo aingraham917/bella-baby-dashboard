@@ -1106,7 +1106,11 @@
                     <div class="sidebar" style="flex-shrink: 0;">
                     <div class="controls-section">
                         <div class="controls-title">Search</div>
-                        <input type="text" id="searchInput" class="search-input" placeholder="Enter photographer name...">
+                        <div style="position:relative;">
+                            <input type="text" id="searchInput" class="search-input" placeholder="Enter photographer name..." style="padding-right:30px;">
+                            <button id="searchClearBtn" onclick="clearSearch()" title="Clear search"
+                                style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#aaa;font-size:16px;line-height:1;padding:0;">✕</button>
+                        </div>
                     </div>
 
                     <div class="controls-section">
@@ -4363,6 +4367,8 @@
             on('searchInput', 'input', (e) => {
                 searchQuery = e.target.value.toLowerCase();
                 currentPage = 1;
+                const clearBtn = document.getElementById('searchClearBtn');
+                if (clearBtn) clearBtn.style.display = e.target.value ? 'block' : 'none';
                 displayRecords();
             });
 
@@ -4459,6 +4465,16 @@
             if (div) div.style.display = 'none';
         }
 
+        function clearSearch() {
+            const input = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('searchClearBtn');
+            if (input) { input.value = ''; input.focus(); }
+            if (clearBtn) clearBtn.style.display = 'none';
+            searchQuery = '';
+            currentPage = 1;
+            displayRecords();
+        }
+
         function switchAMView(mode) {
             amViewMode = mode;
             currentPage = 1;
@@ -4543,6 +4559,8 @@
             // Clear search and filters
             const searchInput = document.getElementById('searchInput');
             if (searchInput) searchInput.value = '';
+            const clearBtn = document.getElementById('searchClearBtn');
+            if (clearBtn) clearBtn.style.display = 'none';
             
             currentFilter = 'all';
             currentSort = 'a-z';
