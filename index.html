@@ -1076,8 +1076,8 @@
                             
                             <!-- Image Storage (Super Admin only) -->
                             <button id="imageStorageOption" class="options-menu-item" onclick="openImageStoragePage()" style="display:none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; transition: background 0.2s;">🗄 Image Storage</button>
-            <!-- Training Library (Everyone) -->
-                            <button id="trainingLibraryOption" class="options-menu-item" onclick="openTrainingLibrary()" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">🎬 Training Library</button>
+            <!-- Resources Library (Everyone) -->
+                            <button id="trainingLibraryOption" class="options-menu-item" onclick="openResourcesLibrary('videos')" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📚 Resources Library</button>
             <!-- Change Password (Everyone) -->
                             <button id="changePasswordOption" class="options-menu-item" onclick="openChangePasswordPage()" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; transition: background 0.2s;">👤 Edit Profile</button>
                         </div>
@@ -1174,7 +1174,7 @@
             </div>
 
             <!-- MANAGE ASSESSMENTS PAGE -->
-            <div id="manageAssessmentsPage" class="page-container" style="display: flex; flex-direction: row;">
+            <div id="manageAssessmentsPage" class="page-container" style="display: none; flex-direction: row;">
                 <div class="main-content">
                     <h2 style="margin: 0 0 20px 0;">Manage Assessments</h2>
                     
@@ -1685,8 +1685,17 @@
             <!-- TRAINING LIBRARY PAGE -->
             <div id="trainingLibraryPage" class="page-container" style="display: none; flex-direction: row;">
                 <div class="main-content">
-                    <h2 style="margin: 0 0 5px 0;">🎬 Training Library</h2>
-                    <p style="color: #999; font-size: 13px; margin-bottom: 20px;">On-demand training videos for all team members.</p>
+                    <h2 style="margin: 0 0 5px 0;">📚 Resources Library</h2>
+                    <p style="color: #999; font-size: 13px; margin-bottom: 15px;">Browse training videos and articles.</p>
+
+                    <!-- Sub-tabs -->
+                    <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid #e0e0e0;">
+                        <button id="rlVideosTab" onclick="switchResourceTab('videos')" style="padding:8px 20px;background:none;border:none;border-bottom:3px solid #4ba8a8;color:#4ba8a8;font-weight:600;cursor:pointer;font-size:13px;margin-bottom:-2px;">🎬 Videos</button>
+                        <button id="rlArticlesTab" onclick="switchResourceTab('articles')" style="padding:8px 20px;background:none;border:none;border-bottom:3px solid transparent;color:#999;font-weight:600;cursor:pointer;font-size:13px;margin-bottom:-2px;">📄 Articles</button>
+                    </div>
+
+                    <!-- Videos panel -->
+                    <div id="rlVideosPanel">
 
                     <!-- Admin: Add Video Panel (super admin only) -->
                     <div id="tlAdminPanel" style="display:none; background:#f9f9f9; border:1px solid #e0e0e0; border-radius:8px; padding:20px; margin-bottom:25px;">
@@ -1699,7 +1708,21 @@
                             </div>
                             <div>
                                 <label class="fl">Category</label>
-                                <input type="text" id="tlCategory" class="fi" placeholder="e.g. Scoring, Technical, Posing">
+                                <select id="tlCategory" class="fi">
+                                    <option value="">Select category...</option>
+                                    <option value="Bella Basics">Bella Basics</option>
+                                    <option value="Camera Skills">Camera Skills</option>
+                                    <option value="Connection">Connection</option>
+                                    <option value="Demise">Demise</option>
+                                    <option value="Editing">Editing</option>
+                                    <option value="Flash">Flash</option>
+                                    <option value="General Photography">General Photography</option>
+                                    <option value="Lightroom Classic">Lightroom Classic</option>
+                                    <option value="Mindset">Mindset</option>
+                                    <option value="Sales">Sales</option>
+                                    <option value="Technology">Technology</option>
+                                    <option value="Other">Other</option>
+                                </select>
                             </div>
                         </div>
                         <div style="margin-bottom:12px;">
@@ -1747,7 +1770,20 @@
                     <div id="tlVideoGrid" style="display:grid;gap:20px;">
                         <p style="color:#999;text-align:center;">Loading videos...</p>
                     </div>
-                </div>
+                    </div><!-- end rlVideosPanel -->
+
+                    <!-- Articles panel -->
+                    <div id="rlArticlesPanel" style="display:none;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                            <p style="font-size:13px;color:#666;margin:0;">Browse training articles and resources.</p>
+                        </div>
+                        <div id="rlArticleStatus" style="margin-bottom:10px;"></div>
+                        <div id="rlArticleGrid" style="display:grid;gap:12px;">
+                            <p style="color:#999;text-align:center;padding:20px;">Loading articles...</p>
+                        </div>
+                    </div>
+
+                </div><!-- end main-content -->
 
                 <div class="sidebar" style="flex-shrink:0;">
                     <div class="controls-section">
@@ -3211,7 +3247,7 @@
                             .select('*')
                             .ilike('Photographer Email', a.photographer_email || '')
                             .ilike('PSS Email Address', currentUser ? currentUser.email : '')
-                            .order('Date', { ascending: false })
+                            .order('created_at', { ascending: false })
                             .limit(1);
                         if (!error && data && data[0]) {
                             // Existing record found — open in edit mode so nothing is lost
@@ -3237,7 +3273,7 @@
                             .select('*')
                             .ilike('Photographer Email', a.photographer_email || '')
                             .ilike('PSS Email Address', currentUser ? currentUser.email : '')
-                            .order('Date', { ascending: false })
+                            .order('created_at', { ascending: false })
                             .limit(1);
                         if (error) throw error;
                         if (data && data[0]) {
@@ -3313,13 +3349,82 @@
         }
 
         function openTrainingLibrary() {
+            openResourcesLibrary('videos');
+        }
+
+        function openResourcesLibrary(tab) {
             showPage('trainingLibraryPage');
-            // Show add button for super admins
             const addBtn = document.getElementById('tlAddBtn');
             if (addBtn) addBtn.style.display = canManageRoles() ? 'block' : 'none';
             const adminPanel = document.getElementById('tlAdminPanel');
             if (adminPanel && !canManageRoles()) adminPanel.style.display = 'none';
-            loadTrainingVideos();
+            switchResourceTab(tab || 'videos');
+        }
+
+        function switchResourceTab(tab) {
+            const videosPanel   = document.getElementById('rlVideosPanel');
+            const articlesPanel = document.getElementById('rlArticlesPanel');
+            const videosBtn     = document.getElementById('rlVideosTab');
+            const articlesBtn   = document.getElementById('rlArticlesTab');
+            if (tab === 'articles') {
+                if (videosPanel)   videosPanel.style.display   = 'none';
+                if (articlesPanel) articlesPanel.style.display = 'block';
+                if (videosBtn)   { videosBtn.style.borderBottomColor = 'transparent'; videosBtn.style.color = '#999'; }
+                if (articlesBtn) { articlesBtn.style.borderBottomColor = '#4ba8a8'; articlesBtn.style.color = '#4ba8a8'; }
+                loadTrainingArticles();
+            } else {
+                if (videosPanel)   videosPanel.style.display   = 'block';
+                if (articlesPanel) articlesPanel.style.display = 'none';
+                if (videosBtn)   { videosBtn.style.borderBottomColor = '#4ba8a8'; videosBtn.style.color = '#4ba8a8'; }
+                if (articlesBtn) { articlesBtn.style.borderBottomColor = 'transparent'; articlesBtn.style.color = '#999'; }
+                loadTrainingVideos();
+            }
+        }
+
+        async function loadTrainingArticles() {
+            const grid   = document.getElementById('rlArticleGrid');
+            const status = document.getElementById('rlArticleStatus');
+            if (!grid) return;
+            grid.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">Loading...</p>';
+            try {
+                const { data, error } = await supabaseClient
+                    .from('training_articles')
+                    .select('*')
+                    .order('title', { ascending: true });
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    grid.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">No articles yet.</p>';
+                    return;
+                }
+                if (status) status.innerHTML = `<p style="font-size:12px;color:#999;margin:0;">${data.length} article${data.length !== 1 ? 's' : ''}</p>`;
+                const groups = {};
+                data.forEach(a => {
+                    const cat = a.category || 'General';
+                    if (!groups[cat]) groups[cat] = [];
+                    groups[cat].push(a);
+                });
+                grid.innerHTML = Object.entries(groups).sort().map(([cat, articles]) => `
+                    <div style="margin-bottom:20px;">
+                        <h4 style="margin:0 0 10px 0;font-size:14px;color:#4ba8a8;border-bottom:2px solid #e8f5f5;padding-bottom:6px;">${cat}</h4>
+                        <div style="display:grid;gap:10px;">
+                            ${articles.map(a => `
+                                <div style="background:white;border:1px solid #e0e0e0;border-radius:8px;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:15px;">
+                                    <div style="flex:1;min-width:0;">
+                                        <div style="font-weight:600;font-size:14px;color:#333;margin-bottom:3px;">${a.title || 'Untitled'}</div>
+                                        ${a.description ? `<div style="font-size:12px;color:#666;line-height:1.5;">${a.description}</div>` : ''}
+                                    </div>
+                                    <a href="${a.articles_link}" target="_blank" rel="noopener"
+                                       style="flex-shrink:0;padding:8px 16px;background:#4ba8a8;color:white;border-radius:5px;text-decoration:none;font-size:13px;font-weight:600;white-space:nowrap;">
+                                        📄 Open Article
+                                    </a>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            } catch(err) {
+                grid.innerHTML = `<p style="color:#ef4444;padding:20px;">Error: ${err.message}</p>`;
+            }
         }
 
         async function loadTrainingVideos() {
@@ -3403,7 +3508,9 @@
 
             // Group by category
             const groups = {};
-            videos.forEach(v => {
+            // Sort videos A-Z by title
+            const sorted = [...videos].sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+            sorted.forEach(v => {
                 const cat = v.category || 'General';
                 if (!groups[cat]) groups[cat] = [];
                 groups[cat].push(v);
@@ -3473,6 +3580,19 @@
             const embed = document.getElementById(`tlEmbed_${id}`);
             const arrow = document.getElementById(`tlArrow_${id}`);
             const isOpen = embed.style.display !== 'none';
+
+            // Stop all other playing videos first
+            document.querySelectorAll('[id^="tlEmbed_"]').forEach(el => {
+                if (el.id !== `tlEmbed_${id}` && el.style.display !== 'none') {
+                    const iframe = el.querySelector('iframe');
+                    if (iframe) { const src = iframe.src; iframe.src = ''; iframe.src = src; }
+                    el.style.display = 'none';
+                    const otherId = el.id.replace('tlEmbed_', '');
+                    const otherArrow = document.getElementById(`tlArrow_${otherId}`);
+                    if (otherArrow) otherArrow.textContent = '▶';
+                }
+            });
+
             embed.style.display = isOpen ? 'none' : 'block';
             arrow.textContent = isOpen ? '▶' : '▼';
         }
@@ -3544,7 +3664,8 @@
             if (!v) return;
             document.getElementById('tlEditId').value = v.id;
             document.getElementById('tlTitle').value = v.title || '';
-            document.getElementById('tlCategory').value = v.category || '';
+            const catSel = document.getElementById('tlCategory');
+            if (catSel) catSel.value = v.category || '';
             document.getElementById('tlDriveLink').value = v.drive_link || '';
             document.getElementById('tlDescription').value = v.description || '';
             document.getElementById('tlPassword').value = v.video_password || '';
@@ -4300,7 +4421,9 @@
                 // Assessments (PSS: trainer, area_manager)
                 const assessmentsOption = document.getElementById('assessmentsOption');
                 if (assessmentsOption) {
-                    assessmentsOption.style.display = ['trainer', 'area_manager'].includes(currentUserRole) ? 'block' : 'none';
+                    assessmentsOption.style.display = ['trainer', 'am'].includes(currentUserRole) ? 'block' : 'none';
+                const adminAssessOpt = document.getElementById('adminAssessmentsOption');
+                if (adminAssessOpt) adminAssessOpt.style.display = canManageRoles() ? 'block' : 'none';
                 }
 
                 // Admin Assessments (Super Admin)
@@ -4845,12 +4968,31 @@
             const tflags = (record['Delivery Standard Flags:'] || '').split(',').map(s => s.trim());
             document.querySelectorAll('input[name="techflag"]').forEach(cb => { if (tflags.includes(cb.value)) cb.checked = true; });
 
-            // Reset image upload area
-            document.getElementById('fImagePreviewList').innerHTML = '';
+            // Show existing uploaded images (read-only previews)
+            formPendingImages = []; // clear pending — existing ones are already saved
+            const previewList = document.getElementById('fImagePreviewList');
             const statusDiv = document.getElementById('fImageUploadStatus');
-            if (statusDiv) statusDiv.textContent = '';
             const hintDiv = document.getElementById('fImageReplaceHint');
-            if (hintDiv) hintDiv.style.display = 'none';
+            if (previewList) {
+                const existingUrls = (record['Reference Images'] || '').split(',').map(u => u.trim()).filter(Boolean);
+                if (existingUrls.length > 0) {
+                    previewList.innerHTML = existingUrls.map((url, i) => {
+                        const rawName = decodeURIComponent(url.split('/').pop().split('?')[0]).replace(/^\d+_/, '');
+                        return `<div style="display:flex;align-items:center;gap:10px;background:#f0fdf4;border:1px solid #a8d5a3;border-radius:4px;padding:8px 12px;font-size:13px;">
+                            <span style="color:#4ba8a8;font-size:18px;">📷</span>
+                            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;">${rawName}</span>
+                            <a href="${url}" target="_blank" style="font-size:11px;color:#4ba8a8;text-decoration:none;">View</a>
+                            <span style="font-size:11px;color:#999;font-style:italic;">Already saved</span>
+                        </div>`;
+                    }).join('');
+                    if (statusDiv) { statusDiv.textContent = 'Image(s) uploaded successfully.'; statusDiv.style.color = '#2d7a2d'; }
+                    if (hintDiv) hintDiv.style.display = 'block';
+                } else {
+                    previewList.innerHTML = '';
+                    if (statusDiv) statusDiv.textContent = '';
+                    if (hintDiv) hintDiv.style.display = 'none';
+                }
+            }
 
             // Apply core skills gating based on pre-filled values
             onFormCoreChange(1);
