@@ -7210,188 +7210,254 @@
         }
 
         function printRecord(record) {
-            let html = `
-                <html>
-                <head>
-                    <title>Growth Assessment - ${record['Photographer Name']}</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; max-width: 850px; margin: 0 auto; padding: 20px; }
-                        h1 { color: #4ba8a8; border-bottom: 2px solid #4ba8a8; padding-bottom: 10px; }
-                        h2 { color: #333; margin-top: 25px; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
-                        h3 { color: #333; margin: 15px 0 10px 0; }
-                        .meta { color: #666; font-size: 13px; margin: 10px 0; }
-                        .detail-row { margin: 15px 0; }
-                        .detail-label { font-weight: bold; color: #333; }
-                        .detail-value { color: #666; margin-top: 5px; line-height: 1.6; }
-                        .gallery { background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0; page-break-inside: avoid; }
-                        .gallery-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
-                        .score-item { padding: 10px; background: white; border: 1px solid #e0e0e0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
-                        .score-label { font-weight: bold; color: #333; }
-                        .score-val { color: #4ba8a8; font-weight: 600; }
-                        .feedback { margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; font-style: italic; font-size: 12px; line-height: 1.5; }
-                        .overall-score { background: #e8f5f5; padding: 10px; border-radius: 4px; margin-top: 10px; font-weight: bold; color: #4ba8a8; }
-                    </style>
-                </head>
-                <body>
+            const isGA = record.record_type === 'growth_assessment';
+            const css = `
+                body { font-family: Arial, sans-serif; max-width: 750px; margin: 0 auto; padding: 24px; color: #333; }
+                h1 { color: #4ba8a8; border-bottom: 2px solid #4ba8a8; padding-bottom: 8px; margin-bottom: 4px; font-size: 20px; }
+                h2 { font-size: 22px; margin: 0 0 4px 0; }
+                .meta { color: #666; font-size: 13px; margin-bottom: 16px; }
+                .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #999; margin: 18px 0 6px 0; }
+                .gallery { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 6px; padding: 14px 16px; margin: 12px 0; page-break-inside: avoid; }
+                .gallery h3 { margin: 0 0 10px 0; font-size: 15px; color: #333; }
+                .scores-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+                .score-item { display: flex; justify-content: space-between; padding: 7px 10px; background: white; border: 1px solid #e8e8e8; border-radius: 4px; font-size: 13px; }
+                .score-val { font-weight: 700; color: #4ba8a8; }
+                .score-total { background: #e8f5f5; padding: 8px 12px; border-radius: 4px; font-weight: 700; color: #4ba8a8; margin-top: 8px; font-size: 14px; }
+                .feedback { margin-top: 10px; font-size: 13px; color: #444; line-height: 1.6; border-top: 1px solid #e0e0e0; padding-top: 8px; }
+                .flags { color: #c92a2a; font-size: 13px; margin: 6px 0; }
+                .notes { color: #555; font-size: 13px; margin: 6px 0; line-height: 1.5; }
+                .overall { background: #f0fdf4; border: 1px solid #a8d5a3; border-radius: 6px; padding: 12px 16px; margin: 16px 0; }
+                .divider { border: none; border-top: 1px solid #e0e0e0; margin: 14px 0; }
+            `;
+
+            let body = '';
+
+            if (isGA) {
+                // ── GROWTH ASSESSMENT PRINT ───────────────────────────────────
+                body = `
                     <h1>Growth Assessment</h1>
-                    <h2>${record['Photographer Name']}</h2>
+                    <h2>${record['Photographer Name'] || ''}</h2>
                     <div class="meta">
-                        <strong>Date:</strong> ${formatDate(record.Date)}<br>
-                        <strong>Level:</strong> ${record['Photographer Level'] || 'N/A'}<br>
-                        <strong>Reviewer:</strong> ${record['PSS Reviewer Name'] || 'N/A'}
+                        <strong>${record['Photographer Level'] || ''}</strong> &nbsp;·&nbsp; ${formatDate(record.Date)}
                     </div>
-            `;
 
-            if (record['Gallery #1 Score:']) {
-                html += `
-                    <div class="gallery">
-                        <h3>Gallery #1 - Score: ${record['Gallery #1 Score:']}</h3>
-                        <div class="gallery-scores">
-                            <div class="score-item"><span class="score-label">Theme/Subject</span><span class="score-val">${record['Gallery #1 Theme/Subject']}</span></div>
-                            <div class="score-item"><span class="score-label">Exposure</span><span class="score-val">${record['Gallery #1 Exposure']}</span></div>
-                            <div class="score-item"><span class="score-label">Focus</span><span class="score-val">${record['Gallery #1 Focus']}</span></div>
-                            <div class="score-item"><span class="score-label">White Balance</span><span class="score-val">${record['Gallery #1 White Balance']}</span></div>
-                            <div class="score-item"><span class="score-label">Posing</span><span class="score-val">${record['Gallery #1 Posing']}</span></div>
-                            <div class="score-item"><span class="score-label">Variety</span><span class="score-val">${record['Gallery #1 Variety']}</span></div>
-                            <div class="score-item"><span class="score-label">Environment</span><span class="score-val">${record['Gallery #1 Environment']}</span></div>
-                            <div class="score-item"><span class="score-label">Editing</span><span class="score-val">${record['Gallery #1 Editing']}</span></div>
-                            <div class="score-item"><span class="score-label">Calming and Soothing</span><span class="score-val">${record['Gallery #1 Calming and soothing']}</span></div>
-                            <div class="score-item"><span class="score-label">Composition/Cropping</span><span class="score-val">${record['Gallery #1 Composition/Cropping']}</span></div>
-                        </div>
-                        ${record['Gallery #1 Feedback:'] ? `<div class="feedback"><strong>Feedback:</strong> ${record['Gallery #1 Feedback:']}</div>` : ''}
+                    <div class="section-title">PSS Reviewer</div>
+                    <div style="font-size:14px;">${record['PSS Reviewer Name'] || 'N/A'}</div>
+
+                    ${record['Delivery Standard Flags:'] ? `
+                        <div class="section-title" style="color:#c92a2a;">Delivery Standard Flags</div>
+                        <div class="flags">${record['Delivery Standard Flags:']}</div>` : ''}
+
+                    ${record['Delivery Notes:'] ? `
+                        <div class="section-title">Delivery Notes</div>
+                        <div class="notes">${record['Delivery Notes:']}</div>` : ''}
+
+                    ${record['Gallery #1 Score:'] ? `
+                        <div class="gallery">
+                            <h3>Gallery #1 &nbsp;<span style="color:#999;font-weight:400;font-size:12px;">${record['Gallery #1 Access Code:'] ? '· Code: ' + record['Gallery #1 Access Code:'] : ''}</span></h3>
+                            <div class="scores-grid">
+                                <div class="score-item"><span>Core Skills</span><span class="score-val">${record['Core Skills (1)'] || '—'}</span></div>
+                                <div class="score-item"><span>Subject and Posing</span><span class="score-val">${record['Subject and Posing (1)'] || '—'}</span></div>
+                                <div class="score-item"><span>Composition, Orientation &amp; Variety</span><span class="score-val">${record['Composition, orientation and variety (1)'] || '—'}</span></div>
+                                <div class="score-item"><span>Editing / Bella Baby Standards</span><span class="score-val">${record['Editing / Bella Baby Standards (1)'] || '—'}</span></div>
+                            </div>
+                            <div class="score-total">Score: ${record['Gallery #1 Score:']}</div>
+                            ${record['Gallery #1 Feedback:'] ? `<div class="feedback">${record['Gallery #1 Feedback:']}</div>` : ''}
+                        </div>` : ''}
+
+                    ${record['Gallery #2 Score:'] ? `
+                        <div class="gallery">
+                            <h3>Gallery #2 &nbsp;<span style="color:#999;font-weight:400;font-size:12px;">${record['Gallery #2 Access Code:'] ? '· Code: ' + record['Gallery #2 Access Code:'] : ''}</span></h3>
+                            <div class="scores-grid">
+                                <div class="score-item"><span>Core Skills</span><span class="score-val">${record['Core Skills (2)'] || '—'}</span></div>
+                                <div class="score-item"><span>Subject and Posing</span><span class="score-val">${record['Subject and Posing (2)'] || '—'}</span></div>
+                                <div class="score-item"><span>Composition, Orientation &amp; Variety</span><span class="score-val">${record['Composition, orientation and variety (2)'] || '—'}</span></div>
+                                <div class="score-item"><span>Editing / Bella Baby Standards</span><span class="score-val">${record['Editing / Bella Baby Standards (2)'] || '—'}</span></div>
+                            </div>
+                            <div class="score-total">Score: ${record['Gallery #2 Score:']}</div>
+                            ${record['Gallery #2 Feedback:'] ? `<div class="feedback">${record['Gallery #2 Feedback:']}</div>` : ''}
+                        </div>` : ''}
+
+                    <div class="overall">
+                        <strong>Average Score:</strong> ${record['Average Gallery Score'] || 'N/A'}
+                        ${record['Current Assessment Level'] ? ` &nbsp;·&nbsp; <strong>Level:</strong> ${record['Current Assessment Level']}` : ''}
                     </div>
+
+                    ${record['Applied Flags'] ? `
+                        <div class="section-title">Category Flags</div>
+                        <div style="font-size:13px;">${record['Applied Flags']}</div>` : ''}
+                `;
+            } else {
+                // ── LEGACY QC RECORD PRINT ────────────────────────────────────
+                body = `
+                    <h1>QC Record</h1>
+                    <h2>${record['Photographer Name'] || ''}</h2>
+                    <div class="meta">
+                        <strong>${record['Photographer Level'] || ''}</strong> &nbsp;·&nbsp; ${formatDate(record.Date)}
+                    </div>
+
+                    ${record['Gallery #1 Score:'] ? `
+                        <div class="gallery">
+                            <h3>Gallery #1 - Score: ${record['Gallery #1 Score:']}</h3>
+                            <div class="scores-grid">
+                                <div class="score-item"><span>Theme/Subject</span><span class="score-val">${record['Gallery #1 Theme/Subject'] || '—'}</span></div>
+                                <div class="score-item"><span>Exposure</span><span class="score-val">${record['Gallery #1 Exposure'] || '—'}</span></div>
+                                <div class="score-item"><span>Focus</span><span class="score-val">${record['Gallery #1 Focus'] || '—'}</span></div>
+                                <div class="score-item"><span>White Balance</span><span class="score-val">${record['Gallery #1 White Balance'] || '—'}</span></div>
+                                <div class="score-item"><span>Posing</span><span class="score-val">${record['Gallery #1 Posing'] || '—'}</span></div>
+                                <div class="score-item"><span>Variety</span><span class="score-val">${record['Gallery #1 Variety'] || '—'}</span></div>
+                                <div class="score-item"><span>Environment</span><span class="score-val">${record['Gallery #1 Environment'] || '—'}</span></div>
+                                <div class="score-item"><span>Editing</span><span class="score-val">${record['Gallery #1 Editing'] || '—'}</span></div>
+                                <div class="score-item"><span>Calming and Soothing</span><span class="score-val">${record['Gallery #1 Calming and soothing'] || '—'}</span></div>
+                                <div class="score-item"><span>Composition/Cropping</span><span class="score-val">${record['Gallery #1 Composition/Cropping'] || '—'}</span></div>
+                            </div>
+                            ${record['Gallery #1 Feedback:'] ? `<div class="feedback"><strong>Feedback:</strong> ${record['Gallery #1 Feedback:']}</div>` : ''}
+                        </div>` : ''}
+
+                    ${record['Gallery #2 Score:'] ? `
+                        <div class="gallery">
+                            <h3>Gallery #2 - Score: ${record['Gallery #2 Score:']}</h3>
+                            <div class="scores-grid">
+                                <div class="score-item"><span>Theme/Subject</span><span class="score-val">${record['Gallery #2 Theme/Subject'] || '—'}</span></div>
+                                <div class="score-item"><span>Exposure</span><span class="score-val">${record['Gallery #2 Exposure'] || '—'}</span></div>
+                                <div class="score-item"><span>Focus</span><span class="score-val">${record['Gallery #2 Focus'] || '—'}</span></div>
+                                <div class="score-item"><span>White Balance</span><span class="score-val">${record['Gallery #2 White Balance'] || '—'}</span></div>
+                                <div class="score-item"><span>Posing</span><span class="score-val">${record['Gallery #2 Posing'] || '—'}</span></div>
+                                <div class="score-item"><span>Variety</span><span class="score-val">${record['Gallery #2 Variety'] || '—'}</span></div>
+                                <div class="score-item"><span>Environment</span><span class="score-val">${record['Gallery #2 Environment'] || '—'}</span></div>
+                                <div class="score-item"><span>Editing</span><span class="score-val">${record['Gallery #2 Editing'] || '—'}</span></div>
+                                <div class="score-item"><span>Calming and Soothing</span><span class="score-val">${record['Gallery #2 Calming and soothing'] || '—'}</span></div>
+                                <div class="score-item"><span>Composition/Cropping</span><span class="score-val">${record['Gallery #2 Composition/Cropping'] || '—'}</span></div>
+                            </div>
+                            ${record['Gallery #2 Feedback:'] ? `<div class="feedback"><strong>Feedback:</strong> ${record['Gallery #2 Feedback:']}</div>` : ''}
+                        </div>` : ''}
+
+                    <div class="overall">
+                        <strong>Average Score:</strong> ${record['Average Gallery Score'] || 'N/A'} &nbsp;·&nbsp;
+                        <strong>Determination:</strong> ${record['Quality Check Determination'] || 'N/A'}
+                    </div>
+
+                    ${record['Delivery Standard Flags:'] ? `
+                        <div class="section-title" style="color:#c92a2a;">Delivery Standard Flags</div>
+                        <div class="flags">${record['Delivery Standard Flags:']}</div>` : ''}
+
+                    ${record['Delivery Notes:'] ? `
+                        <div class="section-title">Delivery Notes</div>
+                        <div class="notes">${record['Delivery Notes:']}</div>` : ''}
                 `;
             }
 
-            if (record['Gallery #2 Score:']) {
-                html += `
-                    <div class="gallery">
-                        <h3>Gallery #2 - Score: ${record['Gallery #2 Score:']}</h3>
-                        <div class="gallery-scores">
-                            <div class="score-item"><span class="score-label">Theme/Subject</span><span class="score-val">${record['Gallery #2 Theme/Subject']}</span></div>
-                            <div class="score-item"><span class="score-label">Exposure</span><span class="score-val">${record['Gallery #2 Exposure']}</span></div>
-                            <div class="score-item"><span class="score-label">Focus</span><span class="score-val">${record['Gallery #2 Focus']}</span></div>
-                            <div class="score-item"><span class="score-label">White Balance</span><span class="score-val">${record['Gallery #2 White Balance']}</span></div>
-                            <div class="score-item"><span class="score-label">Posing</span><span class="score-val">${record['Gallery #2 Posing']}</span></div>
-                            <div class="score-item"><span class="score-label">Variety</span><span class="score-val">${record['Gallery #2 Variety']}</span></div>
-                            <div class="score-item"><span class="score-label">Environment</span><span class="score-val">${record['Gallery #2 Environment']}</span></div>
-                            <div class="score-item"><span class="score-label">Editing</span><span class="score-val">${record['Gallery #2 Editing']}</span></div>
-                            <div class="score-item"><span class="score-label">Calming and Soothing</span><span class="score-val">${record['Gallery #2 Calming and soothing']}</span></div>
-                            <div class="score-item"><span class="score-label">Composition/Cropping</span><span class="score-val">${record['Gallery #2 Composition/Cropping']}</span></div>
-                        </div>
-                        ${record['Gallery #2 Feedback:'] ? `<div class="feedback"><strong>Feedback:</strong> ${record['Gallery #2 Feedback:']}</div>` : ''}
-                    </div>
-                `;
-            }
-
-            html += `
-                    <div class="detail-row">
-                        <div class="detail-label">Overall Review</div>
-                        <div class="detail-value">
-                            Average Score: ${record['Average Gallery Score'] || 'N/A'}<br>
-                            Determination: ${record['Quality Check Determination'] || 'N/A'}
-                        </div>
-                    </div>
-                </body>
-                </html>
-            `;
-
+            const html = `<html><head><title>${isGA ? 'Growth Assessment' : 'QC Record'} - ${record['Photographer Name']}</title><style>${css}</style></head><body>${body}</body></html>`;
             const printWindow = window.open('', '', 'height=800,width=900');
             printWindow.document.write(html);
             printWindow.document.close();
             setTimeout(() => printWindow.print(), 250);
+        }
+
+        function buildRecordPrintBody(record, index, total) {
+            var isGA = record.record_type === 'growth_assessment';
+            var html = '';
+            var typeLabel = isGA ? 'Growth Assessment' : 'QC Record';
+            html += '<div class="record-header">';
+            html += '<div class="record-type">' + typeLabel + ' &nbsp;&middot;&nbsp; ' + (index+1) + ' of ' + total + '</div>';
+            html += '<div class="record-date">' + formatDate(record.Date) + '</div>';
+            html += '</div>';
+            html += '<div class="meta"><strong>Level:</strong> ' + (record['Photographer Level'] || 'N/A');
+            if (isGA) html += ' &nbsp;&middot;&nbsp; <strong>Reviewer:</strong> ' + (record['PSS Reviewer Name'] || 'N/A');
+            html += '</div>';
+
+            if (isGA) {
+                if (record['Delivery Standard Flags:']) {
+                    html += '<div class="section-title" style="color:#c92a2a;">Delivery Standard Flags</div>';
+                    html += '<div class="flags">' + record['Delivery Standard Flags:'] + '</div>';
+                }
+                if (record['Delivery Notes:']) {
+                    html += '<div class="section-title">Delivery Notes</div>';
+                    html += '<div class="notes">' + record['Delivery Notes:'] + '</div>';
+                }
+                if (record['Gallery #1 Score:']) {
+                    html += '<div class="gallery"><h3>Gallery #1' + (record['Gallery #1 Access Code:'] ? ' &middot; Code: ' + record['Gallery #1 Access Code:'] : '') + '</h3>';
+                    html += '<div class="scores-grid">';
+                    html += '<div class="score-item"><span>Core Skills</span><span class="score-val">' + (record['Core Skills (1)'] || '&mdash;') + '</span></div>';
+                    html += '<div class="score-item"><span>Subject and Posing</span><span class="score-val">' + (record['Subject and Posing (1)'] || '&mdash;') + '</span></div>';
+                    html += '<div class="score-item"><span>Composition &amp; Variety</span><span class="score-val">' + (record['Composition, orientation and variety (1)'] || '&mdash;') + '</span></div>';
+                    html += '<div class="score-item"><span>Editing / Standards</span><span class="score-val">' + (record['Editing / Bella Baby Standards (1)'] || '&mdash;') + '</span></div>';
+                    html += '</div><div class="score-total">Score: ' + record['Gallery #1 Score:'] + '</div>';
+                    if (record['Gallery #1 Feedback:']) html += '<div class="feedback">' + record['Gallery #1 Feedback:'] + '</div>';
+                    html += '</div>';
+                }
+                if (record['Gallery #2 Score:']) {
+                    html += '<div class="gallery"><h3>Gallery #2' + (record['Gallery #2 Access Code:'] ? ' &middot; Code: ' + record['Gallery #2 Access Code:'] : '') + '</h3>';
+                    html += '<div class="scores-grid">';
+                    html += '<div class="score-item"><span>Core Skills</span><span class="score-val">' + (record['Core Skills (2)'] || '&mdash;') + '</span></div>';
+                    html += '<div class="score-item"><span>Subject and Posing</span><span class="score-val">' + (record['Subject and Posing (2)'] || '&mdash;') + '</span></div>';
+                    html += '<div class="score-item"><span>Composition &amp; Variety</span><span class="score-val">' + (record['Composition, orientation and variety (2)'] || '&mdash;') + '</span></div>';
+                    html += '<div class="score-item"><span>Editing / Standards</span><span class="score-val">' + (record['Editing / Bella Baby Standards (2)'] || '&mdash;') + '</span></div>';
+                    html += '</div><div class="score-total">Score: ' + record['Gallery #2 Score:'] + '</div>';
+                    if (record['Gallery #2 Feedback:']) html += '<div class="feedback">' + record['Gallery #2 Feedback:'] + '</div>';
+                    html += '</div>';
+                }
+                html += '<div class="overall"><strong>Avg Score:</strong> ' + (record['Average Gallery Score'] || 'N/A') + '</div>';
+            } else {
+                var g1 = record['Gallery #1 Score:'];
+                if (g1) {
+                    html += '<div class="gallery"><h3>Gallery #1 &mdash; Score: ' + g1 + '</h3><div class="scores-grid">';
+                    var g1fields = [['Theme/Subject','Gallery #1 Theme/Subject'],['Exposure','Gallery #1 Exposure'],['Focus','Gallery #1 Focus'],['White Balance','Gallery #1 White Balance'],['Posing','Gallery #1 Posing'],['Variety','Gallery #1 Variety'],['Environment','Gallery #1 Environment'],['Editing','Gallery #1 Editing'],['Calming &amp; Soothing','Gallery #1 Calming and soothing'],['Composition','Gallery #1 Composition/Cropping']];
+                    g1fields.forEach(function(f) { html += '<div class="score-item"><span>' + f[0] + '</span><span class="score-val">' + (record[f[1]] || '&mdash;') + '</span></div>'; });
+                    html += '</div>';
+                    if (record['Gallery #1 Feedback:']) html += '<div class="feedback"><strong>Feedback:</strong> ' + record['Gallery #1 Feedback:'] + '</div>';
+                    html += '</div>';
+                }
+                var g2 = record['Gallery #2 Score:'];
+                if (g2) {
+                    html += '<div class="gallery"><h3>Gallery #2 &mdash; Score: ' + g2 + '</h3><div class="scores-grid">';
+                    var g2fields = [['Theme/Subject','Gallery #2 Theme/Subject'],['Exposure','Gallery #2 Exposure'],['Focus','Gallery #2 Focus'],['White Balance','Gallery #2 White Balance'],['Posing','Gallery #2 Posing'],['Variety','Gallery #2 Variety'],['Environment','Gallery #2 Environment'],['Editing','Gallery #2 Editing'],['Calming &amp; Soothing','Gallery #2 Calming and soothing'],['Composition','Gallery #2 Composition/Cropping']];
+                    g2fields.forEach(function(f) { html += '<div class="score-item"><span>' + f[0] + '</span><span class="score-val">' + (record[f[1]] || '&mdash;') + '</span></div>'; });
+                    html += '</div>';
+                    if (record['Gallery #2 Feedback:']) html += '<div class="feedback"><strong>Feedback:</strong> ' + record['Gallery #2 Feedback:'] + '</div>';
+                    html += '</div>';
+                }
+                html += '<div class="overall"><strong>Avg Score:</strong> ' + (record['Average Gallery Score'] || 'N/A') + ' &nbsp;&middot;&nbsp; <strong>Determination:</strong> ' + (record['Quality Check Determination'] || 'N/A') + '</div>';
+                if (record['Delivery Standard Flags:']) html += '<div class="flags">&#9873; ' + record['Delivery Standard Flags:'] + '</div>';
+                if (record['Delivery Notes:']) html += '<div class="notes">' + record['Delivery Notes:'] + '</div>';
+            }
+            return html;
         }
 
         function printPhotographerRecords(photographerName) {
             const records = allRecords.filter(r => r['Photographer Name'] === photographerName);
-            
-            let html = `
-                <html>
-                <head>
-                    <title>Growth Assessments - ${photographerName}</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; max-width: 850px; margin: 0 auto; padding: 20px; }
-                        h1 { color: #4ba8a8; border-bottom: 2px solid #4ba8a8; padding-bottom: 10px; }
-                        h2 { color: #333; margin-top: 30px; border-bottom: 1px solid #ddd; padding-bottom: 8px; page-break-before: always; }
-                        h3 { color: #333; margin: 15px 0 10px 0; }
-                        .meta { color: #666; font-size: 13px; margin: 10px 0; }
-                        .gallery { background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0; page-break-inside: avoid; }
-                        .gallery-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
-                        .score-item { padding: 10px; background: white; border: 1px solid #e0e0e0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
-                        .score-label { font-weight: bold; color: #333; }
-                        .score-val { color: #4ba8a8; font-weight: 600; }
-                        .feedback { margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; font-style: italic; font-size: 12px; line-height: 1.5; }
-                    </style>
-                </head>
-                <body>
-                    <h1>Growth Assessments Summary</h1>
-                    <div class="meta">
-                        <strong>Photographer:</strong> ${photographerName}<br>
-                        <strong>Total Assessments:</strong> ${records.length}<br>
-                        <strong>Print Date:</strong> ${new Date().toLocaleDateString()}
-                    </div>
+            const css = `
+                body { font-family: Arial, sans-serif; max-width: 750px; margin: 0 auto; padding: 24px; color: #333; }
+                h1 { color: #4ba8a8; border-bottom: 2px solid #4ba8a8; padding-bottom: 8px; font-size: 20px; }
+                .record-header { margin: 20px 0 6px 0; border-bottom: 1px solid #ddd; padding-bottom: 6px; page-break-before: always; }
+                .record-header:first-of-type { page-break-before: avoid; }
+                .record-type { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #4ba8a8; }
+                .record-date { font-size: 16px; font-weight: 700; color: #333; }
+                .meta { color: #666; font-size: 12px; margin: 4px 0 10px 0; }
+                .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #999; margin: 10px 0 4px 0; }
+                .gallery { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px 14px; margin: 8px 0; page-break-inside: avoid; }
+                .gallery h3 { margin: 0 0 8px 0; font-size: 14px; }
+                .scores-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 6px 0; }
+                .score-item { display: flex; justify-content: space-between; padding: 5px 8px; background: white; border: 1px solid #e8e8e8; border-radius: 4px; font-size: 12px; }
+                .score-val { font-weight: 700; color: #4ba8a8; }
+                .score-total { background: #e8f5f5; padding: 6px 10px; border-radius: 4px; font-weight: 700; color: #4ba8a8; font-size: 13px; margin-top: 6px; }
+                .feedback { font-size: 12px; color: #444; line-height: 1.5; border-top: 1px solid #e0e0e0; padding-top: 7px; margin-top: 8px; }
+                .overall { background: #f0fdf4; border: 1px solid #a8d5a3; border-radius: 5px; padding: 8px 12px; margin: 10px 0; font-size: 13px; }
+                .flags { color: #c92a2a; font-size: 12px; margin: 4px 0; }
+                .notes { color: #555; font-size: 12px; margin: 4px 0; line-height: 1.5; }
+                .divider { border: none; border-top: 2px solid #e0e0e0; margin: 18px 0; }
             `;
-
-            records.forEach((record, index) => {
-                html += `
-                    <h2>Assessment ${index + 1} - ${formatDate(record.Date)}</h2>
-                    <div class="meta">
-                        <strong>Reviewer:</strong> ${record['PSS Reviewer Name'] || 'N/A'} | 
-                        <strong>Overall Score:</strong> ${record['Average Gallery Score'] || 'N/A'} | 
-                        <strong>Determination:</strong> ${record['Quality Check Determination'] || 'N/A'}
-                    </div>
-                `;
-
-                if (record['Gallery #1 Score:']) {
-                    html += `
-                        <div class="gallery">
-                            <h3>Gallery #1 - Score: ${record['Gallery #1 Score:']}</h3>
-                            <div class="gallery-scores">
-                                <div class="score-item"><span class="score-label">Theme/Subject</span><span class="score-val">${record['Gallery #1 Theme/Subject']}</span></div>
-                                <div class="score-item"><span class="score-label">Exposure</span><span class="score-val">${record['Gallery #1 Exposure']}</span></div>
-                                <div class="score-item"><span class="score-label">Focus</span><span class="score-val">${record['Gallery #1 Focus']}</span></div>
-                                <div class="score-item"><span class="score-label">White Balance</span><span class="score-val">${record['Gallery #1 White Balance']}</span></div>
-                                <div class="score-item"><span class="score-label">Posing</span><span class="score-val">${record['Gallery #1 Posing']}</span></div>
-                                <div class="score-item"><span class="score-label">Variety</span><span class="score-val">${record['Gallery #1 Variety']}</span></div>
-                                <div class="score-item"><span class="score-label">Environment</span><span class="score-val">${record['Gallery #1 Environment']}</span></div>
-                                <div class="score-item"><span class="score-label">Editing</span><span class="score-val">${record['Gallery #1 Editing']}</span></div>
-                                <div class="score-item"><span class="score-label">Calming and Soothing</span><span class="score-val">${record['Gallery #1 Calming and soothing']}</span></div>
-                                <div class="score-item"><span class="score-label">Composition/Cropping</span><span class="score-val">${record['Gallery #1 Composition/Cropping']}</span></div>
-                            </div>
-                            ${record['Gallery #1 Feedback:'] ? `<div class="feedback"><strong>Feedback:</strong> ${record['Gallery #1 Feedback:']}</div>` : ''}
-                        </div>
-                    `;
-                }
-
-                if (record['Gallery #2 Score:']) {
-                    html += `
-                        <div class="gallery">
-                            <h3>Gallery #2 - Score: ${record['Gallery #2 Score:']}</h3>
-                            <div class="gallery-scores">
-                                <div class="score-item"><span class="score-label">Theme/Subject</span><span class="score-val">${record['Gallery #2 Theme/Subject']}</span></div>
-                                <div class="score-item"><span class="score-label">Exposure</span><span class="score-val">${record['Gallery #2 Exposure']}</span></div>
-                                <div class="score-item"><span class="score-label">Focus</span><span class="score-val">${record['Gallery #2 Focus']}</span></div>
-                                <div class="score-item"><span class="score-label">White Balance</span><span class="score-val">${record['Gallery #2 White Balance']}</span></div>
-                                <div class="score-item"><span class="score-label">Posing</span><span class="score-val">${record['Gallery #2 Posing']}</span></div>
-                                <div class="score-item"><span class="score-label">Variety</span><span class="score-val">${record['Gallery #2 Variety']}</span></div>
-                                <div class="score-item"><span class="score-label">Environment</span><span class="score-val">${record['Gallery #2 Environment']}</span></div>
-                                <div class="score-item"><span class="score-label">Editing</span><span class="score-val">${record['Gallery #2 Editing']}</span></div>
-                                <div class="score-item"><span class="score-label">Calming and Soothing</span><span class="score-val">${record['Gallery #2 Calming and soothing']}</span></div>
-                                <div class="score-item"><span class="score-label">Composition/Cropping</span><span class="score-val">${record['Gallery #2 Composition/Cropping']}</span></div>
-                            </div>
-                            ${record['Gallery #2 Feedback:'] ? `<div class="feedback"><strong>Feedback:</strong> ${record['Gallery #2 Feedback:']}</div>` : ''}
-                        </div>
-                    `;
-                }
-            });
-
-            html += `</body></html>`;
-
+            let body = records.map((r, i) => buildRecordPrintBody(r, i, records.length)).join('<hr class="divider">');
+            const html = '<html><head><title>All Records - ' + photographerName + '</title><style>' + css + '</style></head><body>' +
+                '<h1>All Records</h1>' +
+                '<div style="font-size:13px;color:#666;margin-bottom:20px;"><strong>' + photographerName + '</strong> &nbsp;&middot;&nbsp; ' + records.length + ' record' + (records.length !== 1 ? 's' : '') + ' &nbsp;&middot;&nbsp; Printed ' + new Date().toLocaleDateString() + '</div>' +
+                body + '</body></html>';
             const printWindow = window.open('', '', 'height=800,width=900');
             printWindow.document.write(html);
             printWindow.document.close();
             setTimeout(() => printWindow.print(), 250);
         }
+
 
         function formatDate(dateStr) {
             if (!dateStr) return 'N/A';
