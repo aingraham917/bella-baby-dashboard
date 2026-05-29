@@ -6442,7 +6442,8 @@
         }
 
         function displayRecords() {
-            updateHeaderTagline();
+            console.log('displayRecords START');
+            try { updateHeaderTagline(); } catch(e) { console.error('updateHeaderTagline error:', e); }
             // updateCharts is called separately after loadRecords — skip here to avoid errors
             
             let filtered = allRecords;
