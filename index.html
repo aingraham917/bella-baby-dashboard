@@ -1120,7 +1120,6 @@
                             <div class="controls-title" style="margin-top:0;">Team View</div>
                             <div class="filter-buttons">
                                 <button type="button" id="teamViewBtn" class="filter-btn active" onclick="switchAMView('team')">My Team</button>
-                                <button type="button" id="allViewBtn" class="filter-btn" onclick="switchAMView('all')">All</button>
                             </div>
                         </div>
                         <div id="trainerFilterBtns" style="display:none; margin-top:10px;">
@@ -4222,11 +4221,14 @@
             
             filterBtns.forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    // Only clear/set active on type-filter buttons
                     document.querySelectorAll('.type-filter').forEach(b => b.classList.remove('active'));
                     e.target.classList.add('active');
                     currentFilter = e.target.dataset.filter || 'all';
                     currentPage = 1;
+                    // Reset My Team when clicking a type filter
+                    amViewMode = 'all';
+                    const teamBtn = document.getElementById('teamViewBtn');
+                    if (teamBtn) teamBtn.classList.remove('active');
                     displayRecords();
                 });
             });
@@ -4334,9 +4336,7 @@
             amViewMode = mode;
             currentPage = 1;
             const teamBtn = document.getElementById('teamViewBtn');
-            const allBtn  = document.getElementById('allViewBtn');
             if (teamBtn) teamBtn.classList.toggle('active', mode === 'team');
-            if (allBtn)  allBtn.classList.toggle('active', mode === 'all');
             displayRecords();
         }
 
