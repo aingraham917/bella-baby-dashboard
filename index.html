@@ -4605,7 +4605,7 @@
                 // Assessments (PSS: trainer, area_manager)
                 const assessmentsOption = document.getElementById('assessmentsOption');
                 if (assessmentsOption) {
-                    assessmentsOption.style.display = ['trainer', 'am'].includes(currentUserRole) ? 'block' : 'none';
+                    assessmentsOption.style.display = currentUserRole === 'trainer' ? 'block' : 'none';
                 const adminAssessOpt = document.getElementById('adminAssessmentsOption');
                 if (adminAssessOpt) adminAssessOpt.style.display = canManageRoles() ? 'block' : 'none';
                 }
