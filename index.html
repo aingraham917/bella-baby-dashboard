@@ -1111,10 +1111,10 @@
 
                     <div class="controls-section">
                         <div class="controls-title">Filter</div>
-                        <div class="filter-buttons">
-                            <button type="button" class="filter-btn active" data-filter="all">All Records</button>
-                            <button type="button" class="filter-btn" data-filter="growth_assessment">Growth Assessments</button>
-                            <button type="button" class="filter-btn" data-filter="legacy">Legacy</button>
+                        <div class="filter-buttons" id="typeFilterBtns">
+                            <button type="button" class="filter-btn type-filter active" data-filter="all">All Records</button>
+                            <button type="button" class="filter-btn type-filter" data-filter="growth_assessment">Growth Assessments</button>
+                            <button type="button" class="filter-btn type-filter" data-filter="legacy">Legacy</button>
                         </div>
                         <div id="amTeamFilterBtns" style="display:none; margin-top:10px;">
                             <div class="controls-title" style="margin-top:0;">Team View</div>
@@ -2102,7 +2102,7 @@
         const recordModal = document.getElementById('recordModal');
         const modalClose = document.getElementById('modalClose');
         const modalBody = document.getElementById('modalBody');
-        const filterBtns = document.querySelectorAll('.filter-btn');
+        const filterBtns = document.querySelectorAll('.type-filter');
 
         // INITIALIZE
         // PASSWORD FUNCTIONS
@@ -4221,9 +4221,10 @@
             
             filterBtns.forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    filterBtns.forEach(b => b.classList.remove('active'));
+                    // Only clear/set active on type-filter buttons
+                    document.querySelectorAll('.type-filter').forEach(b => b.classList.remove('active'));
                     e.target.classList.add('active');
-                    currentFilter = e.target.dataset.filter;
+                    currentFilter = e.target.dataset.filter || 'all';
                     currentPage = 1;
                     displayRecords();
                 });
@@ -4333,26 +4334,19 @@
             currentPage = 1;
             const teamBtn = document.getElementById('teamViewBtn');
             const allBtn  = document.getElementById('allViewBtn');
-            if (teamBtn) { teamBtn.classList.toggle('active', mode === 'team'); }
-            if (allBtn)  { allBtn.classList.toggle('active', mode === 'all'); }
-            // Trigger re-render via the filter button click system (already works)
-            // by dispatching a click on the currently active type filter
-            const activeFilter = document.querySelector('.filter-btn[data-filter].active');
-            if (activeFilter) activeFilter.click();
-            else displayRecords();
+            if (teamBtn) teamBtn.classList.toggle('active', mode === 'team');
+            if (allBtn)  allBtn.classList.toggle('active', mode === 'all');
+            displayRecords();
         }
 
         function switchTrainerView(mode) {
             trainerViewMode = mode;
             currentPage = 1;
-            const allBtn     = document.getElementById('trainerAllBtn');
+            const allBtn      = document.getElementById('trainerAllBtn');
             const trainersBtn = document.getElementById('trainerOnlyBtn');
             if (allBtn)      allBtn.classList.toggle('active', mode === 'all');
             if (trainersBtn) trainersBtn.classList.toggle('active', mode === 'trainers');
-            // Trigger re-render via active type filter (same pattern as AM toggle)
-            const activeFilter = document.querySelector('.filter-btn[data-filter].active');
-            if (activeFilter) activeFilter.click();
-            else displayRecords();
+            displayRecords();
         }
 
         // AUTH
