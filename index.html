@@ -2267,7 +2267,8 @@
             // AM sees only their team (unless in 'all' view mode)
             if (role === 'am') {
                 if (amViewMode === 'team') {
-                    return currentAMTeam.includes(email);
+                    // Case-insensitive match
+                    return currentAMTeam.some(t => t.toLowerCase() === email.toLowerCase());
                 }
                 return true; // 'all' mode shows everyone
             }
@@ -4420,7 +4421,6 @@
 
         // DATA
         async function loadRecords() {
-            _recordsLoading = true;
             recordsContainer.innerHTML = '<div class="loading">Loading records...</div>';
 
             try {
@@ -4462,7 +4462,9 @@
                     });
                 }
                 
-                allRecords = [...qcRecords, ...gaRecords];
+                // Tag QC records as 'legacy' so type filter works
+                const taggedQC = qcRecords.map(r => ({ ...r, record_type: r.record_type || 'legacy' }));
+                allRecords = [...taggedQC, ...gaRecords];
                 
                 console.log('Loaded total records:', allRecords.length);
                 
@@ -4493,14 +4495,12 @@
                     adminReportOption.style.display = isSuperAdmin ? 'block' : 'none';
                 }
                 
-                _recordsLoading = false;
                 // Rebuild AM team with fresh assignments
                 if (isAM()) currentAMTeam = getAMTeamPhotographers();
                 displayRecords();
                 // Update charts after records load
                 setTimeout(updateCharts, 100);
             } catch (error) {
-                _recordsLoading = false;
                 console.error('Error loading records:', error);
                 recordsContainer.innerHTML = `<div style="color: red; padding: 20px;">${error.message}</div>`;
             }
@@ -6466,17 +6466,17 @@
             }
         }
 
-        let _recordsLoading = false; // guard against rendering during reload
-
         function displayRecords() {
-            if (_recordsLoading) return; // skip if records are being refreshed
             try { updateHeaderTagline(); } catch(e) { console.error('updateHeaderTagline error:', e); }
             // updateCharts is called separately after loadRecords — skip here to avoid errors
             
             let filtered = allRecords;
 
             if (currentFilter !== 'all') {
-                filtered = filtered.filter(r => r.record_type === currentFilter);
+                filtered = filtered.filter(r => {
+                    const rt = (r.record_type || 'legacy').toLowerCase();
+                    return rt === currentFilter;
+                });
             }
 
             // Filter based on user role
@@ -6485,7 +6485,6 @@
                 return shouldShowPhotographer(photogEmail);
             });
 
-            console.log('displayRecords: role=', getCurrentUserRole(), 'amViewMode=', amViewMode, 'filtered=', filtered.length, 'currentAMTeam=', currentAMTeam.length);
 
             if (filtered.length === 0) {
                 recordsContainer.innerHTML = '<div class="no-records">No records found</div>';
