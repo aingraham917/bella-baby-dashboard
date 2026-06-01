@@ -328,6 +328,31 @@
         .cb-remove{background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0 2px;line-height:1;}
         .cb-remove:hover{color:#ef4444;}
         .cb-body{padding:12px 14px;}
+
+        /* ── ASSIGN TRAINING PAGE ── */
+        .assign-form-panel{background:white;border:1px solid #4ba8a8;border-radius:10px;padding:28px;max-width:640px;}
+        .at-type-group{display:flex;gap:10px;margin-bottom:4px;}
+        .at-type-btn{flex:1;padding:12px;border:2px solid #e0e0e0;border-radius:8px;background:white;font-size:14px;font-weight:600;color:#666;cursor:pointer;transition:all 0.2s;text-align:center;}
+        .at-type-btn:hover{border-color:#4ba8a8;color:#4ba8a8;}
+        .at-type-btn.active{border-color:#4ba8a8;background:#f0fbfb;color:#4ba8a8;}
+
+        /* Photographer search */
+        .photog-search-wrap{position:relative;}
+        .photog-search-input{width:100%;padding:10px 12px;border:2px solid #e0e0e0;border-radius:6px;font-size:13px;transition:border-color 0.2s;}
+        .photog-search-input:focus{outline:none;border-color:#4ba8a8;}
+        .photog-results{position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;border-radius:0 0 6px 6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);max-height:200px;overflow-y:auto;z-index:100;display:none;}
+        .photog-result-item{padding:9px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid #f5f5f5;color:#333;}
+        .photog-result-item:hover{background:#f0fbfb;color:#4ba8a8;}
+        .photog-result-item:last-child{border-bottom:none;}
+        .photog-selected-tag{display:inline-flex;align-items:center;gap:6px;background:#e8f5f5;color:#4ba8a8;border:1px solid #b2dfdb;border-radius:20px;padding:4px 12px;font-size:13px;font-weight:500;margin-top:6px;}
+        .photog-selected-tag button{background:none;border:none;cursor:pointer;color:#4ba8a8;font-size:14px;line-height:1;padding:0;}
+
+        /* Image upload fields */
+        .img-tab-row{display:flex;gap:0;margin-bottom:10px;border:1px solid #e0e0e0;border-radius:6px;overflow:hidden;}
+        .img-tab{flex:1;padding:7px;background:#f5f5f5;border:none;font-size:12px;font-weight:600;color:#666;cursor:pointer;transition:all 0.2s;text-align:center;}
+        .img-tab.active{background:#4ba8a8;color:white;}
+        .img-preview{width:100%;max-height:160px;object-fit:cover;border-radius:6px;margin-top:8px;border:1px solid #e0e0e0;}
+        .img-preview.hidden{display:none;}
     </style>
 </head>
 <body>
@@ -380,8 +405,7 @@
                     <button id="ddBrowse"      onclick="showView('browse');closeDD();"   style="display:none;">🎬 Training Library</button>
                     <button id="ddAMView"      onclick="showView('am');closeDD();"       style="display:none;">👥 My Team Progress</button>
                     <button id="ddAdminView"   onclick="showView('admin');closeDD();"    style="display:none;">📊 Learner Progress</button>
-                    <button id="ddEnroll"      onclick="openEnrollModal();closeDD();"    style="display:none;">➕ Enroll Learner</button>
-                    <button id="ddAssign"      onclick="openAssignModal();closeDD();"    style="display:none;">📋 Assign Module</button>
+                    <button id="ddAssign"      onclick="showView('assign');closeDD();"   style="display:none;">📋 Assign Training</button>
                     <button id="ddCurriculum"  onclick="showView('curriculum');closeDD();" style="display:none;">🗂 Manage Curriculum</button>
                     <button onclick="openChangePW();closeDD();">👤 Change Password</button>
                 </div>
@@ -450,11 +474,78 @@
             <div class="page-sub">Enrollment and completion status across all learners.</div>
             <div class="admin-toolbar">
                 <input type="text" class="search-input" id="adminSearch" placeholder="Search learner..." oninput="filterAdminCards()" style="max-width:260px;">
-                <button class="btn-sm btn-teal" onclick="openEnrollModal()">➕ Enroll Learner</button>
-                <button class="btn-sm btn-teal" onclick="openAssignModal()">📋 Assign Module</button>
+                <button class="btn-sm btn-teal" onclick="showView('assign')">📋 Assign Training</button>
             </div>
             <div id="adminLoading" class="loading" style="display:none;">Loading...</div>
             <div id="adminCards"></div>
+        </div>
+
+        <!-- ─── ASSIGN TRAINING PAGE ─── -->
+        <div id="viewAssign" style="display:none;">
+            <div class="page-title">Assign Training</div>
+            <div class="page-sub">Enroll a photographer in a learning path or assign a standalone module.</div>
+            <div class="assign-form-panel">
+
+                <!-- Step 1: Type -->
+                <div class="cf-row">
+                    <label class="cf-label">What are you assigning?</label>
+                    <div class="at-type-group">
+                        <button class="at-type-btn" id="atBtnPath" onclick="selectAssignType('path')">📚 Learning Path</button>
+                        <button class="at-type-btn" id="atBtnModule" onclick="selectAssignType('module')">📹 Individual Module</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Select path or module -->
+                <div class="cf-row" id="atPathRow" style="display:none;">
+                    <label class="cf-label">Select Path</label>
+                    <select class="cf-select" id="atPathSelect">
+                        <option value="">— Select a path —</option>
+                    </select>
+                </div>
+                <div class="cf-row" id="atModuleRow" style="display:none;">
+                    <label class="cf-label">Select Module</label>
+                    <select class="cf-select" id="atModuleSelect">
+                        <option value="">— Select a module —</option>
+                    </select>
+                </div>
+
+                <!-- Step 3: Photographer search -->
+                <div class="cf-row">
+                    <label class="cf-label">Photographer</label>
+                    <div id="atAMToggleRow" style="display:none;margin-bottom:8px;">
+                        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+                            <input type="checkbox" id="atShowAll" onchange="onAtShowAllChange()" style="accent-color:#4ba8a8;">
+                            Show all photographers (not just my team)
+                        </label>
+                    </div>
+                    <div class="photog-search-wrap">
+                        <input type="text" class="photog-search-input" id="atPhotogSearch"
+                               placeholder="Type name or email to search..."
+                               oninput="searchPhotographers(this.value)"
+                               autocomplete="off">
+                        <div class="photog-results" id="atPhotogResults"></div>
+                    </div>
+                    <div id="atPhotogSelected"></div>
+                </div>
+
+                <!-- Note -->
+                <div class="cf-row">
+                    <label class="cf-label">Note <span>(optional)</span></label>
+                    <textarea class="cf-textarea" id="atNote" placeholder="e.g. Please complete before your next session" style="min-height:60px;"></textarea>
+                </div>
+
+                <!-- Due date -->
+                <div class="cf-row">
+                    <label class="cf-label">Due Date <span>(optional)</span></label>
+                    <input type="date" class="cf-input" id="atDue" style="max-width:200px;">
+                </div>
+
+                <div class="cf-save-row">
+                    <button class="btn-primary" onclick="submitAssignTraining()">Assign</button>
+                    <button class="btn-secondary" onclick="clearAssignForm()">Clear</button>
+                    <span class="cf-save-msg" id="atMsg"></span>
+                </div>
+            </div>
         </div>
 
         <!-- ─── CURRICULUM MANAGER ─── -->
@@ -479,6 +570,24 @@
                     <textarea class="cf-textarea" id="mfDesc" placeholder="Brief description of what this module covers..."></textarea>
                 </div>
 
+                <!-- Cover image -->
+                <div class="cf-row">
+                    <label class="cf-label">Cover Image <span>(optional — shown at top of module)</span></label>
+                    <div class="img-tab-row">
+                        <button type="button" class="img-tab active" id="mfImgTabUrl" onclick="switchImgTab('module','url')">🔗 URL</button>
+                        <button type="button" class="img-tab" id="mfImgTabUpload" onclick="switchImgTab('module','upload')">⬆ Upload</button>
+                    </div>
+                    <div id="mfImgUrlPanel">
+                        <input type="text" class="cf-input" id="mfCoverUrl" placeholder="https://... or Google Drive image link">
+                    </div>
+                    <div id="mfImgUploadPanel" style="display:none;">
+                        <input type="file" id="mfCoverFile" accept="image/*" onchange="previewCoverImage('module',this)" style="font-size:13px;">
+                        <p class="cf-hint">Images stored in Supabase. Keep under 2MB for best performance.</p>
+                    </div>
+                    <img id="mfCoverPreview" class="img-preview hidden" alt="Cover preview">
+                    <input type="hidden" id="mfCoverStoragePath">
+                </div>
+
                 <!-- Content — checkboxes, multiple allowed -->
                 <div class="cf-row">
                     <label class="cf-label">Content <span>(check all that apply — drag to reorder)</span></label>
@@ -494,6 +603,9 @@
                         </label>
                         <label class="ct-checkbox" id="ctcb-text" onclick="toggleContentBlock('text')">
                             <input type="checkbox" value="text" id="ctck-text"> 📝 Written Instructions
+                        </label>
+                        <label class="ct-checkbox" id="ctcb-image" onclick="toggleContentBlock('image')">
+                            <input type="checkbox" value="image" id="ctck-image"> 🖼 Inline Image
                         </label>
                     </div>
                     <!-- Draggable content blocks zone -->
@@ -587,43 +699,7 @@
 </div><!-- /dashboard -->
 </div><!-- /main-container -->
 
-<!-- ══════════════════════════ ENROLL MODAL ══ -->
-<div class="modal-overlay" id="enrollModal">
-    <div class="modal-box">
-        <button class="modal-close" onclick="closeEnrollModal()">&times;</button>
-        <h3>Enroll a Learner</h3>
-        <div id="enrollMsg"></div>
-        <label>Learner Email</label>
-        <input type="email" id="enrollEmail" placeholder="photographer@bellababy.co">
-        <label>Training Path</label>
-        <select id="enrollPath"><option value="">Loading paths...</option></select>
-        <div class="modal-btns">
-            <button onclick="submitEnroll()" style="background:#4ba8a8;color:white;">Enroll</button>
-            <button onclick="closeEnrollModal()" style="background:#f0f0f0;color:#333;">Cancel</button>
-        </div>
-    </div>
-</div>
-
-<!-- ══════════════════════════ ASSIGN MODAL ══ -->
-<div class="modal-overlay" id="assignModal">
-    <div class="modal-box">
-        <button class="modal-close" onclick="closeAssignModal()">&times;</button>
-        <h3>Assign a Module</h3>
-        <div id="assignMsg"></div>
-        <label>Photographer Email</label>
-        <input type="email" id="assignEmail" placeholder="photographer@bellababy.co">
-        <label>Module</label>
-        <select id="assignModule"><option value="">Loading modules...</option></select>
-        <label>Note <span style="font-weight:400;font-size:11px;color:#999;">(optional — reason for assignment)</span></label>
-        <textarea id="assignNote" placeholder="e.g. Please rewatch before your next session"></textarea>
-        <label>Due Date <span style="font-weight:400;font-size:11px;color:#999;">(optional)</span></label>
-        <input type="date" id="assignDue" style="width:100%;padding:10px 12px;border:2px solid #e0e0e0;border-radius:6px;font-size:13px;">
-        <div class="modal-btns">
-            <button onclick="submitAssign()" style="background:#4ba8a8;color:white;">Assign</button>
-            <button onclick="closeAssignModal()" style="background:#f0f0f0;color:#333;">Cancel</button>
-        </div>
-    </div>
-</div>
+<!-- Enroll and Assign consolidated into Assign Training page -->
 
 <!-- ════════════════════ FORGOT PASSWORD MODAL ══ -->
 <div class="pw-modal" id="forgotPWModal">
@@ -778,7 +854,7 @@ function showDashboard() {
     if (isPhotog())  document.getElementById('ddMyTraining').style.display = 'block';
     if (isAM())      document.getElementById('ddAMView').style.display = 'block';
     if (isAdmin() || isTrainer()) document.getElementById('ddAdminView').style.display = 'block';
-    if (isStaff())   { document.getElementById('ddEnroll').style.display = 'block'; document.getElementById('ddAssign').style.display = 'block'; }
+    if (isStaff())   document.getElementById('ddAssign').style.display = 'block';
     if (isSuperAdmin()) document.getElementById('ddCurriculum').style.display = 'block';
 
     // Default landing
@@ -787,8 +863,8 @@ function showDashboard() {
     else                 showView('learner');
 }
 
-const VIEWS = ['learner','browse','am','admin','curriculum'];
-const VIEW_ID = { learner:'viewLearner', browse:'viewBrowse', am:'viewAM', admin:'viewAdmin', curriculum:'viewCurriculum' };
+const VIEWS = ['learner','browse','am','admin','assign','curriculum'];
+const VIEW_ID = { learner:'viewLearner', browse:'viewBrowse', am:'viewAM', admin:'viewAdmin', assign:'viewAssign', curriculum:'viewCurriculum' };
 function showView(name, addBreadcrumb) {
     VIEWS.forEach(v => { const el = document.getElementById(VIEW_ID[v]); if(el) el.style.display = 'none'; });
     const target = document.getElementById(VIEW_ID[name]);
@@ -807,6 +883,7 @@ function showView(name, addBreadcrumb) {
     if (name === 'browse')     loadBrowseView();
     if (name === 'am')         loadAMView();
     if (name === 'admin')      loadAdminView();
+    if (name === 'assign')     loadAssignView();
     if (name === 'curriculum') loadCurriculumView();
 }
 
@@ -997,6 +1074,14 @@ function buildModContent(mod, source) {
     const passed = prog?.status === 'passed';
     let html = '';
 
+    // Cover image at top of module
+    if (mod.cover_image_url) {
+        html += `<div style="margin-bottom:16px;border-radius:10px;overflow:hidden;max-height:220px;">
+            <img src="${esc(mod.cover_image_url)}" alt="${esc(mod.title)}"
+                 style="width:100%;object-fit:cover;display:block;">
+        </div>`;
+    }
+
     // Determine content block order
     let order = [];
     try { order = JSON.parse(mod.content_order || '[]'); } catch(e) {}
@@ -1032,6 +1117,15 @@ function buildModContent(mod, source) {
                     </a>
                   </div>`
                 : `<div class="no-video">🔗 No article link attached yet.</div>`;
+        } else if (ct === 'image') {
+            const imgUrl = mod.image_url;
+            if (imgUrl) {
+                html += `<div style="margin-bottom:16px;text-align:center;">
+                    <img src="${esc(imgUrl)}" alt="${esc(mod.image_caption || '')}"
+                         style="max-width:100%;border-radius:8px;border:1px solid #e0e0e0;">
+                    ${mod.image_caption ? `<div style="font-size:12px;color:#999;margin-top:6px;">${esc(mod.image_caption)}</div>` : ''}
+                </div>`;
+            }
         } else if (ct === 'text') {
             html += mod.text_content
                 ? `<div style="background:white;border:1px solid #e0e0e0;border-radius:8px;padding:20px;margin-bottom:16px;font-size:14px;line-height:1.7;color:#333;" class="ql-editor">${mod.text_content}</div>`
@@ -1811,10 +1905,12 @@ const CONTENT_TYPES = {
     video:   { icon:'🎬', label:'Video',               color:'#4ba8a8' },
     pdf:     { icon:'📄', label:'PDF',                 color:'#c62828' },
     article: { icon:'🔗', label:'Article / Link',      color:'#b45309' },
-    text:    { icon:'📝', label:'Written Instructions', color:'#7c3aed' }
+    text:    { icon:'📝', label:'Written Instructions', color:'#7c3aed' },
+    image:   { icon:'🖼', label:'Inline Image',        color:'#6366f1' }
 };
 
 function buildBlockHTML(type) {
+    if (type === 'image') return buildImageBlockHTML();
     const { icon, label } = CONTENT_TYPES[type];
     const quillId = 'quill-block-' + type;
     let inputs = '';
@@ -1922,12 +2018,19 @@ function getContentBlocks() {
     const zone = document.getElementById('contentBlocksZone');
     return [...zone.children].map(block => {
         const type = block.dataset.type;
-        let value = '';
+        let value = '', extra = null;
         if (type === 'video')   value = document.getElementById('cb-video-url')?.value.trim() || '';
         if (type === 'pdf')     value = document.getElementById('cb-pdf-url')?.value.trim() || '';
         if (type === 'article') value = document.getElementById('cb-article-url')?.value.trim() || '';
         if (type === 'text')    value = quillInstances['quill-block-text']?.root.innerHTML || '';
-        return { type, value };
+        if (type === 'image') {
+            const tabUrl = document.getElementById('cbImgTabUrl');
+            value = tabUrl?.classList.contains('active')
+                ? (document.getElementById('cb-image-url')?.value.trim() || '')
+                : '__upload__';
+            extra = document.getElementById('cb-image-caption')?.value.trim() || null;
+        }
+        return { type, value, caption: extra };
     });
 }
 
@@ -1998,10 +2101,9 @@ async function saveModuleForm() {
     const desc    = document.getElementById('mfDesc').value.trim() || null;
     const hasQuiz = document.querySelector('input[name="mfHasQuiz"]:checked')?.value === 'yes';
     const pathYN  = document.querySelector('input[name="mfPathYN"]:checked')?.value;
-    const contentType = document.querySelector('input[name="mfContentType"]:checked')?.value;
 
     if (!title) { showCFMsg(msgEl, 'error', 'Module title is required.'); return; }
-    if (!contentType) { showCFMsg(msgEl, 'error', 'Please select a content type.'); return; }
+    // Content type validation is handled by getContentBlocks() check below
 
     btn.disabled = true; btn.textContent = 'Saving...';
 
@@ -2097,6 +2199,44 @@ async function saveModuleForm() {
             }
         }
 
+        // Handle cover image
+        const coverData = getCoverImageData('module');
+        if (coverData.isUpload) {
+            const uploaded = await uploadCoverImage('module', moduleId);
+            if (uploaded) {
+                await sb.from('lms_modules').update({
+                    cover_image_url:  uploaded.url,
+                    cover_image_path: uploaded.path
+                }).eq('id', moduleId);
+            }
+        } else if (coverData.url) {
+            await sb.from('lms_modules').update({
+                cover_image_url:  coverData.url,
+                cover_image_path: null
+            }).eq('id', moduleId);
+        }
+
+        // Handle inline image uploads in content blocks
+        const imageBlock = blocks.find(b => b.type === 'image' && b.value === '__upload__');
+        if (imageBlock) {
+            const fileInput = document.getElementById('cb-image-file');
+            if (fileInput?.files[0]) {
+                const file = fileInput.files[0];
+                const ext  = file.name.split('.').pop();
+                const path = `modules/${moduleId}/inline-image.${ext}`;
+                await sb.storage.from(LMS_BUCKET).upload(path, file, { upsert: true });
+                const { data: { publicUrl } } = sb.storage.from(LMS_BUCKET).getPublicUrl(path);
+                // Update the block value in content_order storage
+                const updatedOrder = JSON.parse(modData.content_order);
+                // Store the public URL as the image value — re-save
+                await sb.from('lms_modules').update({
+                    image_url: publicUrl,
+                    image_path: path,
+                    image_caption: imageBlock.caption
+                }).eq('id', moduleId);
+            }
+        }
+
         showCFMsg(msgEl, 'success', editId ? '✓ Module updated!' : '✓ Module saved!');
         if (!editId) clearModuleForm();
         await loadCurriculumView();
@@ -2136,6 +2276,14 @@ function clearModuleForm() {
     document.getElementById('mfNewSectionPanel').style.display = 'none';
     document.getElementById('mfSaveMsg').textContent = '';
     document.getElementById('mfSaveMsg').className = 'cf-save-msg';
+    // Clear cover image
+    const coverUrl = document.getElementById('mfCoverUrl');
+    const coverFile = document.getElementById('mfCoverFile');
+    const coverPreview = document.getElementById('mfCoverPreview');
+    if (coverUrl) coverUrl.value = '';
+    if (coverFile) coverFile.value = '';
+    if (coverPreview) { coverPreview.src = ''; coverPreview.classList.add('hidden'); }
+    switchImgTab('module', 'url');
     document.getElementById('moduleFormTitle').textContent = '➕ Add New Module';
     document.getElementById('mfSaveBtn').textContent = 'Save Module';
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2196,6 +2344,14 @@ async function editModuleFill(moduleId) {
 
     const hint = document.getElementById('contentBlocksHint');
     if (hint) hint.style.display = order.length > 1 ? 'block' : 'none';
+
+    // Restore cover image
+    const coverPreview = document.getElementById('mfCoverPreview');
+    if (mod.cover_image_url) {
+        document.getElementById('mfCoverUrl').value = mod.cover_image_url;
+        switchImgTab('module', 'url');
+        if (coverPreview) { coverPreview.src = mod.cover_image_url; coverPreview.classList.remove('hidden'); }
+    }
     if (mod.has_quiz) selectQuizYN('yes'); else selectQuizYN('no');
 
     // Check if in a path
@@ -2557,63 +2713,269 @@ async function deletePath(pathId) {
 }
 
 // ══════════════════════════════════════════════
-// ENROLL MODAL
+// ASSIGN TRAINING PAGE
 // ══════════════════════════════════════════════
-async function openEnrollModal() {
-    document.getElementById('enrollModal').classList.add('active');
-    document.getElementById('enrollEmail').value = '';
-    document.getElementById('enrollMsg').innerHTML = '';
+let atAssignType = null;       // 'path' or 'module'
+let atSelectedEmail = null;    // chosen photographer email
+let allPhotographers = [];     // full list for search
+let atShowAllPhotogs = false;
+
+async function loadAssignView() {
+    // Load paths and modules for selects
     const { data: paths } = await sb.from('lms_paths').select('*').eq('is_active', true).order('title');
     allPaths = paths || [];
-    document.getElementById('enrollPath').innerHTML = paths?.length
-        ? paths.map(p => `<option value="${p.id}">${esc(p.title)}</option>`).join('')
-        : '<option value="">No paths available</option>';
-}
-function closeEnrollModal() { document.getElementById('enrollModal').classList.remove('active'); }
-async function submitEnroll() {
-    const email  = document.getElementById('enrollEmail').value.trim().toLowerCase();
-    const pathId = document.getElementById('enrollPath').value;
-    const msgEl  = document.getElementById('enrollMsg');
-    if (!email || !pathId) { msgEl.innerHTML = '<div class="modal-msg error">Please fill in all fields.</div>'; return; }
-    const { error } = await sb.from('lms_enrollments').insert([{ user_email: email, path_id: pathId, enrolled_by: currentUser.email, is_active: true }]);
-    if (error) {
-        msgEl.innerHTML = `<div class="modal-msg error">${error.code === '23505' ? 'Already enrolled in this path.' : esc(error.message)}</div>`;
-        return;
-    }
-    msgEl.innerHTML = '<div class="modal-msg success">✓ Enrolled!</div>';
-    setTimeout(closeEnrollModal, 1200);
-    loadAdminView();
+    const { data: mods } = await sb.from('lms_modules').select('*').eq('is_active', true).order('title');
+    allModules = mods || [];
+
+    document.getElementById('atPathSelect').innerHTML =
+        '<option value="">— Select a path —</option>' +
+        allPaths.map(p => `<option value="${p.id}">${esc(p.title)}</option>`).join('');
+
+    document.getElementById('atModuleSelect').innerHTML =
+        '<option value="">— Select a module —</option>' +
+        allModules.map(m => `<option value="${m.id}">${esc(m.title)}</option>`).join('');
+
+    // Load photographer list
+    await loadPhotographerList();
+
+    // Show AM toggle if AM
+    document.getElementById('atAMToggleRow').style.display = isAM() ? 'block' : 'none';
+
+    // Reset form
+    clearAssignForm(true);
 }
 
-// ══════════════════════════════════════════════
-// ASSIGN MODAL
-// ══════════════════════════════════════════════
-async function openAssignModal() {
-    document.getElementById('assignModal').classList.add('active');
-    document.getElementById('assignEmail').value = '';
-    document.getElementById('assignNote').value  = '';
-    document.getElementById('assignDue').value   = '';
-    document.getElementById('assignMsg').innerHTML = '';
-    if (!allModules.length) {
-        const { data } = await sb.from('lms_modules').select('*').eq('is_active', true).order('title');
-        allModules = data || [];
+async function loadPhotographerList() {
+    try {
+        // Get all unique photographer emails from growth_assessments or user_roles
+        const { data } = await sb
+            .from('user_roles')
+            .select('user_email')
+            .eq('role', 'user')
+            .order('user_email');
+
+        let emails = (data || []).map(r => r.user_email.toLowerCase());
+
+        // If AM and not showing all, filter to team only
+        if (isAM() && !atShowAllPhotogs && amTeam.length) {
+            emails = emails.filter(e => amTeam.includes(e));
+        }
+
+        allPhotographers = emails;
+    } catch(e) {
+        console.warn('loadPhotographerList', e);
+        allPhotographers = [];
     }
-    document.getElementById('assignModule').innerHTML = allModules.length
-        ? allModules.map(m => `<option value="${m.id}">${esc(m.title)}</option>`).join('')
-        : '<option value="">No modules available</option>';
 }
-function closeAssignModal() { document.getElementById('assignModal').classList.remove('active'); }
-async function submitAssign() {
-    const email    = document.getElementById('assignEmail').value.trim().toLowerCase();
-    const moduleId = document.getElementById('assignModule').value;
-    const note     = document.getElementById('assignNote').value.trim() || null;
-    const due      = document.getElementById('assignDue').value || null;
-    const msgEl    = document.getElementById('assignMsg');
-    if (!email || !moduleId) { msgEl.innerHTML = '<div class="modal-msg error">Please fill in all fields.</div>'; return; }
-    const { error } = await sb.from('lms_assignments').insert([{ user_email: email, module_id: moduleId, assigned_by: currentUser.email, note, due_date: due, is_active: true }]);
-    if (error) { msgEl.innerHTML = `<div class="modal-msg error">${esc(error.message)}</div>`; return; }
-    msgEl.innerHTML = '<div class="modal-msg success">✓ Assigned!</div>';
-    setTimeout(closeAssignModal, 1200);
+
+function selectAssignType(type) {
+    atAssignType = type;
+    document.getElementById('atBtnPath').classList.toggle('active', type === 'path');
+    document.getElementById('atBtnModule').classList.toggle('active', type === 'module');
+    document.getElementById('atPathRow').style.display   = type === 'path'   ? 'block' : 'none';
+    document.getElementById('atModuleRow').style.display = type === 'module' ? 'block' : 'none';
+}
+
+async function onAtShowAllChange() {
+    atShowAllPhotogs = document.getElementById('atShowAll').checked;
+    await loadPhotographerList();
+    // Re-run search with current input
+    searchPhotographers(document.getElementById('atPhotogSearch').value);
+}
+
+function searchPhotographers(query) {
+    const results = document.getElementById('atPhotogResults');
+    if (!query.trim()) { results.style.display = 'none'; return; }
+    const q = query.toLowerCase();
+    const matches = allPhotographers.filter(e => e.includes(q)).slice(0, 12);
+    if (!matches.length) {
+        results.innerHTML = '<div class="photog-result-item" style="color:#999;">No matches found</div>';
+        results.style.display = 'block';
+        return;
+    }
+    results.innerHTML = matches.map(e =>
+        `<div class="photog-result-item" onclick="selectPhotographer('${esc(e)}')">${esc(e)}</div>`
+    ).join('');
+    results.style.display = 'block';
+}
+
+function selectPhotographer(email) {
+    atSelectedEmail = email;
+    document.getElementById('atPhotogSearch').value = email;
+    document.getElementById('atPhotogResults').style.display = 'none';
+    document.getElementById('atPhotogSelected').innerHTML =
+        `<div class="photog-selected-tag">✓ ${esc(email)}
+            <button onclick="clearPhotogSelection()" title="Remove">&times;</button>
+        </div>`;
+}
+
+function clearPhotogSelection() {
+    atSelectedEmail = null;
+    document.getElementById('atPhotogSearch').value = '';
+    document.getElementById('atPhotogSelected').innerHTML = '';
+}
+
+function clearAssignForm(keepSelects) {
+    if (!keepSelects) {
+        atAssignType = null;
+        document.getElementById('atBtnPath').classList.remove('active');
+        document.getElementById('atBtnModule').classList.remove('active');
+        document.getElementById('atPathRow').style.display = 'none';
+        document.getElementById('atModuleRow').style.display = 'none';
+    }
+    clearPhotogSelection();
+    document.getElementById('atNote').value = '';
+    document.getElementById('atDue').value  = '';
+    document.getElementById('atMsg').textContent = '';
+    document.getElementById('atMsg').className = 'cf-save-msg';
+}
+
+async function submitAssignTraining() {
+    const msgEl = document.getElementById('atMsg');
+    if (!atAssignType) { showCFMsg(msgEl, 'error', 'Please choose Path or Module.'); return; }
+    if (!atSelectedEmail) { showCFMsg(msgEl, 'error', 'Please select a photographer.'); return; }
+
+    const note = document.getElementById('atNote').value.trim() || null;
+    const due  = document.getElementById('atDue').value || null;
+
+    try {
+        if (atAssignType === 'path') {
+            const pathId = document.getElementById('atPathSelect').value;
+            if (!pathId) { showCFMsg(msgEl, 'error', 'Please select a path.'); return; }
+            const { error } = await sb.from('lms_enrollments').insert([{
+                user_email:   atSelectedEmail,
+                path_id:      pathId,
+                enrolled_by:  currentUser.email,
+                is_active:    true
+            }]);
+            if (error) {
+                showCFMsg(msgEl, 'error', error.code === '23505' ? 'Already enrolled in this path.' : error.message);
+                return;
+            }
+            showCFMsg(msgEl, 'success', '✓ Enrolled in path!');
+        } else {
+            const moduleId = document.getElementById('atModuleSelect').value;
+            if (!moduleId) { showCFMsg(msgEl, 'error', 'Please select a module.'); return; }
+            const { error } = await sb.from('lms_assignments').insert([{
+                user_email:   atSelectedEmail,
+                module_id:    moduleId,
+                assigned_by:  currentUser.email,
+                note,
+                due_date:     due,
+                is_active:    true
+            }]);
+            if (error) { showCFMsg(msgEl, 'error', error.message); return; }
+            showCFMsg(msgEl, 'success', '✓ Module assigned!');
+        }
+        setTimeout(() => clearAssignForm(true), 2000);
+    } catch(e) {
+        showCFMsg(msgEl, 'error', 'Error: ' + e.message);
+    }
+}
+
+// Close photographer results when clicking outside
+document.addEventListener('click', e => {
+    if (!e.target.closest('.photog-search-wrap')) {
+        const r = document.getElementById('atPhotogResults');
+        if (r) r.style.display = 'none';
+    }
+});
+
+// ══════════════════════════════════════════════
+// IMAGE HANDLING
+// ══════════════════════════════════════════════
+const LMS_BUCKET = 'lms-images';
+
+function switchImgTab(context, tab) {
+    const urlPanel    = document.getElementById(context === 'module' ? 'mfImgUrlPanel' : 'pfImgUrlPanel');
+    const uploadPanel = document.getElementById(context === 'module' ? 'mfImgUploadPanel' : 'pfImgUploadPanel');
+    const tabUrl      = document.getElementById(context === 'module' ? 'mfImgTabUrl' : 'pfImgTabUrl');
+    const tabUpload   = document.getElementById(context === 'module' ? 'mfImgTabUpload' : 'pfImgTabUpload');
+    if (!urlPanel) return;
+    urlPanel.style.display    = tab === 'url'    ? 'block' : 'none';
+    uploadPanel.style.display = tab === 'upload' ? 'block' : 'none';
+    tabUrl.classList.toggle('active', tab === 'url');
+    tabUpload.classList.toggle('active', tab === 'upload');
+}
+
+function previewCoverImage(context, input) {
+    const preview = document.getElementById(context === 'module' ? 'mfCoverPreview' : 'pfCoverPreview');
+    if (!preview) return;
+    const file = input.files[0];
+    if (!file) { preview.classList.add('hidden'); return; }
+    const reader = new FileReader();
+    reader.onload = e => { preview.src = e.target.result; preview.classList.remove('hidden'); };
+    reader.readAsDataURL(file);
+}
+
+async function uploadCoverImage(context, recordId) {
+    const fileInput = document.getElementById(context === 'module' ? 'mfCoverFile' : 'pfCoverFile');
+    if (!fileInput?.files[0]) return null;
+    const file = fileInput.files[0];
+    const ext  = file.name.split('.').pop();
+    const path = `${context}s/${recordId}/cover.${ext}`;
+    const { error } = await sb.storage.from(LMS_BUCKET).upload(path, file, { upsert: true });
+    if (error) { console.error('uploadCoverImage', error); return null; }
+    const { data: { publicUrl } } = sb.storage.from(LMS_BUCKET).getPublicUrl(path);
+    return { url: publicUrl, path };
+}
+
+function getCoverImageData(context) {
+    const urlTab = document.getElementById(context === 'module' ? 'mfImgTabUrl' : 'pfImgTabUrl');
+    const isUrl  = urlTab?.classList.contains('active');
+    if (isUrl) {
+        const url = document.getElementById(context === 'module' ? 'mfCoverUrl' : 'pfCoverUrl')?.value.trim() || null;
+        return { url, path: null, isUpload: false };
+    }
+    return { url: null, path: null, isUpload: true };
+}
+
+// ── Inline image content block
+function buildImageBlockHTML() {
+    return `
+        <div class="content-block" id="cb-block-image" draggable="true" data-type="image"
+             ondragstart="onDragStart(event)" ondragover="onDragOver(event)"
+             ondragleave="onDragLeave(event)" ondrop="onDrop(event)" ondragend="onDragEnd(event)">
+            <div class="cb-handle-row">
+                <span class="cb-drag-handle" title="Drag to reorder">⠿</span>
+                <span class="cb-type-label">🖼 Inline Image</span>
+                <button class="cb-remove" onclick="removeContentBlock('image')" title="Remove">&times;</button>
+            </div>
+            <div class="cb-body">
+                <div class="img-tab-row">
+                    <button type="button" class="img-tab active" id="cbImgTabUrl" onclick="switchInlineImgTab('url')">🔗 URL</button>
+                    <button type="button" class="img-tab" id="cbImgTabUpload" onclick="switchInlineImgTab('upload')">⬆ Upload</button>
+                </div>
+                <div id="cbImgUrlPanel">
+                    <input type="text" class="cf-input" id="cb-image-url" placeholder="https://... image URL">
+                </div>
+                <div id="cbImgUploadPanel" style="display:none;">
+                    <input type="file" id="cb-image-file" accept="image/*" onchange="previewInlineImage(this)" style="font-size:13px;">
+                </div>
+                <img id="cb-image-preview" class="img-preview hidden" alt="Image preview">
+                <input type="hidden" id="cb-image-storage-path">
+                <div class="cf-row" style="margin-top:10px;">
+                    <label class="cf-label">Caption <span>(optional)</span></label>
+                    <input type="text" class="cf-input" id="cb-image-caption" placeholder="Image caption...">
+                </div>
+            </div>
+        </div>`;
+}
+
+function switchInlineImgTab(tab) {
+    document.getElementById('cbImgUrlPanel').style.display    = tab === 'url'    ? 'block' : 'none';
+    document.getElementById('cbImgUploadPanel').style.display = tab === 'upload' ? 'block' : 'none';
+    document.getElementById('cbImgTabUrl').classList.toggle('active', tab === 'url');
+    document.getElementById('cbImgTabUpload').classList.toggle('active', tab === 'upload');
+}
+
+function previewInlineImage(input) {
+    const preview = document.getElementById('cb-image-preview');
+    const file = input.files[0];
+    if (!file || !preview) return;
+    const reader = new FileReader();
+    reader.onload = e => { preview.src = e.target.result; preview.classList.remove('hidden'); };
+    reader.readAsDataURL(file);
 }
 
 // ══════════════════════════════════════════════
