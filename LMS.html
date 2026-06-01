@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bella Baby – Learning Hub</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;min-height:100vh;}
+
+        /* ── AUTH ── */
+        .auth-container{width:100%;display:flex;justify-content:center;align-items:center;background:#f7f7f8;min-height:100vh;}
+        .auth-card{background:white;border-radius:12px;padding:40px 50px;width:520px;max-width:95vw;box-shadow:0 4px 20px rgba(0,0,0,0.1);}
+        .logo-section{text-align:center;margin-bottom:30px;}
+        .logo-img{width:100px;height:auto;margin-bottom:15px;}
+        .auth-card h1{color:#333;font-size:24px;margin-bottom:5px;}
+        .auth-card p{color:#999;font-size:14px;}
+        .form-group{margin-bottom:20px;}
+        label{display:block;margin-bottom:8px;color:#333;font-weight:500;font-size:14px;}
+        input[type="email"],input[type="password"]{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:6px;font-size:14px;transition:border-color 0.3s;}
+        input:focus{outline:none;border-color:#4ba8a8;}
+        .login-btn{width:100%;padding:12px;background:#4ba8a8;color:white;border:none;border-radius:6px;font-size:16px;font-weight:600;cursor:pointer;transition:background 0.2s;}
+        .login-btn:hover{background:#3d8a8a;}
+        .error-msg{background:#fee;color:#c33;padding:12px;border-radius:6px;margin-bottom:20px;font-size:14px;display:none;}
+        .error-msg.show{display:block;}
+
+        /* ── LAYOUT ── */
+        .main-container{display:flex;min-height:100vh;background:#fff;}
+        .dashboard-wrapper{width:100%;max-width:900px;margin:0 auto;display:flex;flex-direction:column;}
+        .dashboard{display:none;width:100%;flex-direction:column;}
+        .dashboard.active{display:flex;}
+
+        /* ── HEADER ── */
+        .dashboard-header{background:white;padding:25px 30px;text-align:center;border-bottom:1px solid #e0e0e0;}
+        .header-logo{display:inline-block;max-width:150px;height:auto;border-radius:12px;object-fit:contain;margin:20px 0;}
+        .dashboard-header h1{color:#333;font-size:22px;margin-bottom:5px;}
+        .dashboard-header p{color:#999;font-size:14px;}
+
+        /* ── TOP BAR ── */
+        .top-bar{background:#f8f8f8;border-bottom:1px solid #e0e0e0;padding:8px 30px;display:flex;justify-content:space-between;align-items:center;}
+        .top-bar-left{display:flex;align-items:center;gap:20px;font-size:13px;}
+        .top-bar-right{display:flex;align-items:center;gap:12px;}
+        .top-bar-right button,.top-bar-left .opt-btn{padding:6px 16px;font-size:12px;border:none;border-radius:6px;cursor:pointer;background:#e8f5f5;color:#4ba8a8;transition:background 0.2s;white-space:nowrap;}
+        .top-bar-right button:hover,.top-bar-left .opt-btn:hover{background:#d0e8e8;}
+        #optionsBtn{background:#4ba8a8;color:white;padding:8px 15px;font-size:14px;font-weight:600;border:none;border-radius:4px;cursor:pointer;}
+        .logout-btn-top{background:#9e9e9e!important;color:white!important;}
+        .logout-btn-top:hover{background:#757575!important;}
+
+        /* ── OPTIONS DROPDOWN ── */
+        .options-wrap{position:relative;}
+        .options-dd{display:none;position:absolute;top:100%;left:0;background:white;border:1px solid #ddd;border-radius:4px;min-width:210px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:1000;margin-top:5px;}
+        .options-dd a,.options-dd button{display:block;width:100%;text-align:left;padding:12px 15px;background:none;border:none;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f0f0;color:#333;text-decoration:none;transition:background 0.15s;}
+        .options-dd a:last-child,.options-dd button:last-child{border-bottom:none;}
+        .options-dd a:hover,.options-dd button:hover{background:#f9f9f9;}
+
+        /* ── BREADCRUMB ── */
+        .breadcrumb{display:none;padding:10px 30px;background:#f9f9f9;border-bottom:1px solid #e0e0e0;font-size:13px;color:#666;}
+        .breadcrumb a{color:#4ba8a8;text-decoration:none;font-weight:600;}
+        .breadcrumb.show{display:block;}
+
+        /* ── LMS CONTENT ── */
+        .lms-content{flex:1;padding:0 30px 50px 30px;}
+        .page-title{font-size:20px;font-weight:700;color:#333;margin:24px 0 4px 0;}
+        .page-sub{font-size:13px;color:#999;margin-bottom:20px;}
+
+        /* ── PROGRESS BANNER ── */
+        .progress-banner{background:white;border:1px solid #e0e0e0;border-radius:10px;padding:20px 24px;margin:24px 0 20px 0;}
+        .progress-banner.hidden{display:none;}
+        .pb-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+        .pb-title{font-weight:700;font-size:15px;color:#333;}
+        .pb-pct{font-size:14px;font-weight:700;color:#4ba8a8;}
+        .progress-track{width:100%;height:10px;background:#e0e0e0;border-radius:10px;overflow:hidden;}
+        .progress-fill{height:100%;background:linear-gradient(90deg,#4ba8a8,#a8d5a3);border-radius:10px;transition:width 0.5s ease;}
+        .pb-sub{margin-top:8px;font-size:12px;color:#999;}
+
+        /* ── EMPTY STATES ── */
+        .empty-state{text-align:center;padding:60px 20px;color:#999;}
+        .empty-state h3{font-size:18px;color:#555;margin-bottom:10px;}
+        .empty-state p{font-size:14px;line-height:1.6;}
+
+        /* ── SECTION CARDS ── */
+        .sections-list{display:grid;gap:12px;}
+        .section-card{background:white;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;}
+        .section-card.locked{opacity:0.62;}
+        .section-header{padding:16px 20px;background:#fafafa;border-bottom:1px solid #e0e0e0;cursor:pointer;transition:background 0.2s;display:flex;justify-content:space-between;align-items:center;user-select:none;}
+        .section-card.locked .section-header{cursor:default;}
+        .section-header:hover{background:#f0f0f0;}
+        .section-card.locked .section-header:hover{background:#fafafa;}
+        .sec-left{flex:1;}
+        .sec-num{font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;}
+        .sec-title{font-weight:600;color:#333;font-size:15px;}
+        .sec-meta{font-size:12px;color:#999;margin-top:3px;}
+        .sec-right{display:flex;align-items:center;gap:12px;}
+        .status-badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:12px;white-space:nowrap;}
+        .badge-complete{background:#e8f5e9;color:#2d7a2d;}
+        .badge-progress{background:#e8f5f5;color:#4ba8a8;}
+        .badge-locked{background:#f0f0f0;color:#aaa;}
+        .badge-start{background:#fff8e1;color:#b45309;}
+        .expand-icon{color:#999;font-size:14px;transition:transform 0.25s;}
+        .section-card.open .expand-icon{transform:rotate(180deg);}
+        .section-modules{display:none;}
+        .section-card.open .section-modules{display:block;}
+
+        /* ── MODULE ROWS ── */
+        .module-row{border-top:1px solid #f0f0f0;}
+        .module-row-hdr{padding:12px 20px 12px 36px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:background 0.2s;}
+        .module-row-hdr:hover{background:#f9f9f9;}
+        .module-row.locked .module-row-hdr{cursor:default;}
+        .module-row.locked .module-row-hdr:hover{background:transparent;}
+        .mod-left{flex:1;}
+        .mod-title{font-size:14px;color:#333;font-weight:500;}
+        .mod-title.dim{color:#bbb;}
+        .mod-upcoming{font-size:11px;color:#ccc;margin-top:2px;}
+        .mod-right{display:flex;align-items:center;gap:10px;}
+        .mod-expand{color:#ccc;font-size:12px;}
+
+        /* ── MODULE CONTENT ── */
+        .module-content{display:none;padding:20px 20px 24px 36px;border-top:1px solid #f5f5f5;background:#fafeff;}
+        .module-row.open .module-content{display:block;}
+        .video-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:8px;background:#000;margin-bottom:16px;}
+        .video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:8px;}
+        .no-video{padding:30px;text-align:center;color:#999;font-size:13px;background:#f5f5f5;border-radius:8px;margin-bottom:16px;}
+        .mod-desc{font-size:14px;color:#555;line-height:1.6;margin-bottom:20px;}
+
+        /* ── QUIZ ── */
+        .quiz-box{background:white;border:1px solid #e0e0e0;border-radius:8px;padding:20px;margin-bottom:16px;}
+        .quiz-box h4{font-size:14px;font-weight:700;color:#333;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid #f0f0f0;}
+        .quiz-q{margin-bottom:20px;}
+        .quiz-q p{font-size:14px;font-weight:600;color:#333;margin-bottom:10px;line-height:1.5;}
+        .quiz-opts{display:grid;gap:8px;}
+        .quiz-opt{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:2px solid #e0e0e0;border-radius:6px;cursor:pointer;font-size:13px;color:#333;transition:border-color 0.2s,background 0.2s;line-height:1.4;}
+        .quiz-opt:hover{border-color:#4ba8a8;background:#f0fbfb;}
+        .quiz-opt input[type="radio"]{margin-top:2px;accent-color:#4ba8a8;flex-shrink:0;}
+        .quiz-opt.opt-correct{border-color:#4ba8a8;background:#e8f5e9;}
+        .quiz-opt.opt-wrong{border-color:#ef4444;background:#fff0f0;}
+        .quiz-opt.opt-right-answer{border-color:#4ba8a8;background:#e8f5f5;}
+        .quiz-result{padding:12px 16px;border-radius:6px;font-size:13px;font-weight:600;margin-bottom:16px;display:none;}
+        .quiz-result.pass{background:#e8f5e9;color:#2d7a2d;border:1px solid #a8d5a3;}
+        .quiz-result.fail{background:#fff0f0;color:#c62828;border:1px solid #ffcdd2;}
+
+        /* ── ACTIONS ── */
+        .mod-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+        .btn-primary{padding:10px 24px;background:#4ba8a8;color:white;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s;}
+        .btn-primary:hover{background:#3d8a8a;}
+        .btn-primary:disabled{background:#ccc;cursor:not-allowed;}
+        .btn-secondary{padding:10px 20px;background:#f0f0f0;color:#333;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;transition:background 0.2s;}
+        .btn-secondary:hover{background:#e0e0e0;}
+        .btn-sm{padding:6px 14px;font-size:12px;font-weight:600;border:none;border-radius:4px;cursor:pointer;}
+        .btn-teal{background:#4ba8a8;color:white;}
+        .btn-teal:hover{background:#3d8a8a;}
+        .btn-red{background:#fff0f0;color:#c62828;}
+        .btn-red:hover{background:#ffdddd;}
+        .completed-msg{font-size:13px;color:#2d7a2d;font-weight:600;}
+
+        /* ── ADMIN TOOLBAR ── */
+        .admin-toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+        .search-input{padding:9px 12px;border:2px solid #e0e0e0;border-radius:6px;font-size:13px;transition:border-color 0.3s;}
+        .search-input:focus{outline:none;border-color:#4ba8a8;}
+
+        /* ── LEARNER CARDS (admin/AM view) ── */
+        .learner-card{background:white;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;margin-bottom:10px;}
+        .learner-card-hdr{padding:14px 20px;background:#fafafa;border-bottom:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:background 0.2s;}
+        .learner-card-hdr:hover{background:#f0f0f0;}
+        .learner-name{font-weight:600;color:#333;font-size:14px;}
+        .learner-meta{font-size:12px;color:#999;margin-top:2px;}
+        .learner-summary{display:flex;align-items:center;gap:14px;}
+        .learner-pct{font-size:13px;font-weight:700;color:#4ba8a8;white-space:nowrap;}
+        .learner-detail{display:none;padding:16px 20px;}
+        .learner-card.open .learner-detail{display:block;}
+
+        /* mini progress bar */
+        .mini-track{width:100%;height:7px;background:#e0e0e0;border-radius:8px;overflow:hidden;margin:5px 0;}
+        .mini-fill{height:100%;background:linear-gradient(90deg,#4ba8a8,#a8d5a3);border-radius:8px;}
+
+        /* module detail table */
+        .mod-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;}
+        .mod-table th{text-align:left;padding:6px 10px;background:#f5f5f5;color:#666;font-weight:600;border-bottom:1px solid #e0e0e0;}
+        .mod-table td{padding:7px 10px;border-bottom:1px solid #f5f5f5;color:#333;}
+        .mod-table tr:last-child td{border-bottom:none;}
+        .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;}
+        .dot-passed{background:#4ba8a8;}
+        .dot-progress{background:#f59e0b;}
+        .dot-none{background:#ccc;}
+        .dot-failed{background:#ef4444;}
+
+        /* ── AM FEED ── */
+        .am-filter-row{display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap;}
+        .filter-select{padding:8px 12px;border:2px solid #e0e0e0;border-radius:6px;font-size:13px;background:white;cursor:pointer;}
+        .filter-select:focus{outline:none;border-color:#4ba8a8;}
+
+        .notif-feed{display:grid;gap:8px;margin-top:12px;}
+        .notif-item{padding:12px 16px;background:#f9f9f9;border-radius:6px;border-left:3px solid #4ba8a8;font-size:13px;color:#333;line-height:1.5;}
+        .notif-item.path{border-left-color:#2d7a2d;}
+        .notif-item.voluntary{border-left-color:#f59e0b;}
+        .notif-item.rewatch{border-left-color:#9e9e9e;}
+        .notif-time{font-size:11px;color:#999;margin-top:4px;}
+
+        /* ── ENROLL MODAL ── */
+        .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:1000;}
+        .modal-overlay.active{display:flex;}
+        .modal-box{background:white;border-radius:12px;padding:32px;max-width:500px;width:95vw;position:relative;max-height:90vh;overflow-y:auto;}
+        .modal-box h3{font-size:18px;color:#333;margin-bottom:16px;}
+        .modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#999;}
+        .modal-close:hover{color:#333;}
+        .modal-box label{font-size:13px;font-weight:600;color:#333;display:block;margin-bottom:6px;margin-top:14px;}
+        .modal-box select,.modal-box input[type="text"],.modal-box input[type="email"],.modal-box textarea{width:100%;padding:10px 12px;border:2px solid #e0e0e0;border-radius:6px;font-size:13px;}
+        .modal-box select:focus,.modal-box input:focus,.modal-box textarea:focus{outline:none;border-color:#4ba8a8;}
+        .modal-box textarea{min-height:70px;resize:vertical;font-family:inherit;}
+        .modal-msg{font-size:13px;padding:10px 14px;border-radius:6px;margin-bottom:12px;}
+        .modal-msg.success{background:#e8f5e9;color:#2d7a2d;}
+        .modal-msg.error{background:#fff0f0;color:#c62828;}
+        .modal-btns{display:flex;gap:10px;margin-top:20px;}
+        .modal-btns button{flex:1;padding:11px;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600;}
+
+        /* ── PASSWORD MODALS ── */
+        .pw-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:1001;}
+        .pw-modal.active{display:flex;}
+        .pw-box{background:white;border-radius:12px;padding:40px;max-width:400px;width:95vw;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+        .pw-success{background:#e8f5e9;color:#2e7d32;padding:12px;border-radius:6px;margin-bottom:15px;font-size:13px;}
+        .pw-error{background:#ffebee;color:#c62828;padding:12px;border-radius:6px;margin-bottom:15px;font-size:13px;}
+
+        /* ── CURRICULUM MANAGER ── */
+        .curr-path-card{background:white;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:16px;overflow:hidden;}
+        .curr-path-hdr{padding:14px 20px;background:#f0fbfb;display:flex;justify-content:space-between;align-items:center;}
+        .curr-path-title{font-weight:700;font-size:15px;color:#333;}
+        .curr-path-meta{font-size:12px;color:#999;margin-top:2px;}
+        .curr-section{border-top:1px solid #e0e0e0;}
+        .curr-sec-hdr{padding:10px 20px 10px 36px;display:flex;justify-content:space-between;align-items:center;background:#fafafa;}
+        .curr-sec-title{font-size:13px;font-weight:600;color:#333;}
+        .curr-mod-row{padding:8px 20px 8px 52px;border-top:1px solid #f5f5f5;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#555;}
+        .curr-actions{display:flex;gap:6px;}
+
+        /* ── LOADING ── */
+        .loading{text-align:center;padding:40px;color:#4ba8a8;font-size:14px;}
+
+        /* ── BROWSE LIBRARY ── */
+        .library-grid{display:grid;gap:14px;}
+        .lib-card{background:white;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;}
+        .lib-card-hdr{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:background 0.2s;}
+        .lib-card-hdr:hover{background:#f9f9f9;}
+        .lib-title{font-weight:600;font-size:14px;color:#333;}
+        .lib-meta{font-size:12px;color:#999;margin-top:2px;}
+        .lib-badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:10px;}
+        .lib-done{background:#e8f5e9;color:#2d7a2d;}
+        .lib-new{background:#e8f5f5;color:#4ba8a8;}
+        .lib-content{display:none;padding:16px 18px;border-top:1px solid #f0f0f0;background:#fafeff;}
+        .lib-card.open .lib-content{display:block;}
+    </style>
+</head>
+<body>
+<div class="main-container">
+
+<!-- ══════════════════════════════════════ LOGIN ══ -->
+<div class="auth-container" id="authContainer">
+    <div class="auth-card">
+        <div class="logo-section">
+            <img src="https://i.ibb.co/39k5ZmTb/Bella-Baby-Logo.png" alt="Bella Baby" class="logo-img">
+            <h1>Bella Baby</h1>
+            <p>Learning Hub</p>
+        </div>
+        <div id="loginError" class="error-msg"></div>
+        <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" placeholder="••••••••">
+        </div>
+        <button class="login-btn" onclick="handleLogin()">Sign In</button>
+        <div style="text-align:center;margin-top:15px;">
+            <a href="#" onclick="openForgotPW();return false;" style="color:#4ba8a8;text-decoration:none;font-size:13px;">Forgot password?</a>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════ DASHBOARD ══ -->
+<div class="dashboard" id="dashboard">
+<div class="dashboard-wrapper">
+
+    <div class="dashboard-header">
+        <img src="https://i.ibb.co/39k5ZmTb/Bella-Baby-Logo.png" alt="Bella Baby" class="header-logo">
+        <h1>Professional Development Hub</h1>
+        <p>Learning Hub</p>
+    </div>
+
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <span>Logged in as <strong id="userEmailDisplay"></strong></span>
+            <div class="options-wrap">
+                <button id="optionsBtn">Options ▾</button>
+                <div class="options-dd" id="optionsDD">
+                    <a href="index.html">🏠 Growth Assessments</a>
+                    <button id="ddMyTraining"  onclick="showView('learner');closeDD();"  style="display:none;">📚 My Training</button>
+                    <button id="ddBrowse"      onclick="showView('browse');closeDD();"   style="display:none;">🎬 Training Library</button>
+                    <button id="ddAMView"      onclick="showView('am');closeDD();"       style="display:none;">👥 My Team Progress</button>
+                    <button id="ddAdminView"   onclick="showView('admin');closeDD();"    style="display:none;">📊 Learner Progress</button>
+                    <button id="ddEnroll"      onclick="openEnrollModal();closeDD();"    style="display:none;">➕ Enroll Learner</button>
+                    <button id="ddAssign"      onclick="openAssignModal();closeDD();"    style="display:none;">📋 Assign Module</button>
+                    <button id="ddCurriculum"  onclick="showView('curriculum');closeDD();" style="display:none;">🗂 Manage Curriculum</button>
+                    <button onclick="openChangePW();closeDD();">👤 Change Password</button>
+                </div>
+            </div>
+        </div>
+        <div class="top-bar-right">
+            <button class="logout-btn-top" onclick="handleLogout()">Log Out</button>
+        </div>
+    </div>
+
+    <div class="breadcrumb" id="breadcrumb">
+        <a href="#" onclick="goBack();return false;">← Back</a>
+        <span id="breadcrumbLabel"></span>
+    </div>
+
+    <div class="lms-content">
+
+        <!-- ─── LEARNER VIEW ─── -->
+        <div id="viewLearner" style="display:none;">
+            <div class="progress-banner hidden" id="progressBanner">
+                <div class="pb-row">
+                    <span class="pb-title" id="bannerTitle">—</span>
+                    <span class="pb-pct" id="bannerPct">0%</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill" id="bannerFill" style="width:0%"></div></div>
+                <div class="pb-sub" id="bannerSub"></div>
+            </div>
+            <div id="learnerLoading" class="loading">Loading your training...</div>
+            <div id="learnerEmpty" class="empty-state" style="display:none;">
+                <h3>No training assigned yet</h3>
+                <p>Your training path will appear here once it has been assigned.<br>Reach out to your trainer if you think this is a mistake.</p>
+            </div>
+            <div class="sections-list" id="sectionsList" style="display:none;"></div>
+        </div>
+
+        <!-- ─── BROWSE LIBRARY ─── -->
+        <div id="viewBrowse" style="display:none;">
+            <div class="page-title">Training Library</div>
+            <div class="page-sub">Browse all available training modules. Completions are tracked and visible to your AM.</div>
+            <div class="admin-toolbar">
+                <input type="text" class="search-input" id="browseSearch" placeholder="Search modules..." oninput="filterLibrary()" style="flex:1;max-width:300px;">
+            </div>
+            <div id="browseLoading" class="loading" style="display:none;">Loading library...</div>
+            <div class="library-grid" id="libraryGrid"></div>
+        </div>
+
+        <!-- ─── AM TEAM VIEW ─── -->
+        <div id="viewAM" style="display:none;">
+            <div class="page-title">My Team Progress</div>
+            <div class="page-sub">Training activity and completion status for your photographers.</div>
+            <div class="am-filter-row">
+                <input type="text" class="search-input" id="amSearch" placeholder="Search photographer..." oninput="filterAMCards()" style="max-width:240px;">
+                <select class="filter-select" id="amTypeFilter" onchange="filterAMCards()">
+                    <option value="all">All Activity</option>
+                    <option value="path_completed">Path Completions</option>
+                    <option value="module">Module Completions</option>
+                </select>
+            </div>
+            <div id="amLoading" class="loading" style="display:none;">Loading team data...</div>
+            <div id="amCards"></div>
+        </div>
+
+        <!-- ─── ADMIN PROGRESS VIEW ─── -->
+        <div id="viewAdmin" style="display:none;">
+            <div class="page-title">Learner Progress</div>
+            <div class="page-sub">Enrollment and completion status across all learners.</div>
+            <div class="admin-toolbar">
+                <input type="text" class="search-input" id="adminSearch" placeholder="Search learner..." oninput="filterAdminCards()" style="max-width:260px;">
+                <button class="btn-sm btn-teal" onclick="openEnrollModal()">➕ Enroll Learner</button>
+                <button class="btn-sm btn-teal" onclick="openAssignModal()">📋 Assign Module</button>
+            </div>
+            <div id="adminLoading" class="loading" style="display:none;">Loading...</div>
+            <div id="adminCards"></div>
+        </div>
+
+        <!-- ─── CURRICULUM MANAGER ─── -->
+        <div id="viewCurriculum" style="display:none;">
+            <div class="page-title">Manage Curriculum</div>
+            <div class="page-sub">Add and edit paths, sections, modules, and quiz questions.</div>
+            <div class="admin-toolbar">
+                <button class="btn-sm btn-teal" onclick="promptAddPath()">+ New Path</button>
+                <button class="btn-sm btn-teal" onclick="promptAddModule()">+ New Module</button>
+            </div>
+            <div id="curriculumContent"><div class="loading">Loading curriculum...</div></div>
+        </div>
+
+    </div><!-- /lms-content -->
+</div><!-- /dashboard-wrapper -->
+</div><!-- /dashboard -->
+</div><!-- /main-container -->
+
+<!-- ══════════════════════════ ENROLL MODAL ══ -->
+<div class="modal-overlay" id="enrollModal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeEnrollModal()">&times;</button>
+        <h3>Enroll a Learner</h3>
+        <div id="enrollMsg"></div>
+        <label>Learner Email</label>
+        <input type="email" id="enrollEmail" placeholder="photographer@bellababy.co">
+        <label>Training Path</label>
+        <select id="enrollPath"><option value="">Loading paths...</option></select>
+        <div class="modal-btns">
+            <button onclick="submitEnroll()" style="background:#4ba8a8;color:white;">Enroll</button>
+            <button onclick="closeEnrollModal()" style="background:#f0f0f0;color:#333;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════ ASSIGN MODAL ══ -->
+<div class="modal-overlay" id="assignModal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeAssignModal()">&times;</button>
+        <h3>Assign a Module</h3>
+        <div id="assignMsg"></div>
+        <label>Photographer Email</label>
+        <input type="email" id="assignEmail" placeholder="photographer@bellababy.co">
+        <label>Module</label>
+        <select id="assignModule"><option value="">Loading modules...</option></select>
+        <label>Note <span style="font-weight:400;font-size:11px;color:#999;">(optional — reason for assignment)</span></label>
+        <textarea id="assignNote" placeholder="e.g. Please rewatch before your next session"></textarea>
+        <label>Due Date <span style="font-weight:400;font-size:11px;color:#999;">(optional)</span></label>
+        <input type="date" id="assignDue" style="width:100%;padding:10px 12px;border:2px solid #e0e0e0;border-radius:6px;font-size:13px;">
+        <div class="modal-btns">
+            <button onclick="submitAssign()" style="background:#4ba8a8;color:white;">Assign</button>
+            <button onclick="closeAssignModal()" style="background:#f0f0f0;color:#333;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════ FORGOT PASSWORD MODAL ══ -->
+<div class="pw-modal" id="forgotPWModal">
+    <div class="pw-box">
+        <button onclick="closeForgotPW()" style="float:right;font-size:24px;cursor:pointer;color:#999;border:none;background:none;margin-bottom:20px;">&times;</button>
+        <h2 style="color:#333;margin-bottom:20px;clear:both;">Reset Password</h2>
+        <div id="forgotPWMsg"></div>
+        <div class="form-group">
+            <label for="resetEmail">Email</label>
+            <input type="email" id="resetEmail" placeholder="your@email.com">
+        </div>
+        <button class="login-btn" onclick="handleForgotPW()">Send Reset Link</button>
+        <p style="text-align:center;color:#999;font-size:12px;margin-top:15px;">We'll send a link to reset your password.</p>
+    </div>
+</div>
+
+<!-- ══════════════════ CHANGE PASSWORD MODAL ══ -->
+<div class="pw-modal" id="changePWModal">
+    <div class="pw-box">
+        <button onclick="closeChangePW()" style="float:right;font-size:24px;cursor:pointer;color:#999;border:none;background:none;margin-bottom:20px;">&times;</button>
+        <h2 style="color:#333;margin-bottom:20px;clear:both;">Change Password</h2>
+        <div id="changePWMsg"></div>
+        <div class="form-group">
+            <label for="cpNew">New Password</label>
+            <input type="password" id="cpNew" placeholder="••••••••">
+        </div>
+        <div class="form-group">
+            <label for="cpConfirm">Confirm New Password</label>
+            <input type="password" id="cpConfirm" placeholder="••••••••">
+        </div>
+        <button class="login-btn" onclick="handleChangePW()">Update Password</button>
+    </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════
+const SUPABASE_URL      = 'https://hlfoaynyuzfexhqydesl.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_k2yrsTdzgIVgXbQqxbZNbw_ASPVbSks';
+const { createClient } = window.supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let currentUser   = null;
+let userRole      = 'user';
+let userLevel     = null;       // photographer level for notifications
+let allUserRoles  = {};
+let amTeam        = [];         // photographer emails for current AM
+let currentEnrollment = null;
+let pathData      = null;       // { path, sections: [{...section, modules:[]}] }
+let progressMap   = {};         // module_id → progress row
+let allModules    = [];         // full module catalog
+let allPaths      = [];
+let previousView  = null;
+
+// ══════════════════════════════════════════════
+// ROLE HELPERS
+// ══════════════════════════════════════════════
+const isStaff    = () => ['super_admin','admin','trainer','am'].includes(userRole);
+const isAdmin    = () => ['super_admin','admin'].includes(userRole);
+const isSuperAdmin = () => userRole === 'super_admin';
+const isAM       = () => userRole === 'am';
+const isTrainer  = () => userRole === 'trainer';
+const isPhotog   = () => userRole === 'user';
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+async function init() {
+    // Handle password recovery
+    const hash = window.location.hash;
+    if (hash.includes('access_token')) {
+        const params = new URLSearchParams(hash.replace('#','?'));
+        const at = params.get('access_token');
+        const rt = params.get('refresh_token') || '';
+        if (at) {
+            await sb.auth.setSession({ access_token: at, refresh_token: rt });
+            window.location.hash = '';
+        }
+    }
+
+    sb.auth.onAuthStateChange(async (_e, session) => {
+        if (session) { currentUser = session.user; await boot(); }
+        else { currentUser = null; showAuth(); }
+    });
+
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) { currentUser = session.user; await boot(); }
+    else showAuth();
+}
+
+async function boot() {
+    await loadRoles();
+    showDashboard();
+}
+
+async function loadRoles() {
+    try {
+        const { data } = await sb.from('user_roles').select('*');
+        allUserRoles = {};
+        (data || []).forEach(r => { allUserRoles[r.user_email.toLowerCase()] = r.role; });
+    } catch(e) { console.warn('user_roles', e); }
+    userRole = allUserRoles[currentUser.email.toLowerCase()] || 'user';
+
+    // Load AM team if applicable
+    if (isAM()) {
+        try {
+            const { data } = await sb.from('am_photographer_mapping')
+                .select('"Photographer Email"')
+                .eq('"AM Email"', currentUser.email);
+            amTeam = (data || []).map(r => r['Photographer Email'].toLowerCase());
+        } catch(e) { console.warn('am_mapping', e); }
+    }
+}
+
+// ══════════════════════════════════════════════
+// SHOW / HIDE
+// ══════════════════════════════════════════════
+function showAuth() {
+    document.getElementById('authContainer').style.display = 'flex';
+    document.getElementById('dashboard').classList.remove('active');
+}
+
+function showDashboard() {
+    document.getElementById('authContainer').style.display = 'none';
+    document.getElementById('dashboard').classList.add('active');
+    document.getElementById('userEmailDisplay').textContent = currentUser.email;
+
+    // Wire up options menu visibility
+    if (!isPhotog()) document.getElementById('ddBrowse').style.display = 'block';
+    if (isPhotog())  document.getElementById('ddMyTraining').style.display = 'block';
+    if (isAM())      document.getElementById('ddAMView').style.display = 'block';
+    if (isAdmin() || isTrainer()) document.getElementById('ddAdminView').style.display = 'block';
+    if (isStaff())   { document.getElementById('ddEnroll').style.display = 'block'; document.getElementById('ddAssign').style.display = 'block'; }
+    if (isSuperAdmin()) document.getElementById('ddCurriculum').style.display = 'block';
+
+    // Default landing
+    if (isAM())          showView('am');
+    else if (isAdmin() || isTrainer()) showView('admin');
+    else                 showView('learner');
+}
+
+const VIEWS = ['learner','browse','am','admin','curriculum'];
+const VIEW_ID = { learner:'viewLearner', browse:'viewBrowse', am:'viewAM', admin:'viewAdmin', curriculum:'viewCurriculum' };
+function showView(name, addBreadcrumb) {
+    VIEWS.forEach(v => { const el = document.getElementById(VIEW_ID[v]); if(el) el.style.display = 'none'; });
+    const target = document.getElementById(VIEW_ID[name]);
+    if (target) target.style.display = 'block';
+
+    if (addBreadcrumb) {
+        previousView = addBreadcrumb;
+        showBreadcrumb(name);
+    } else {
+        hideBreadcrumb();
+        previousView = null;
+    }
+
+    // Load data for the view
+    if (name === 'learner')    loadLearnerView();
+    if (name === 'browse')     loadBrowseView();
+    if (name === 'am')         loadAMView();
+    if (name === 'admin')      loadAdminView();
+    if (name === 'curriculum') loadCurriculumView();
+}
+
+function showBreadcrumb(label) {
+    const bc = document.getElementById('breadcrumb');
+    bc.classList.add('show');
+    document.getElementById('breadcrumbLabel').textContent = ' / ' + label;
+}
+function hideBreadcrumb() { document.getElementById('breadcrumb').classList.remove('show'); }
+function goBack() { if (previousView) showView(previousView); }
+
+// ══════════════════════════════════════════════
+// LEARNER VIEW
+// ══════════════════════════════════════════════
+async function loadLearnerView() {
+    const loadEl = document.getElementById('learnerLoading');
+    const emptyEl = document.getElementById('learnerEmpty');
+    const listEl = document.getElementById('sectionsList');
+    const banner = document.getElementById('progressBanner');
+
+    loadEl.style.display = 'block';
+    emptyEl.style.display = 'none';
+    listEl.style.display = 'none';
+    banner.classList.add('hidden');
+
+    try {
+        // Get active enrollment
+        const { data: enrollments } = await sb
+            .from('lms_enrollments')
+            .select('*, lms_paths(*)')
+            .eq('user_email', currentUser.email.toLowerCase())
+            .eq('is_active', true)
+            .order('enrolled_at', { ascending: false })
+            .limit(1);
+
+        if (!enrollments?.length) {
+            loadEl.style.display = 'none';
+            emptyEl.style.display = 'block';
+            return;
+        }
+
+        currentEnrollment = enrollments[0];
+        const pathId = currentEnrollment.path_id;
+
+        // Load sections with their module assignments
+        const { data: sections } = await sb
+            .from('lms_path_sections')
+            .select('*')
+            .eq('path_id', pathId)
+            .eq('is_active', true)
+            .order('section_order');
+
+        // Load path_modules to get ordered module IDs per section
+        const { data: pathModules } = await sb
+            .from('lms_path_modules')
+            .select('*, lms_modules(*)')
+            .eq('path_id', pathId)
+            .eq('is_active', true)
+            .order('module_order');
+
+        // Group modules by section
+        const secMap = {};
+        (sections || []).forEach(s => { secMap[s.id] = { ...s, modules: [] }; });
+        (pathModules || []).forEach(pm => {
+            if (pm.section_id && secMap[pm.section_id]) {
+                secMap[pm.section_id].modules.push(pm.lms_modules);
+            }
+        });
+
+        pathData = {
+            path: currentEnrollment.lms_paths,
+            sections: (sections || []).map(s => secMap[s.id])
+        };
+
+        // Load progress
+        const allModIds = (pathModules || []).map(pm => pm.module_id);
+        progressMap = {};
+        if (allModIds.length) {
+            const { data: prog } = await sb
+                .from('lms_progress')
+                .select('*')
+                .eq('user_email', currentUser.email.toLowerCase())
+                .in('module_id', allModIds);
+            (prog || []).forEach(p => { progressMap[p.module_id] = p; });
+        }
+
+        // Progress stats
+        const total = allModIds.length;
+        const done  = Object.values(progressMap).filter(p => p.status === 'passed').length;
+        const pct   = total ? Math.round((done / total) * 100) : 0;
+
+        document.getElementById('bannerTitle').textContent = currentEnrollment.lms_paths.title;
+        document.getElementById('bannerPct').textContent   = pct + '%';
+        document.getElementById('bannerFill').style.width  = pct + '%';
+        document.getElementById('bannerSub').textContent   = `${done} of ${total} modules completed`;
+        banner.classList.remove('hidden');
+
+        loadEl.style.display = 'none';
+        listEl.style.display = 'grid';
+        renderSections(pathData.sections);
+
+    } catch(e) {
+        console.error('loadLearnerView', e);
+        loadEl.style.display = 'none';
+        emptyEl.style.display = 'block';
+    }
+}
+
+function renderSections(sections) {
+    const container = document.getElementById('sectionsList');
+    container.innerHTML = '';
+    let firstUnlocked = -1;
+
+    sections.forEach((section, si) => {
+        const mods = section.modules || [];
+        const total = mods.length;
+        const done  = mods.filter(m => progressMap[m.id]?.status === 'passed').length;
+        const prevComplete = si === 0 ? true : isSectionDone(sections[si - 1]);
+        const locked = !prevComplete;
+
+        if (!locked && firstUnlocked === -1) firstUnlocked = si;
+
+        let badge, badgeClass;
+        if (locked)               { badge = '🔒 Upcoming';  badgeClass = 'badge-locked'; }
+        else if (done === total && total > 0) { badge = '✓ Complete'; badgeClass = 'badge-complete'; }
+        else if (done > 0)        { badge = 'In Progress'; badgeClass = 'badge-progress'; }
+        else                      { badge = 'Start Here';  badgeClass = 'badge-start'; }
+
+        const card = document.createElement('div');
+        card.className = 'section-card' + (locked ? ' locked' : '');
+        card.id = 'sc-' + section.id;
+        card.innerHTML = `
+            <div class="section-header" onclick="${locked ? '' : `toggleSection('${section.id}')`}">
+                <div class="sec-left">
+                    <div class="sec-num">Section ${section.section_order}</div>
+                    <div class="sec-title">${esc(section.title)}</div>
+                    <div class="sec-meta">${total} module${total !== 1 ? 's' : ''} · ${done} completed</div>
+                </div>
+                <div class="sec-right">
+                    <span class="status-badge ${badgeClass}">${badge}</span>
+                    ${locked ? '' : '<span class="expand-icon">▼</span>'}
+                </div>
+            </div>
+            <div class="section-modules" id="sm-${section.id}">
+                ${renderModuleRows(mods, locked, si, sections)}
+            </div>`;
+        container.appendChild(card);
+    });
+
+    // Auto-open first unlocked incomplete section
+    if (firstUnlocked >= 0) {
+        const s = sections[firstUnlocked];
+        const allDone = (s.modules || []).every(m => progressMap[m.id]?.status === 'passed');
+        if (!allDone) setTimeout(() => toggleSection(s.id, true), 80);
+    }
+}
+
+function renderModuleRows(mods, sectionLocked, si, allSections) {
+    if (!mods.length) return `<div style="padding:14px 20px 14px 36px;font-size:13px;color:#999;">No modules in this section yet.</div>`;
+    return mods.map((mod, mi) => {
+        const prevOk = mi === 0
+            ? (si === 0 ? true : isSectionDone(allSections[si - 1]))
+            : progressMap[mods[mi - 1].id]?.status === 'passed';
+        const locked = sectionLocked || (!pathData?.path?.is_sequential ? false : !prevOk);
+        const passed = progressMap[mod.id]?.status === 'passed';
+        const icon = locked ? '🔒' : passed ? '<span style="color:#4ba8a8;">✓</span>' : '<span style="color:#ddd;">○</span>';
+        return `
+            <div class="module-row${locked ? ' locked' : ''}" id="mr-${mod.id}">
+                <div class="module-row-hdr" onclick="${locked ? '' : `toggleModule('${mod.id}')`}">
+                    <div class="mod-left">
+                        <div class="mod-title${locked ? ' dim' : ''}">${esc(mod.title)}</div>
+                        ${locked ? '<div class="mod-upcoming">Complete the previous module first</div>' : ''}
+                    </div>
+                    <div class="mod-right">
+                        <span>${icon}</span>
+                        ${locked ? '' : '<span class="mod-expand">▼</span>'}
+                    </div>
+                </div>
+                <div class="module-content" id="mc-${mod.id}">
+                    ${buildModContent(mod, 'path')}
+                </div>
+            </div>`;
+    }).join('');
+}
+
+function buildModContent(mod, source) {
+    const prog   = progressMap[mod.id];
+    const passed = prog?.status === 'passed';
+    let html = '';
+
+    // Video
+    const embed = buildEmbed(mod.video_url);
+    html += embed
+        ? `<div class="video-wrap">${embed}</div>`
+        : `<div class="no-video">📹 No video attached to this module yet.</div>`;
+
+    // Description
+    if (mod.description) html += `<div class="mod-desc">${esc(mod.description)}</div>`;
+
+    // Already passed
+    if (passed) {
+        const d = prog.last_completed_at ? fmtDateTime(prog.last_completed_at) : '';
+        const rewatched = (prog.watch_count || 0) > 1;
+        html += `<div class="mod-actions">
+            <span class="completed-msg">✓ ${rewatched ? 'Watched again' : 'Completed'}${d ? ' · ' + d : ''}${prog.best_quiz_score != null ? ' · Best score: ' + prog.best_quiz_score + '%' : ''}</span>
+            <button class="btn-secondary" onclick="rewatchModule('${mod.id}','${source}')">Rewatch</button>
+        </div>`;
+        return html;
+    }
+
+    // Quiz or complete button
+    if (mod.has_quiz) {
+        html += `
+            <div class="quiz-box" id="qb-${mod.id}">
+                <h4>📝 Knowledge Check</h4>
+                <div id="ql-${mod.id}" style="color:#999;font-size:13px;">Loading questions...</div>
+                <div id="qq-${mod.id}"></div>
+                <div id="qr-${mod.id}" class="quiz-result"></div>
+                <div class="mod-actions" id="qa-${mod.id}">
+                    <button class="btn-primary" id="qs-${mod.id}" onclick="submitQuiz('${mod.id}','${source}')" style="display:none;">Submit Answers</button>
+                    <button class="btn-secondary" id="qretry-${mod.id}" onclick="retryQuiz('${mod.id}','${source}')" style="display:none;">Try Again</button>
+                </div>
+            </div>`;
+    } else {
+        html += `<div class="mod-actions">
+            <button class="btn-primary" id="cb-${mod.id}" onclick="markComplete('${mod.id}','${source}')">Mark Complete</button>
+        </div>`;
+    }
+    return html;
+}
+
+function isSectionDone(section) {
+    return (section.modules || []).length > 0 && (section.modules || []).every(m => progressMap[m.id]?.status === 'passed');
+}
+
+function toggleSection(id, force) {
+    const card = document.getElementById('sc-' + id);
+    if (!card || card.classList.contains('locked')) return;
+    if (force || !card.classList.contains('open')) card.classList.add('open');
+    else card.classList.remove('open');
+}
+
+function toggleModule(id) {
+    const row = document.getElementById('mr-' + id);
+    if (!row || row.classList.contains('locked')) return;
+    const wasOpen = row.classList.contains('open');
+    if (!wasOpen) {
+        row.classList.add('open');
+        if (document.getElementById('ql-' + id)) loadQuiz(id);
+    } else row.classList.remove('open');
+}
+
+// ══════════════════════════════════════════════
+// QUIZ
+// ══════════════════════════════════════════════
+async function loadQuiz(moduleId) {
+    const loadEl = document.getElementById('ql-' + moduleId);
+    const questEl = document.getElementById('qq-' + moduleId);
+    const submitBtn = document.getElementById('qs-' + moduleId);
+    if (!loadEl) return;
+
+    const { data: qs } = await sb
+        .from('lms_quiz_questions')
+        .select('*')
+        .eq('module_id', moduleId)
+        .order('question_order');
+
+    if (loadEl) loadEl.style.display = 'none';
+    if (!qs?.length) {
+        if (questEl) questEl.innerHTML = '<p style="color:#999;font-size:13px;margin-bottom:12px;">No questions configured yet.</p>';
+        const actEl = document.getElementById('qa-' + moduleId);
+        if (actEl) actEl.innerHTML = `<button class="btn-primary" onclick="markComplete('${moduleId}','path')">Mark Complete</button>`;
+        return;
+    }
+
+    if (questEl) questEl.innerHTML = qs.map((q, i) => `
+        <div class="quiz-q" id="qrow-${q.id}">
+            <p>${i + 1}. ${esc(q.question_text)}</p>
+            <div class="quiz-opts">
+                <label class="quiz-opt"><input type="radio" name="qn-${q.id}" value="a"> ${esc(q.option_a)}</label>
+                <label class="quiz-opt"><input type="radio" name="qn-${q.id}" value="b"> ${esc(q.option_b)}</label>
+                ${q.option_c ? `<label class="quiz-opt"><input type="radio" name="qn-${q.id}" value="c"> ${esc(q.option_c)}</label>` : ''}
+                ${q.option_d ? `<label class="quiz-opt"><input type="radio" name="qn-${q.id}" value="d"> ${esc(q.option_d)}</label>` : ''}
+            </div>
+        </div>`).join('');
+
+    if (submitBtn) submitBtn.style.display = 'inline-block';
+    window['_quiz_' + moduleId] = qs;
+}
+
+function submitQuiz(moduleId, source) {
+    const qs = window['_quiz_' + moduleId];
+    if (!qs) return;
+
+    let passing = 80;
+    // find module in pathData or allModules
+    const mod = findModule(moduleId);
+    if (mod) passing = mod.passing_score || 80;
+
+    let correct = 0;
+    qs.forEach(q => {
+        const sel = document.querySelector(`input[name="qn-${q.id}"]:checked`);
+        document.querySelectorAll(`#qrow-${q.id} .quiz-opt`).forEach(opt => {
+            opt.querySelector('input').disabled = true;
+            opt.style.cursor = 'default';
+            if (opt.querySelector('input').value === q.correct_answer) opt.classList.add('opt-right-answer');
+        });
+        if (sel) {
+            const selOpt = sel.closest('.quiz-opt');
+            if (sel.value === q.correct_answer) { correct++; selOpt.classList.add('opt-correct'); }
+            else selOpt.classList.add('opt-wrong');
+        }
+    });
+
+    const score  = Math.round((correct / qs.length) * 100);
+    const passed = score >= passing;
+    const resEl  = document.getElementById('qr-' + moduleId);
+    const subBtn = document.getElementById('qs-' + moduleId);
+    const retBtn = document.getElementById('qretry-' + moduleId);
+
+    resEl.style.display = 'block';
+    resEl.className = 'quiz-result ' + (passed ? 'pass' : 'fail');
+    resEl.textContent = passed
+        ? `✓ Passed! ${score}% (${correct}/${qs.length} correct).`
+        : `✗ ${score}% — you need ${passing}% to pass. Review the highlighted answers and try again.`;
+
+    if (subBtn) subBtn.style.display = 'none';
+    if (retBtn && !passed) retBtn.style.display = 'inline-block';
+
+    saveProgress(moduleId, passed ? 'passed' : 'failed', score, source);
+}
+
+function retryQuiz(moduleId, source) {
+    ['qr-','qq-'].forEach(p => { const el = document.getElementById(p + moduleId); if(el) el.innerHTML = ''; });
+    const ql = document.getElementById('ql-' + moduleId);
+    if (ql) { ql.style.display = 'block'; ql.textContent = 'Loading questions...'; }
+    const qs = document.getElementById('qs-' + moduleId);
+    const qr = document.getElementById('qretry-' + moduleId);
+    if (qs) qs.style.display = 'none';
+    if (qr) qr.style.display = 'none';
+    loadQuiz(moduleId);
+}
+
+// ══════════════════════════════════════════════
+// MARK COMPLETE / REWATCH
+// ══════════════════════════════════════════════
+async function markComplete(moduleId, source) {
+    const btn = document.getElementById('cb-' + moduleId);
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+    await saveProgress(moduleId, 'passed', null, source);
+}
+
+async function rewatchModule(moduleId, source) {
+    await saveProgress(moduleId, 'passed', null, source, true);
+    // Reload the view to refresh UI
+    if (source === 'path') await loadLearnerView();
+    else await loadBrowseView();
+}
+
+async function saveProgress(moduleId, status, quizScore, source, isRewatch) {
+    const now = new Date().toISOString();
+    const existing = progressMap[moduleId];
+    const isFirstComplete = !existing?.first_completed_at && status === 'passed';
+    const watchIncrement  = (status === 'passed') ? 1 : 0;
+
+    const record = {
+        user_email:         currentUser.email.toLowerCase(),
+        module_id:          moduleId,
+        status,
+        source:             source || 'voluntary',
+        last_quiz_score:    quizScore,
+        best_quiz_score:    quizScore != null
+                                ? Math.max(quizScore, existing?.best_quiz_score || 0)
+                                : (existing?.best_quiz_score || null),
+        last_completed_at:  status === 'passed' ? now : (existing?.last_completed_at || null),
+        first_completed_at: isFirstComplete ? now : (existing?.first_completed_at || null),
+        watch_count:        (existing?.watch_count || 0) + watchIncrement,
+        updated_at:         now
+    };
+    if (!existing) record.started_at = now;
+
+    if (existing) {
+        await sb.from('lms_progress').update(record).eq('id', existing.id);
+        progressMap[moduleId] = { ...existing, ...record };
+    } else {
+        const { data } = await sb.from('lms_progress').insert([record]).select();
+        if (data?.[0]) progressMap[moduleId] = data[0];
+    }
+
+    // Fire AM notification if passed
+    if (status === 'passed') {
+        await fireAMNotification(moduleId, source, isRewatch, existing);
+        // Auto-advance in path view
+        if (source === 'path') {
+            await loadLearnerView();
+            setTimeout(autoOpenNext, 300);
+        }
+    }
+}
+
+async function fireAMNotification(moduleId, source, isRewatch, existingProg) {
+    try {
+        // Find AM for this photographer
+        const { data: mapping } = await sb
+            .from('am_photographer_mapping')
+            .select('"AM Email"')
+            .ilike('"Photographer Email"', currentUser.email);
+        if (!mapping?.length) return;
+
+        const amEmail = mapping[0]['AM Email'];
+        const mod = findModule(moduleId);
+        const modTitle = mod?.title || moduleId;
+
+        // Get photographer level from user metadata or user_roles
+        const meta = currentUser.user_metadata || currentUser.raw_user_meta_data || {};
+        const displayName = meta.full_name || meta.name || currentUser.email;
+
+        let eventType;
+        if (isRewatch)          eventType = 'module_rewatch';
+        else if (source === 'voluntary') eventType = 'module_voluntary';
+        else if (source === 'assigned')  eventType = 'module_assigned';
+        else                            eventType = 'module_assigned'; // path completions handled separately
+
+        // Check if entire path is now complete
+        if (source === 'path' && currentEnrollment && pathData) {
+            const allIds = pathData.sections.flatMap(s => (s.modules || []).map(m => m.id));
+            const allDone = allIds.every(id => progressMap[id]?.status === 'passed');
+            if (allDone) {
+                await sb.from('lms_am_notifications').insert([{
+                    am_email:           amEmail,
+                    user_email:         currentUser.email.toLowerCase(),
+                    user_display_name:  displayName,
+                    user_level:         userLevel,
+                    event_type:         'path_completed',
+                    path_id:            currentEnrollment.path_id,
+                    path_title:         currentEnrollment.lms_paths?.title,
+                    module_id:          null,
+                    module_title:       null,
+                    completed_at:       new Date().toISOString()
+                }]);
+                // Mark enrollment complete
+                await sb.from('lms_enrollments')
+                    .update({ completed_at: new Date().toISOString() })
+                    .eq('id', currentEnrollment.id);
+                return;
+            }
+        }
+
+        // Module-level notification (not path completion)
+        await sb.from('lms_am_notifications').insert([{
+            am_email:           amEmail,
+            user_email:         currentUser.email.toLowerCase(),
+            user_display_name:  displayName,
+            user_level:         userLevel,
+            event_type:         eventType,
+            path_id:            source === 'path' ? currentEnrollment?.path_id : null,
+            path_title:         source === 'path' ? currentEnrollment?.lms_paths?.title : null,
+            module_id:          moduleId,
+            module_title:       modTitle,
+            completed_at:       new Date().toISOString()
+        }]);
+    } catch(e) { console.warn('fireAMNotification', e); }
+}
+
+function autoOpenNext() {
+    if (!pathData) return;
+    for (const s of pathData.sections) {
+        for (let mi = 0; mi < (s.modules || []).length; mi++) {
+            const mod = s.modules[mi];
+            if (progressMap[mod.id]?.status !== 'passed') {
+                const si = pathData.sections.indexOf(s);
+                const prevSecOk = si === 0 ? true : isSectionDone(pathData.sections[si-1]);
+                const prevModOk = mi === 0 ? prevSecOk : progressMap[s.modules[mi-1].id]?.status === 'passed';
+                if (prevModOk) {
+                    toggleSection(s.id, true);
+                    setTimeout(() => toggleModule(mod.id), 200);
+                }
+                return;
+            }
+        }
+    }
+}
+
+// ══════════════════════════════════════════════
+// BROWSE LIBRARY
+// ══════════════════════════════════════════════
+async function loadBrowseView() {
+    document.getElementById('browseLoading').style.display = 'block';
+    document.getElementById('libraryGrid').innerHTML = '';
+
+    const { data: mods } = await sb.from('lms_modules').select('*').eq('is_active', true).order('title');
+    allModules = mods || [];
+
+    // Load progress for all these modules
+    if (allModules.length) {
+        const { data: prog } = await sb.from('lms_progress').select('*')
+            .eq('user_email', currentUser.email.toLowerCase())
+            .in('module_id', allModules.map(m => m.id));
+        (prog || []).forEach(p => { progressMap[p.module_id] = p; });
+    }
+
+    document.getElementById('browseLoading').style.display = 'none';
+    renderLibrary(allModules);
+}
+
+function renderLibrary(mods) {
+    const grid = document.getElementById('libraryGrid');
+    if (!mods.length) {
+        grid.innerHTML = '<div class="empty-state"><h3>No modules available yet</h3><p>Check back soon.</p></div>';
+        return;
+    }
+    grid.innerHTML = mods.map(mod => {
+        const prog   = progressMap[mod.id];
+        const passed = prog?.status === 'passed';
+        const rewatched = (prog?.watch_count || 0) > 1;
+        const badgeHtml = passed
+            ? `<span class="lib-badge lib-done">${rewatched ? '↺ Rewatched' : '✓ Completed'}</span>`
+            : `<span class="lib-badge lib-new">Available</span>`;
+        return `
+            <div class="lib-card" id="lib-${mod.id}">
+                <div class="lib-card-hdr" onclick="toggleLibCard('${mod.id}')">
+                    <div>
+                        <div class="lib-title">${esc(mod.title)}</div>
+                        ${mod.description ? `<div class="lib-meta">${esc(mod.description.substring(0,80))}${mod.description.length > 80 ? '…' : ''}</div>` : ''}
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        ${badgeHtml}
+                        <span style="color:#ccc;font-size:12px;">▼</span>
+                    </div>
+                </div>
+                <div class="lib-content" id="lc-${mod.id}">
+                    ${buildModContent(mod, 'voluntary')}
+                </div>
+            </div>`;
+    }).join('');
+}
+
+function toggleLibCard(id) {
+    const card = document.getElementById('lib-' + id);
+    if (!card) return;
+    const wasOpen = card.classList.contains('open');
+    if (!wasOpen) {
+        card.classList.add('open');
+        if (document.getElementById('ql-' + id)) loadQuiz(id);
+    } else card.classList.remove('open');
+}
+
+function filterLibrary() {
+    const q = document.getElementById('browseSearch').value.toLowerCase();
+    allModules.forEach(m => {
+        const el = document.getElementById('lib-' + m.id);
+        if (el) el.style.display = (m.title.toLowerCase().includes(q) || (m.description || '').toLowerCase().includes(q)) ? 'block' : 'none';
+    });
+}
+
+// ══════════════════════════════════════════════
+// AM TEAM VIEW
+// ══════════════════════════════════════════════
+async function loadAMView() {
+    document.getElementById('amLoading').style.display = 'block';
+    document.getElementById('amCards').innerHTML = '';
+
+    try {
+        // Get AM's team emails
+        let teamEmails = amTeam;
+        if (!teamEmails.length && isAM()) {
+            const { data } = await sb.from('am_photographer_mapping')
+                .select('"Photographer Email","AM Email"')
+                .ilike('"AM Email"', currentUser.email);
+            teamEmails = (data || []).map(r => r['Photographer Email'].toLowerCase());
+            amTeam = teamEmails;
+        }
+
+        if (!teamEmails.length) {
+            document.getElementById('amLoading').style.display = 'none';
+            document.getElementById('amCards').innerHTML = '<div class="empty-state"><h3>No photographers assigned to your team</h3></div>';
+            return;
+        }
+
+        // Load enrollments for team
+        const { data: enrollments } = await sb
+            .from('lms_enrollments')
+            .select('*, lms_paths(*)')
+            .in('user_email', teamEmails)
+            .eq('is_active', true);
+
+        // Load notifications for team
+        const { data: notifs } = await sb
+            .from('lms_am_notifications')
+            .select('*')
+            .eq('am_email', currentUser.email.toLowerCase())
+            .order('completed_at', { ascending: false });
+
+        // Load all progress for team
+        let allProgress = [];
+        if (teamEmails.length) {
+            const { data: prog } = await sb.from('lms_progress').select('*, lms_modules(title)')
+                .in('user_email', teamEmails);
+            allProgress = prog || [];
+        }
+
+        // Load path module counts
+        const pathIds = [...new Set((enrollments || []).map(e => e.path_id))];
+        const pathModCounts = {};
+        for (const pid of pathIds) {
+            const { data: pms } = await sb.from('lms_path_modules').select('id').eq('path_id', pid).eq('is_active', true);
+            pathModCounts[pid] = pms?.length || 0;
+        }
+
+        document.getElementById('amLoading').style.display = 'none';
+        renderAMCards(teamEmails, enrollments || [], notifs || [], allProgress, pathModCounts);
+
+    } catch(e) {
+        console.error('loadAMView', e);
+        document.getElementById('amLoading').style.display = 'none';
+    }
+}
+
+function renderAMCards(teamEmails, enrollments, notifs, allProgress, pathModCounts) {
+    const container = document.getElementById('amCards');
+    if (!teamEmails.length) {
+        container.innerHTML = '<div class="empty-state"><h3>No photographers on your team yet.</h3></div>';
+        return;
+    }
+
+    const typeFilter = document.getElementById('amTypeFilter')?.value || 'all';
+    const searchVal  = document.getElementById('amSearch')?.value.toLowerCase() || '';
+
+    container.innerHTML = '';
+    teamEmails.forEach(email => {
+        if (searchVal && !email.includes(searchVal)) return;
+
+        const myEnrollments = enrollments.filter(e => e.user_email === email);
+        const myNotifs      = notifs.filter(n => n.user_email === email);
+        const myProgress    = allProgress.filter(p => p.user_email === email);
+
+        // Filter notifications by type
+        let filteredNotifs = myNotifs;
+        if (typeFilter === 'path_completed') filteredNotifs = myNotifs.filter(n => n.event_type === 'path_completed');
+        if (typeFilter === 'module')         filteredNotifs = myNotifs.filter(n => n.event_type !== 'path_completed');
+
+        // Build enrollment progress rows
+        let enrollHtml = '';
+        myEnrollments.forEach(e => {
+            const total   = pathModCounts[e.path_id] || 0;
+            const done    = myProgress.filter(p => p.status === 'passed').length;
+            const pct     = total ? Math.round((done / total) * 100) : 0;
+            enrollHtml += `
+                <div style="margin-bottom:14px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;color:#333;margin-bottom:4px;">
+                        <span>📚 ${esc(e.lms_paths?.title || '—')}</span>
+                        <span style="color:#4ba8a8;">${pct}%</span>
+                    </div>
+                    <div class="mini-track"><div class="mini-fill" style="width:${pct}%"></div></div>
+                    <div style="font-size:11px;color:#999;margin-top:3px;">${done} of ${total} modules completed${e.completed_at ? ' · ✓ Finished ' + fmtDate(e.completed_at) : ''}</div>
+                </div>`;
+        });
+        if (!myEnrollments.length) enrollHtml = '<p style="font-size:13px;color:#999;margin-bottom:12px;">Not enrolled in any path.</p>';
+
+        // Build notification feed
+        let feedHtml = filteredNotifs.length
+            ? filteredNotifs.map(n => buildNotifItem(n)).join('')
+            : '<p style="font-size:13px;color:#999;">No activity yet.</p>';
+
+        const level    = myNotifs[0]?.user_level || '';
+        const lastActivity = myNotifs[0]?.completed_at ? fmtDate(myNotifs[0].completed_at) : 'No activity';
+        const cardId   = 'amc-' + email.replace(/[@.]/g, '_');
+
+        const card = document.createElement('div');
+        card.className = 'learner-card';
+        card.dataset.email = email;
+        card.innerHTML = `
+            <div class="learner-card-hdr" onclick="toggleLearnerCard('${cardId}')">
+                <div>
+                    <div class="learner-name">${email}${level ? ` <span style="font-size:11px;color:#999;font-weight:400;">(${level})</span>` : ''}</div>
+                    <div class="learner-meta">Last activity: ${lastActivity}</div>
+                </div>
+                <div class="learner-summary">
+                    <span style="color:#ccc;">▼</span>
+                </div>
+            </div>
+            <div class="learner-detail" id="${cardId}">
+                <div style="border-bottom:1px solid #f0f0f0;padding-bottom:14px;margin-bottom:14px;">
+                    <div style="font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Learning Path Progress</div>
+                    ${enrollHtml}
+                </div>
+                <div>
+                    <div style="font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Activity</div>
+                    <div class="notif-feed">${feedHtml}</div>
+                </div>
+            </div>`;
+        container.appendChild(card);
+    });
+}
+
+function buildNotifItem(n) {
+    const name    = n.user_display_name || n.user_email;
+    const level   = n.user_level ? ` (${n.user_level})` : '';
+    const dateStr = fmtDateTime(n.completed_at);
+    let icon, cls, text;
+
+    if (n.event_type === 'path_completed') {
+        icon = '🎓'; cls = 'path';
+        text = `<strong>${esc(name)}${level}</strong> completed <strong>${esc(n.path_title || '—')}</strong>`;
+    } else if (n.event_type === 'module_rewatch') {
+        icon = '🔁'; cls = 'rewatch';
+        text = `<strong>${esc(name)}${level}</strong> watched <strong>${esc(n.module_title || '—')}</strong> again`;
+    } else if (n.event_type === 'module_voluntary') {
+        icon = '📹'; cls = 'voluntary';
+        text = `<strong>${esc(name)}${level}</strong> completed <strong>${esc(n.module_title || '—')}</strong> <span style="color:#999;">(voluntary)</span>`;
+    } else {
+        icon = '📋'; cls = '';
+        text = `<strong>${esc(name)}${level}</strong> completed assigned module <strong>${esc(n.module_title || '—')}</strong>`;
+    }
+
+    return `<div class="notif-item ${cls}">${icon} ${text}<div class="notif-time">${dateStr}</div></div>`;
+}
+
+function filterAMCards() { loadAMView(); }
+
+// ══════════════════════════════════════════════
+// ADMIN VIEW
+// ══════════════════════════════════════════════
+async function loadAdminView() {
+    document.getElementById('adminLoading').style.display = 'block';
+    document.getElementById('adminCards').innerHTML = '';
+
+    try {
+        const { data: enrollments } = await sb
+            .from('lms_enrollments')
+            .select('*, lms_paths(*)')
+            .eq('is_active', true)
+            .order('enrolled_at', { ascending: false });
+
+        if (!enrollments?.length) {
+            document.getElementById('adminLoading').style.display = 'none';
+            document.getElementById('adminCards').innerHTML = '<div class="empty-state"><h3>No learners enrolled yet</h3><p>Use the Enroll Learner button to get started.</p></div>';
+            return;
+        }
+
+        const pathIds = [...new Set(enrollments.map(e => e.path_id))];
+        const pathSectionsMap = {};
+        for (const pid of pathIds) {
+            const { data: secs } = await sb
+                .from('lms_path_sections')
+                .select('*, lms_path_modules(*, lms_modules(*))')
+                .eq('path_id', pid)
+                .order('section_order');
+            pathSectionsMap[pid] = secs || [];
+        }
+
+        const userEmails = [...new Set(enrollments.map(e => e.user_email))];
+        let allProg = [];
+        if (userEmails.length) {
+            const { data: prog } = await sb.from('lms_progress').select('*').in('user_email', userEmails);
+            allProg = prog || [];
+        }
+
+        document.getElementById('adminLoading').style.display = 'none';
+        renderAdminCards(enrollments, pathSectionsMap, allProg);
+    } catch(e) {
+        console.error('loadAdminView', e);
+        document.getElementById('adminLoading').style.display = 'none';
+    }
+}
+
+function renderAdminCards(enrollments, pathSectionsMap, allProg) {
+    const container  = document.getElementById('adminCards');
+    const searchVal  = document.getElementById('adminSearch')?.value.toLowerCase() || '';
+    container.innerHTML = '';
+
+    enrollments.forEach(e => {
+        const email = e.user_email;
+        if (searchVal && !email.includes(searchVal)) return;
+
+        const sections = pathSectionsMap[e.path_id] || [];
+        const allModIds = sections.flatMap(s => (s.lms_path_modules || []).map(pm => pm.module_id));
+        const total   = allModIds.length;
+        const done    = allProg.filter(p => p.user_email === email && allModIds.includes(p.module_id) && p.status === 'passed').length;
+        const pct     = total ? Math.round((done / total) * 100) : 0;
+
+        let tableRows = '';
+        sections.forEach(sec => {
+            (sec.lms_path_modules || [])
+                .sort((a,b) => a.module_order - b.module_order)
+                .forEach(pm => {
+                    const mod  = pm.lms_modules;
+                    if (!mod) return;
+                    const prog = allProg.find(p => p.user_email === email && p.module_id === mod.id);
+                    const st   = prog?.status || 'not_started';
+                    const dotC = { passed:'dot-passed', in_progress:'dot-progress', not_started:'dot-none', failed:'dot-failed' }[st] || 'dot-none';
+                    const stLbl = { passed:'Passed', in_progress:'In Progress', not_started:'Not Started', failed:'Failed' }[st] || 'Not Started';
+                    const dateStr = prog?.last_completed_at ? fmtDate(prog.last_completed_at) : '—';
+                    const score   = prog?.best_quiz_score != null ? prog.best_quiz_score + '%' : '—';
+                    tableRows += `<tr>
+                        <td>${esc(sec.title)}</td>
+                        <td>${esc(mod.title)}</td>
+                        <td><span class="dot ${dotC}"></span>${stLbl}</td>
+                        <td>${score}</td>
+                        <td>${dateStr}</td>
+                    </tr>`;
+                });
+        });
+
+        const cardId = 'admc-' + email.replace(/[@.]/g,'_');
+        const card = document.createElement('div');
+        card.className = 'learner-card';
+        card.dataset.email = email;
+        card.innerHTML = `
+            <div class="learner-card-hdr" onclick="toggleLearnerCard('${cardId}')">
+                <div>
+                    <div class="learner-name">${esc(email)}</div>
+                    <div class="learner-meta">${esc(e.lms_paths?.title || '—')} · Enrolled ${fmtDate(e.enrolled_at)}</div>
+                </div>
+                <div class="learner-summary">
+                    <span class="learner-pct">${pct}%</span>
+                    <span style="color:#ccc;">▼</span>
+                </div>
+            </div>
+            <div class="learner-detail" id="${cardId}">
+                <div style="margin-bottom:12px;">
+                    <div style="display:flex;justify-content:space-between;font-size:12px;color:#666;margin-bottom:4px;">
+                        <span>${done} of ${total} modules completed</span>
+                        <span style="color:#4ba8a8;font-weight:700;">${pct}%</span>
+                    </div>
+                    <div class="mini-track"><div class="mini-fill" style="width:${pct}%"></div></div>
+                </div>
+                <table class="mod-table">
+                    <thead><tr><th>Section</th><th>Module</th><th>Status</th><th>Best Score</th><th>Completed</th></tr></thead>
+                    <tbody>${tableRows || '<tr><td colspan="5" style="color:#999;text-align:center;">No modules yet</td></tr>'}</tbody>
+                </table>
+            </div>`;
+        container.appendChild(card);
+    });
+}
+
+function filterAdminCards() { loadAdminView(); }
+
+// ══════════════════════════════════════════════
+// CURRICULUM MANAGER
+// ══════════════════════════════════════════════
+async function loadCurriculumView() {
+    const container = document.getElementById('curriculumContent');
+    container.innerHTML = '<div class="loading">Loading...</div>';
+    try {
+        const { data: paths } = await sb.from('lms_paths').select('*').order('created_at');
+        const { data: mods }  = await sb.from('lms_modules').select('*').eq('is_active', true).order('title');
+        allModules = mods || [];
+        allPaths   = paths || [];
+
+        let html = '';
+
+        // ── Standalone modules section
+        html += `<div style="margin-bottom:24px;">
+            <div style="font-size:14px;font-weight:700;color:#333;margin-bottom:10px;">🗂 All Modules (${allModules.length})</div>
+            <div style="display:grid;gap:8px;">
+                ${allModules.map(m => `
+                    <div style="background:white;border:1px solid #e0e0e0;border-radius:6px;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <span style="font-size:13px;font-weight:600;color:#333;">${esc(m.title)}</span>
+                            <span style="font-size:11px;color:#999;margin-left:8px;">${m.has_quiz ? '📝 Quiz' : '📹 No quiz'}</span>
+                        </div>
+                        <div class="curr-actions">
+                            <button class="btn-sm btn-teal" onclick="editModulePrompt('${m.id}')">Edit</button>
+                            <button class="btn-sm" style="background:#fff8e1;color:#b45309;" onclick="manageQuiz('${m.id}','${esc(m.title)}')">Quiz</button>
+                            <button class="btn-sm btn-red" onclick="deleteModule('${m.id}')">Delete</button>
+                        </div>
+                    </div>`).join('') || '<p style="color:#999;font-size:13px;">No modules yet. Add one above.</p>'}
+            </div>
+        </div>`;
+
+        // ── Paths
+        html += `<div style="font-size:14px;font-weight:700;color:#333;margin-bottom:10px;">📚 Learning Paths</div>`;
+        for (const path of (paths || [])) {
+            const { data: sections } = await sb
+                .from('lms_path_sections')
+                .select('*, lms_path_modules(module_order, lms_modules(id,title))')
+                .eq('path_id', path.id)
+                .order('section_order');
+            html += buildCurrPath(path, sections || []);
+        }
+        if (!paths?.length) html += '<p style="color:#999;font-size:13px;">No paths yet. Add one above.</p>';
+
+        container.innerHTML = html;
+    } catch(e) {
+        container.innerHTML = `<p style="color:#c33;">Error: ${esc(e.message)}</p>`;
+    }
+}
+
+function buildCurrPath(path, sections) {
+    const totalMods = sections.reduce((t, s) => t + (s.lms_path_modules || []).length, 0);
+    const secHtml = sections.map(sec => {
+        const mods = (sec.lms_path_modules || [])
+            .sort((a,b) => a.module_order - b.module_order)
+            .map(pm => pm.lms_modules).filter(Boolean);
+        return `
+            <div class="curr-section">
+                <div class="curr-sec-hdr">
+                    <span class="curr-sec-title">§${sec.section_order} ${esc(sec.title)}</span>
+                    <div class="curr-actions">
+                        <button class="btn-sm btn-teal" onclick="addModuleToSection('${path.id}','${sec.id}')">+ Add Module</button>
+                        <button class="btn-sm btn-red" onclick="deleteSection('${sec.id}')">Delete Section</button>
+                    </div>
+                </div>
+                ${mods.map(m => `
+                    <div class="curr-mod-row">
+                        <span>📹 ${esc(m.title)}</span>
+                        <div class="curr-actions">
+                            <button class="btn-sm btn-red" onclick="removeModuleFromPath('${path.id}','${m.id}')">Remove</button>
+                        </div>
+                    </div>`).join('') || '<div style="padding:8px 20px 8px 52px;font-size:12px;color:#ccc;">No modules yet</div>'}
+            </div>`;
+    }).join('');
+
+    return `
+        <div class="curr-path-card">
+            <div class="curr-path-hdr">
+                <div>
+                    <div class="curr-path-title">${esc(path.title)} ${path.is_sequential ? '<span style="font-size:11px;color:#4ba8a8;font-weight:400;">Sequential</span>' : '<span style="font-size:11px;color:#f59e0b;font-weight:400;">Open Order</span>'}</div>
+                    <div class="curr-path-meta">${sections.length} sections · ${totalMods} modules</div>
+                </div>
+                <div class="curr-actions">
+                    <button class="btn-sm btn-teal" onclick="promptAddSection('${path.id}')">+ Section</button>
+                    <button class="btn-sm btn-red" onclick="deletePath('${path.id}')">Delete Path</button>
+                </div>
+            </div>
+            ${secHtml}
+        </div>`;
+}
+
+// Curriculum actions
+async function promptAddPath() {
+    const title = prompt('New path title (e.g. "Advanced Lighting Series"):');
+    if (!title) return;
+    const desc = prompt('Description (optional):') || '';
+    const seq  = confirm('Should this path be sequential? (OK = yes, must complete in order)');
+    await sb.from('lms_paths').insert([{ title, description: desc, is_sequential: seq, is_active: true, created_by: currentUser.email }]);
+    loadCurriculumView();
+}
+
+async function promptAddModule() {
+    const title = prompt('Module title:');
+    if (!title) return;
+    const videoUrl   = prompt('Video URL (Google Drive, Vimeo, YouTube — leave blank if none):') || null;
+    const desc       = prompt('Description (optional):') || null;
+    const hasQuiz    = confirm('Does this module have a quiz?');
+    await sb.from('lms_modules').insert([{ title, video_url: videoUrl, description: desc, has_quiz: hasQuiz, passing_score: 80, is_active: true, created_by: currentUser.email }]);
+    loadCurriculumView();
+}
+
+async function editModulePrompt(moduleId) {
+    const { data: mod } = await sb.from('lms_modules').select('*').eq('id', moduleId).single();
+    if (!mod) return;
+    const title    = prompt('Module title:', mod.title);
+    if (title === null) return;
+    const videoUrl = prompt('Video URL:', mod.video_url || '');
+    const desc     = prompt('Description:', mod.description || '');
+    const hasQuiz  = confirm('Has quiz? (OK = yes)');
+    await sb.from('lms_modules').update({ title, video_url: videoUrl || null, description: desc || null, has_quiz: hasQuiz, updated_at: new Date().toISOString() }).eq('id', moduleId);
+    loadCurriculumView();
+}
+
+async function deleteModule(moduleId) {
+    if (!confirm('Delete this module permanently?')) return;
+    await sb.from('lms_modules').delete().eq('id', moduleId);
+    loadCurriculumView();
+}
+
+async function promptAddSection(pathId) {
+    const title = prompt('Section title:');
+    if (!title) return;
+    const { data: existing } = await sb.from('lms_path_sections').select('section_order').eq('path_id', pathId).order('section_order', { ascending: false }).limit(1);
+    const order = existing?.[0]?.section_order + 1 || 1;
+    await sb.from('lms_path_sections').insert([{ path_id: pathId, title, section_order: order, is_active: true }]);
+    loadCurriculumView();
+}
+
+async function deleteSection(sectionId) {
+    if (!confirm('Delete this section? Modules will be unlinked but not deleted.')) return;
+    await sb.from('lms_path_sections').delete().eq('id', sectionId);
+    loadCurriculumView();
+}
+
+async function addModuleToSection(pathId, sectionId) {
+    if (!allModules.length) {
+        alert('No modules exist yet. Create a module first.');
+        return;
+    }
+    const options = allModules.map((m, i) => `${i + 1}. ${m.title}`).join('\n');
+    const choice = prompt('Choose a module number to add:\n\n' + options);
+    const idx = parseInt(choice) - 1;
+    if (isNaN(idx) || idx < 0 || idx >= allModules.length) return;
+    const mod = allModules[idx];
+    const { data: existing } = await sb.from('lms_path_modules').select('module_order').eq('path_id', pathId).eq('section_id', sectionId).order('module_order', { ascending: false }).limit(1);
+    const order = existing?.[0]?.module_order + 1 || 1;
+    await sb.from('lms_path_modules').insert([{ path_id: pathId, section_id: sectionId, module_id: mod.id, module_order: order, is_active: true }]);
+    loadCurriculumView();
+}
+
+async function removeModuleFromPath(pathId, moduleId) {
+    if (!confirm('Remove this module from the path? The module itself will not be deleted.')) return;
+    await sb.from('lms_path_modules').delete().eq('path_id', pathId).eq('module_id', moduleId);
+    loadCurriculumView();
+}
+
+async function deletePath(pathId) {
+    if (!confirm('Delete this path? Modules will not be deleted, only their path assignments.')) return;
+    await sb.from('lms_paths').delete().eq('id', pathId);
+    loadCurriculumView();
+}
+
+async function manageQuiz(moduleId, moduleTitle) {
+    const { data: qs } = await sb.from('lms_quiz_questions').select('*').eq('module_id', moduleId).order('question_order');
+    const count = qs?.length || 0;
+    const action = prompt(`Quiz for "${moduleTitle}"\n${count} question(s) currently.\n\nOptions:\n1. Add a question\n2. Delete all questions\n3. Cancel\n\nEnter 1 or 2:`);
+    if (action === '1') {
+        const qText = prompt('Question text:');
+        if (!qText) return;
+        const a = prompt('Option A:'); if (!a) return;
+        const b = prompt('Option B:'); if (!b) return;
+        const c = prompt('Option C (leave blank to skip):') || null;
+        const d = prompt('Option D (leave blank to skip):') || null;
+        const correct = prompt('Correct answer letter (a, b, c, or d):')?.toLowerCase();
+        if (!['a','b','c','d'].includes(correct)) { alert('Invalid answer letter.'); return; }
+        await sb.from('lms_quiz_questions').insert([{
+            module_id: moduleId, question_text: qText,
+            question_order: count + 1,
+            option_a: a, option_b: b, option_c: c, option_d: d,
+            correct_answer: correct
+        }]);
+        if (c || d) await sb.from('lms_modules').update({ has_quiz: true }).eq('id', moduleId);
+        alert('Question added!');
+    } else if (action === '2') {
+        if (!confirm('Delete ALL questions for this module?')) return;
+        await sb.from('lms_quiz_questions').delete().eq('module_id', moduleId);
+        await sb.from('lms_modules').update({ has_quiz: false }).eq('id', moduleId);
+        alert('Questions deleted.');
+    }
+    loadCurriculumView();
+}
+
+// ══════════════════════════════════════════════
+// ENROLL MODAL
+// ══════════════════════════════════════════════
+async function openEnrollModal() {
+    document.getElementById('enrollModal').classList.add('active');
+    document.getElementById('enrollEmail').value = '';
+    document.getElementById('enrollMsg').innerHTML = '';
+    const { data: paths } = await sb.from('lms_paths').select('*').eq('is_active', true).order('title');
+    allPaths = paths || [];
+    document.getElementById('enrollPath').innerHTML = paths?.length
+        ? paths.map(p => `<option value="${p.id}">${esc(p.title)}</option>`).join('')
+        : '<option value="">No paths available</option>';
+}
+function closeEnrollModal() { document.getElementById('enrollModal').classList.remove('active'); }
+async function submitEnroll() {
+    const email  = document.getElementById('enrollEmail').value.trim().toLowerCase();
+    const pathId = document.getElementById('enrollPath').value;
+    const msgEl  = document.getElementById('enrollMsg');
+    if (!email || !pathId) { msgEl.innerHTML = '<div class="modal-msg error">Please fill in all fields.</div>'; return; }
+    const { error } = await sb.from('lms_enrollments').insert([{ user_email: email, path_id: pathId, enrolled_by: currentUser.email, is_active: true }]);
+    if (error) {
+        msgEl.innerHTML = `<div class="modal-msg error">${error.code === '23505' ? 'Already enrolled in this path.' : esc(error.message)}</div>`;
+        return;
+    }
+    msgEl.innerHTML = '<div class="modal-msg success">✓ Enrolled!</div>';
+    setTimeout(closeEnrollModal, 1200);
+    loadAdminView();
+}
+
+// ══════════════════════════════════════════════
+// ASSIGN MODAL
+// ══════════════════════════════════════════════
+async function openAssignModal() {
+    document.getElementById('assignModal').classList.add('active');
+    document.getElementById('assignEmail').value = '';
+    document.getElementById('assignNote').value  = '';
+    document.getElementById('assignDue').value   = '';
+    document.getElementById('assignMsg').innerHTML = '';
+    if (!allModules.length) {
+        const { data } = await sb.from('lms_modules').select('*').eq('is_active', true).order('title');
+        allModules = data || [];
+    }
+    document.getElementById('assignModule').innerHTML = allModules.length
+        ? allModules.map(m => `<option value="${m.id}">${esc(m.title)}</option>`).join('')
+        : '<option value="">No modules available</option>';
+}
+function closeAssignModal() { document.getElementById('assignModal').classList.remove('active'); }
+async function submitAssign() {
+    const email    = document.getElementById('assignEmail').value.trim().toLowerCase();
+    const moduleId = document.getElementById('assignModule').value;
+    const note     = document.getElementById('assignNote').value.trim() || null;
+    const due      = document.getElementById('assignDue').value || null;
+    const msgEl    = document.getElementById('assignMsg');
+    if (!email || !moduleId) { msgEl.innerHTML = '<div class="modal-msg error">Please fill in all fields.</div>'; return; }
+    const { error } = await sb.from('lms_assignments').insert([{ user_email: email, module_id: moduleId, assigned_by: currentUser.email, note, due_date: due, is_active: true }]);
+    if (error) { msgEl.innerHTML = `<div class="modal-msg error">${esc(error.message)}</div>`; return; }
+    msgEl.innerHTML = '<div class="modal-msg success">✓ Assigned!</div>';
+    setTimeout(closeAssignModal, 1200);
+}
+
+// ══════════════════════════════════════════════
+// SHARED HELPERS
+// ══════════════════════════════════════════════
+function toggleLearnerCard(id) {
+    const el = document.getElementById(id);
+    el?.closest('.learner-card')?.classList.toggle('open');
+}
+
+function findModule(moduleId) {
+    if (allModules.length) return allModules.find(m => m.id === moduleId);
+    if (!pathData) return null;
+    for (const s of pathData.sections) {
+        const m = (s.modules || []).find(m => m.id === moduleId);
+        if (m) return m;
+    }
+    return null;
+}
+
+function buildEmbed(url) {
+    if (!url) return '';
+    const drive1 = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+    if (drive1) return `<iframe src="https://drive.google.com/file/d/${drive1[1]}/preview" allowfullscreen></iframe>`;
+    const drive2 = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+    if (drive2) return `<iframe src="https://drive.google.com/file/d/${drive2[1]}/preview" allowfullscreen></iframe>`;
+    const vimeo  = url.match(/vimeo\.com\/(\d+)/);
+    if (vimeo)  return `<iframe src="https://player.vimeo.com/video/${vimeo[1]}" allowfullscreen></iframe>`;
+    const yt     = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/);
+    if (yt)     return `<iframe src="https://www.youtube.com/embed/${yt[1]}" allowfullscreen></iframe>`;
+    return `<iframe src="${esc(url)}" allowfullscreen></iframe>`;
+}
+
+function fmtDate(str) {
+    if (!str) return '—';
+    return new Date(str).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+function fmtDateTime(str) {
+    if (!str) return '—';
+    return new Date(str).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' });
+}
+function esc(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════
+async function handleLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pw    = document.getElementById('loginPassword').value;
+    const errEl = document.getElementById('loginError');
+    errEl.classList.remove('show');
+    const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+    if (error) { errEl.textContent = error.message; errEl.classList.add('show'); }
+}
+async function handleLogout() { await sb.auth.signOut(); }
+
+function openForgotPW() { document.getElementById('forgotPWModal').classList.add('active'); document.getElementById('forgotPWMsg').innerHTML = ''; }
+function closeForgotPW() { document.getElementById('forgotPWModal').classList.remove('active'); }
+async function handleForgotPW() {
+    const email = document.getElementById('resetEmail').value.trim();
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: `${location.origin}${location.pathname}` });
+    document.getElementById('forgotPWMsg').innerHTML = error
+        ? `<div class="pw-error">${esc(error.message)}</div>`
+        : '<div class="pw-success">✓ Reset link sent!</div>';
+    if (!error) setTimeout(closeForgotPW, 1800);
+}
+
+function openChangePW() { document.getElementById('changePWModal').classList.add('active'); document.getElementById('changePWMsg').innerHTML = ''; }
+function closeChangePW() { document.getElementById('changePWModal').classList.remove('active'); }
+async function handleChangePW() {
+    const np = document.getElementById('cpNew').value;
+    const cp = document.getElementById('cpConfirm').value;
+    const el = document.getElementById('changePWMsg');
+    if (np !== cp) { el.innerHTML = '<div class="pw-error">Passwords do not match.</div>'; return; }
+    if (np.length < 6) { el.innerHTML = '<div class="pw-error">Minimum 6 characters.</div>'; return; }
+    const { error } = await sb.auth.updateUser({ password: np });
+    el.innerHTML = error
+        ? `<div class="pw-error">${esc(error.message)}</div>`
+        : '<div class="pw-success">✓ Password updated!</div>';
+    if (!error) setTimeout(closeChangePW, 1500);
+}
+
+// ── Options dropdown
+document.getElementById('optionsBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    const dd = document.getElementById('optionsDD');
+    dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+});
+document.addEventListener('click', () => { document.getElementById('optionsDD').style.display = 'none'; });
+function closeDD() { document.getElementById('optionsDD').style.display = 'none'; }
+
+// ── Enter on login
+document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+
+// ══════════════════════════════════════════════
+// GO
+// ══════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
