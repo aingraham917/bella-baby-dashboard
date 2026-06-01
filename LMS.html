@@ -307,6 +307,27 @@
         .ct-pdf{background:#fff0f0;color:#c62828;}
         .ct-article{background:#fff8e1;color:#b45309;}
         .ct-text{background:#f3e8ff;color:#7c3aed;}
+
+        /* ── CONTENT CHECKBOXES ── */
+        .ct-check-group{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+        .ct-checkbox{display:flex;align-items:center;gap:7px;padding:9px 14px;border:2px solid #e0e0e0;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:#333;transition:all 0.2s;user-select:none;}
+        .ct-checkbox:hover{border-color:#4ba8a8;}
+        .ct-checkbox.checked{border-color:#4ba8a8;background:#f0fbfb;}
+        .ct-checkbox input{accent-color:#4ba8a8;}
+
+        /* ── DRAG AND DROP CONTENT BLOCKS ── */
+        .content-blocks-zone{display:grid;gap:10px;margin-top:14px;}
+        .content-block{background:white;border:2px solid #e0e0e0;border-radius:10px;overflow:hidden;transition:border-color 0.2s,box-shadow 0.2s;}
+        .content-block.dragging{opacity:0.5;border-color:#4ba8a8;}
+        .content-block.drag-over{border-color:#4ba8a8;box-shadow:0 0 0 3px rgba(75,168,168,0.15);}
+        .cb-handle-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f8f8f8;border-bottom:1px solid #e0e0e0;cursor:grab;}
+        .cb-handle-row:active{cursor:grabbing;}
+        .cb-drag-handle{color:#bbb;font-size:18px;line-height:1;cursor:grab;padding:0 4px;}
+        .cb-drag-handle:hover{color:#4ba8a8;}
+        .cb-type-label{font-size:12px;font-weight:700;color:#555;flex:1;}
+        .cb-remove{background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0 2px;line-height:1;}
+        .cb-remove:hover{color:#ef4444;}
+        .cb-body{padding:12px 14px;}
     </style>
 </head>
 <body>
@@ -458,51 +479,26 @@
                     <textarea class="cf-textarea" id="mfDesc" placeholder="Brief description of what this module covers..."></textarea>
                 </div>
 
-                <!-- Content type -->
+                <!-- Content — checkboxes, multiple allowed -->
                 <div class="cf-row">
-                    <label class="cf-label">Content Type *</label>
-                    <div class="cf-radio-group" id="mfContentTypeGroup">
-                        <label class="cf-radio" onclick="selectContentType('video')">
-                            <input type="radio" name="mfContentType" value="video"> 🎬 Video
+                    <label class="cf-label">Content <span>(check all that apply — drag to reorder)</span></label>
+                    <div class="ct-check-group">
+                        <label class="ct-checkbox" id="ctcb-video" onclick="toggleContentBlock('video')">
+                            <input type="checkbox" value="video" id="ctck-video"> 🎬 Video
                         </label>
-                        <label class="cf-radio" onclick="selectContentType('pdf')">
-                            <input type="radio" name="mfContentType" value="pdf"> 📄 PDF
+                        <label class="ct-checkbox" id="ctcb-pdf" onclick="toggleContentBlock('pdf')">
+                            <input type="checkbox" value="pdf" id="ctck-pdf"> 📄 PDF
                         </label>
-                        <label class="cf-radio" onclick="selectContentType('article')">
-                            <input type="radio" name="mfContentType" value="article"> 🔗 Article / Link
+                        <label class="ct-checkbox" id="ctcb-article" onclick="toggleContentBlock('article')">
+                            <input type="checkbox" value="article" id="ctck-article"> 🔗 Article / Link
                         </label>
-                        <label class="cf-radio" onclick="selectContentType('text')">
-                            <input type="radio" name="mfContentType" value="text"> 📝 Written Instructions
+                        <label class="ct-checkbox" id="ctcb-text" onclick="toggleContentBlock('text')">
+                            <input type="checkbox" value="text" id="ctck-text"> 📝 Written Instructions
                         </label>
                     </div>
-                </div>
-
-                <!-- Video URL -->
-                <div class="cf-sub-panel hidden" id="mfVideoPanel">
-                    <label class="cf-label">Video URL</label>
-                    <input type="text" class="cf-input" id="mfVideoUrl" placeholder="Google Drive, Vimeo, or YouTube URL">
-                    <p class="cf-hint">Google Drive: share link or file URL · Vimeo: vimeo.com/123456 · YouTube: youtube.com/watch?v=...</p>
-                </div>
-
-                <!-- PDF URL -->
-                <div class="cf-sub-panel hidden" id="mfPdfPanel">
-                    <label class="cf-label">PDF URL</label>
-                    <input type="text" class="cf-input" id="mfPdfUrl" placeholder="Google Drive share link or direct PDF URL">
-                    <p class="cf-hint">Learners will see a button to open the PDF in a new tab.</p>
-                </div>
-
-                <!-- Article URL -->
-                <div class="cf-sub-panel hidden" id="mfArticlePanel">
-                    <label class="cf-label">Article / Link URL</label>
-                    <input type="text" class="cf-input" id="mfArticleUrl" placeholder="https://...">
-                    <p class="cf-hint">Learners will see a button to open the link in a new tab.</p>
-                </div>
-
-                <!-- Text / Rich content -->
-                <div class="cf-sub-panel hidden" id="mfTextPanel">
-                    <label class="cf-label">Written Instructions</label>
-                    <div id="mfQuillEditor" style="min-height:160px;background:white;border-radius:0 0 6px 6px;"></div>
-                    <input type="hidden" id="mfTextContent">
+                    <!-- Draggable content blocks zone -->
+                    <div class="content-blocks-zone" id="contentBlocksZone"></div>
+                    <p class="cf-hint" id="contentBlocksHint" style="display:none;">Drag the ⠿ handle to reorder how content appears to learners.</p>
                 </div>
 
                 <!-- Has quiz -->
@@ -999,46 +995,49 @@ function renderModuleRows(mods, sectionLocked, si, allSections) {
 function buildModContent(mod, source) {
     const prog   = progressMap[mod.id];
     const passed = prog?.status === 'passed';
-    const ct     = mod.content_type || 'video';
     let html = '';
 
-    // Content area by type
-    if (ct === 'video') {
-        const embed = buildEmbed(mod.video_url);
-        html += embed
-            ? `<div class="video-wrap">${embed}</div>`
-            : `<div class="no-video">📹 No video attached to this module yet.</div>`;
-    } else if (ct === 'pdf') {
-        if (mod.content_url) {
-            html += `<div style="margin-bottom:16px;">
-                <a href="${esc(mod.content_url)}" target="_blank" rel="noopener"
-                   style="display:inline-flex;align-items:center;gap:8px;padding:12px 20px;background:#fff0f0;color:#c62828;border:2px solid #ffcdd2;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;transition:all 0.2s;"
-                   onmouseover="this.style.background='#ffebee'" onmouseout="this.style.background='#fff0f0'">
-                    📄 Open PDF
-                </a>
-            </div>`;
-        } else {
-            html += `<div class="no-video">📄 No PDF attached yet.</div>`;
+    // Determine content block order
+    let order = [];
+    try { order = JSON.parse(mod.content_order || '[]'); } catch(e) {}
+    if (!order.length && mod.content_type) order = [mod.content_type];
+    if (!order.length) order = ['video']; // fallback
+
+    // Render each content block in order
+    order.forEach(ct => {
+        if (ct === 'video') {
+            const embed = buildEmbed(mod.video_url);
+            html += embed
+                ? `<div class="video-wrap">${embed}</div>`
+                : `<div class="no-video">📹 No video attached yet.</div>`;
+        } else if (ct === 'pdf') {
+            const url = mod.pdf_url || mod.content_url;
+            html += url
+                ? `<div style="margin-bottom:16px;">
+                    <a href="${esc(url)}" target="_blank" rel="noopener"
+                       style="display:inline-flex;align-items:center;gap:8px;padding:12px 20px;background:#fff0f0;color:#c62828;border:2px solid #ffcdd2;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;"
+                       onmouseover="this.style.background='#ffebee'" onmouseout="this.style.background='#fff0f0'">
+                        📄 Open PDF
+                    </a>
+                  </div>`
+                : `<div class="no-video">📄 No PDF attached yet.</div>`;
+        } else if (ct === 'article') {
+            const url = mod.article_url || mod.content_url;
+            html += url
+                ? `<div style="margin-bottom:16px;">
+                    <a href="${esc(url)}" target="_blank" rel="noopener"
+                       style="display:inline-flex;align-items:center;gap:8px;padding:12px 20px;background:#fff8e1;color:#b45309;border:2px solid #ffe082;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;"
+                       onmouseover="this.style.background='#fff3cd'" onmouseout="this.style.background='#fff8e1'">
+                        🔗 Read Article
+                    </a>
+                  </div>`
+                : `<div class="no-video">🔗 No article link attached yet.</div>`;
+        } else if (ct === 'text') {
+            html += mod.text_content
+                ? `<div style="background:white;border:1px solid #e0e0e0;border-radius:8px;padding:20px;margin-bottom:16px;font-size:14px;line-height:1.7;color:#333;" class="ql-editor">${mod.text_content}</div>`
+                : `<div class="no-video">📝 No written content attached yet.</div>`;
         }
-    } else if (ct === 'article') {
-        if (mod.content_url) {
-            html += `<div style="margin-bottom:16px;">
-                <a href="${esc(mod.content_url)}" target="_blank" rel="noopener"
-                   style="display:inline-flex;align-items:center;gap:8px;padding:12px 20px;background:#fff8e1;color:#b45309;border:2px solid #ffe082;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;transition:all 0.2s;"
-                   onmouseover="this.style.background='#fff3cd'" onmouseout="this.style.background='#fff8e1'">
-                    🔗 Read Article
-                </a>
-            </div>`;
-        } else {
-            html += `<div class="no-video">🔗 No article link attached yet.</div>`;
-        }
-    } else if (ct === 'text') {
-        if (mod.text_content) {
-            html += `<div style="background:white;border:1px solid #e0e0e0;border-radius:8px;padding:20px;margin-bottom:16px;font-size:14px;line-height:1.7;color:#333;" class="ql-editor">${mod.text_content}</div>`;
-        } else {
-            html += `<div class="no-video">📝 No written content attached yet.</div>`;
-        }
-    }
+    });
 
     // Description
     if (mod.description) html += `<div class="mod-desc">${esc(mod.description)}</div>`;
@@ -1788,12 +1787,12 @@ function filterAdminCards() { loadAdminView(); }
 // CURRICULUM MANAGER
 // ══════════════════════════════════════════════
 
-// ── Quill instance
-let quillEditor = null;
+// ── Quill instances per content block
+const quillInstances = {};
 
-function initQuill() {
-    if (quillEditor) return;
-    quillEditor = new Quill('#mfQuillEditor', {
+function initQuillForBlock(blockId) {
+    if (quillInstances[blockId]) return;
+    quillInstances[blockId] = new Quill('#' + blockId, {
         theme: 'snow',
         placeholder: 'Enter written instructions here...',
         modules: {
@@ -1807,16 +1806,129 @@ function initQuill() {
     });
 }
 
-// ── Content type selector
-function selectContentType(type) {
-    ['video','pdf','article','text'].forEach(t => {
-        document.getElementById('mf' + t.charAt(0).toUpperCase() + t.slice(1) + 'Panel').classList.add('hidden');
+// ── Content block definitions
+const CONTENT_TYPES = {
+    video:   { icon:'🎬', label:'Video',               color:'#4ba8a8' },
+    pdf:     { icon:'📄', label:'PDF',                 color:'#c62828' },
+    article: { icon:'🔗', label:'Article / Link',      color:'#b45309' },
+    text:    { icon:'📝', label:'Written Instructions', color:'#7c3aed' }
+};
+
+function buildBlockHTML(type) {
+    const { icon, label } = CONTENT_TYPES[type];
+    const quillId = 'quill-block-' + type;
+    let inputs = '';
+    if (type === 'video') {
+        inputs = `<label class="cf-label">Video URL</label>
+            <input type="text" class="cf-input" id="cb-video-url" placeholder="Google Drive, Vimeo, or YouTube URL">
+            <p class="cf-hint">Google Drive share link · vimeo.com/123456 · youtube.com/watch?v=...</p>`;
+    } else if (type === 'pdf') {
+        inputs = `<label class="cf-label">PDF URL</label>
+            <input type="text" class="cf-input" id="cb-pdf-url" placeholder="Google Drive share link or direct PDF URL">
+            <p class="cf-hint">Learners will see a button to open the PDF in a new tab.</p>`;
+    } else if (type === 'article') {
+        inputs = `<label class="cf-label">Article / Link URL</label>
+            <input type="text" class="cf-input" id="cb-article-url" placeholder="https://...">
+            <p class="cf-hint">Learners will see a button to open the link in a new tab.</p>`;
+    } else if (type === 'text') {
+        inputs = `<label class="cf-label">Written Instructions</label>
+            <div id="${quillId}" style="min-height:160px;background:white;"></div>`;
+    }
+    return `
+        <div class="content-block" id="cb-block-${type}" draggable="true" data-type="${type}"
+             ondragstart="onDragStart(event)" ondragover="onDragOver(event)"
+             ondragleave="onDragLeave(event)" ondrop="onDrop(event)" ondragend="onDragEnd(event)">
+            <div class="cb-handle-row">
+                <span class="cb-drag-handle" title="Drag to reorder">⠿</span>
+                <span class="cb-type-label">${icon} ${label}</span>
+                <button class="cb-remove" onclick="removeContentBlock('${type}')" title="Remove">&times;</button>
+            </div>
+            <div class="cb-body">${inputs}</div>
+        </div>`;
+}
+
+// ── Toggle a content block on/off via checkbox
+function toggleContentBlock(type) {
+    // Small delay so the checkbox state has updated
+    setTimeout(() => {
+        const checked = document.getElementById('ctck-' + type)?.checked;
+        const label   = document.getElementById('ctcb-' + type);
+        const zone    = document.getElementById('contentBlocksZone');
+        const hint    = document.getElementById('contentBlocksHint');
+
+        if (checked) {
+            label?.classList.add('checked');
+            // Only add if not already there
+            if (!document.getElementById('cb-block-' + type)) {
+                zone.insertAdjacentHTML('beforeend', buildBlockHTML(type));
+                if (type === 'text') setTimeout(() => initQuillForBlock('quill-block-text'), 80);
+            }
+        } else {
+            label?.classList.remove('checked');
+            document.getElementById('cb-block-' + type)?.remove();
+        }
+
+        // Show/hide hint
+        const anyBlocks = zone.children.length > 0;
+        hint.style.display = anyBlocks && zone.children.length > 1 ? 'block' : 'none';
+    }, 0);
+}
+
+function removeContentBlock(type) {
+    document.getElementById('cb-block-' + type)?.remove();
+    const cb = document.getElementById('ctck-' + type);
+    if (cb) cb.checked = false;
+    document.getElementById('ctcb-' + type)?.classList.remove('checked');
+    const zone = document.getElementById('contentBlocksZone');
+    document.getElementById('contentBlocksHint').style.display =
+        zone.children.length > 1 ? 'block' : 'none';
+    if (type === 'text') delete quillInstances['quill-block-text'];
+}
+
+// ── Drag and drop
+let dragSrc = null;
+function onDragStart(e) {
+    dragSrc = e.currentTarget;
+    dragSrc.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+}
+function onDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const target = e.currentTarget;
+    if (target !== dragSrc) target.classList.add('drag-over');
+}
+function onDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function onDragEnd(e) {
+    dragSrc?.classList.remove('dragging');
+    document.querySelectorAll('.content-block').forEach(b => b.classList.remove('drag-over'));
+    dragSrc = null;
+}
+function onDrop(e) {
+    e.preventDefault();
+    const target = e.currentTarget;
+    target.classList.remove('drag-over');
+    if (!dragSrc || dragSrc === target) return;
+    const zone = document.getElementById('contentBlocksZone');
+    const blocks = [...zone.children];
+    const fromIdx = blocks.indexOf(dragSrc);
+    const toIdx   = blocks.indexOf(target);
+    if (fromIdx < toIdx) target.after(dragSrc);
+    else target.before(dragSrc);
+}
+
+// ── Read current content block order + values
+function getContentBlocks() {
+    const zone = document.getElementById('contentBlocksZone');
+    return [...zone.children].map(block => {
+        const type = block.dataset.type;
+        let value = '';
+        if (type === 'video')   value = document.getElementById('cb-video-url')?.value.trim() || '';
+        if (type === 'pdf')     value = document.getElementById('cb-pdf-url')?.value.trim() || '';
+        if (type === 'article') value = document.getElementById('cb-article-url')?.value.trim() || '';
+        if (type === 'text')    value = quillInstances['quill-block-text']?.root.innerHTML || '';
+        return { type, value };
     });
-    document.getElementById('mf' + type.charAt(0).toUpperCase() + type.slice(1) + 'Panel').classList.remove('hidden');
-    document.querySelectorAll('#mfContentTypeGroup .cf-radio').forEach(r => r.classList.remove('selected'));
-    const radio = document.querySelector(`input[name="mfContentType"][value="${type}"]`);
-    if (radio) { radio.checked = true; radio.closest('.cf-radio').classList.add('selected'); }
-    if (type === 'text') setTimeout(initQuill, 50);
 }
 
 function selectQuizYN(val) {
@@ -1894,19 +2006,29 @@ async function saveModuleForm() {
     btn.disabled = true; btn.textContent = 'Saving...';
 
     try {
-        // Build content URL / text
-        let videoUrl = null, contentUrl = null, textContent = null;
-        if (contentType === 'video') videoUrl = document.getElementById('mfVideoUrl').value.trim() || null;
-        if (contentType === 'pdf')   contentUrl = document.getElementById('mfPdfUrl').value.trim() || null;
-        if (contentType === 'article') contentUrl = document.getElementById('mfArticleUrl').value.trim() || null;
-        if (contentType === 'text' && quillEditor) textContent = quillEditor.root.innerHTML;
+        // Read content blocks in their dragged order
+        const blocks = getContentBlocks();
+        if (!blocks.length) { showCFMsg(msgEl, 'error', 'Please select at least one content type.'); btn.disabled = false; btn.textContent = editId ? 'Update Module' : 'Save Module'; return; }
+
+        // Extract values by type (a module can have multiple)
+        const videoUrl    = blocks.find(b => b.type === 'video')?.value || null;
+        const contentUrl  = blocks.find(b => b.type === 'pdf' || b.type === 'article')?.value || null;
+        const pdfUrl      = blocks.find(b => b.type === 'pdf')?.value || null;
+        const articleUrl  = blocks.find(b => b.type === 'article')?.value || null;
+        const textContent = blocks.find(b => b.type === 'text')?.value || null;
+        const contentOrder = JSON.stringify(blocks.map(b => b.type));
+        // Primary content_type is first block for backwards compat
+        const contentType = blocks[0]?.type || 'video';
 
         // Upsert module
         const modData = {
             title, description: desc,
             content_type: contentType,
+            content_order: contentOrder,
             video_url: videoUrl,
-            content_url: contentUrl,
+            content_url: pdfUrl || articleUrl || null,
+            pdf_url: pdfUrl || null,
+            article_url: articleUrl || null,
             text_content: textContent,
             has_quiz: hasQuiz,
             passing_score: 80,
@@ -1996,11 +2118,15 @@ function clearModuleForm() {
     document.getElementById('mfEditId').value = '';
     document.getElementById('mfTitle').value = '';
     document.getElementById('mfDesc').value = '';
-    document.getElementById('mfVideoUrl').value = '';
-    document.getElementById('mfPdfUrl').value = '';
-    document.getElementById('mfArticleUrl').value = '';
-    if (quillEditor) quillEditor.root.innerHTML = '';
-    ['video','pdf','article','text'].forEach(t => document.getElementById('mf' + t.charAt(0).toUpperCase() + t.slice(1) + 'Panel').classList.add('hidden'));
+    // Clear all content blocks
+    ['video','pdf','article','text'].forEach(t => {
+        document.getElementById('cb-block-' + t)?.remove();
+        const cb = document.getElementById('ctck-' + t);
+        if (cb) cb.checked = false;
+        document.getElementById('ctcb-' + t)?.classList.remove('checked');
+        if (t === 'text') delete quillInstances['quill-block-text'];
+    });
+    document.getElementById('contentBlocksHint').style.display = 'none';
     document.querySelectorAll('.cf-radio').forEach(r => r.classList.remove('selected'));
     document.querySelectorAll('.cf-radio input').forEach(r => r.checked = false);
     document.getElementById('mfPathPanel').classList.add('hidden');
@@ -2025,14 +2151,51 @@ async function editModuleFill(moduleId) {
     document.getElementById('moduleFormTitle').textContent = '✏️ Edit Module';
     document.getElementById('mfSaveBtn').textContent = 'Update Module';
 
-    // Content type
-    if (mod.content_type) {
-        selectContentType(mod.content_type);
-        if (mod.content_type === 'video' && mod.video_url) document.getElementById('mfVideoUrl').value = mod.video_url;
-        if (mod.content_type === 'pdf' && mod.content_url) document.getElementById('mfPdfUrl').value = mod.content_url;
-        if (mod.content_type === 'article' && mod.content_url) document.getElementById('mfArticleUrl').value = mod.content_url;
-        if (mod.content_type === 'text' && mod.text_content) { setTimeout(() => { initQuill(); quillEditor.root.innerHTML = mod.text_content; }, 100); }
-    }
+    // Restore content blocks in saved order
+    let order = [];
+    try { order = JSON.parse(mod.content_order || '[]'); } catch(e) {}
+    if (!order.length && mod.content_type) order = [mod.content_type];
+
+    // Clear first
+    ['video','pdf','article','text'].forEach(t => {
+        document.getElementById('cb-block-' + t)?.remove();
+        const cb = document.getElementById('ctck-' + t);
+        if (cb) cb.checked = false;
+        document.getElementById('ctcb-' + t)?.classList.remove('checked');
+        if (t === 'text') delete quillInstances['quill-block-text'];
+    });
+
+    // Add blocks in saved order
+    const zone = document.getElementById('contentBlocksZone');
+    order.forEach(type => {
+        if (!document.getElementById('cb-block-' + type)) {
+            zone.insertAdjacentHTML('beforeend', buildBlockHTML(type));
+        }
+        const cb = document.getElementById('ctck-' + type);
+        if (cb) cb.checked = true;
+        document.getElementById('ctcb-' + type)?.classList.add('checked');
+    });
+
+    // Fill values
+    setTimeout(() => {
+        if (mod.video_url)   { const el = document.getElementById('cb-video-url');   if(el) el.value = mod.video_url; }
+        if (mod.pdf_url)     { const el = document.getElementById('cb-pdf-url');     if(el) el.value = mod.pdf_url; }
+        if (mod.article_url) { const el = document.getElementById('cb-article-url'); if(el) el.value = mod.article_url; }
+        // backwards compat: if content_url set but no specific pdf/article url
+        if (mod.content_url && !mod.pdf_url && !mod.article_url) {
+            const el = document.getElementById('cb-pdf-url') || document.getElementById('cb-article-url');
+            if (el) el.value = mod.content_url;
+        }
+        if (order.includes('text') && mod.text_content) {
+            initQuillForBlock('quill-block-text');
+            setTimeout(() => {
+                if (quillInstances['quill-block-text']) quillInstances['quill-block-text'].root.innerHTML = mod.text_content;
+            }, 120);
+        }
+    }, 80);
+
+    const hint = document.getElementById('contentBlocksHint');
+    if (hint) hint.style.display = order.length > 1 ? 'block' : 'none';
     if (mod.has_quiz) selectQuizYN('yes'); else selectQuizYN('no');
 
     // Check if in a path
