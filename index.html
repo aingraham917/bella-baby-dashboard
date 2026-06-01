@@ -1082,6 +1082,7 @@
                             <button id="changePasswordOption" class="options-menu-item" onclick="openChangePasswordPage()" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; transition: background 0.2s;">👤 Edit Profile</button>
                         </div>
                     </div>
+                    <a href="LMS.html" style="padding: 8px 15px; background: #a8d5a3; color: #1a4d1a; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; text-decoration: none; display: inline-block; transition: background 0.2s;" onmouseover="this.style.background='#8fc98a'" onmouseout="this.style.background='#a8d5a3'">Learning</a>
                 </div>
                 <div class="top-bar-right">
                     <button class="logout-btn" id="logoutBtn" style="background: #9e9e9e; color: white; margin: 0; padding: 6px 14px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer;">Log Out</button>
@@ -5685,19 +5686,14 @@
                 try {
                     const safeName = entry.name.replace(/[^a-zA-Z0-9._-]/g,'_');
                     const path = `ga-references/${assessmentId}/${Date.now()}_${safeName}`;
-                    const { error } = await supabaseClient.storage
+                    const { data, error } = await supabaseClient.storage
                         .from('ga-images')
-                        .upload(path, entry.blob, { contentType: 'image/jpeg', upsert: true });
-                    if (error) {
-                        console.warn('Upload error for', entry.name, error.message);
-                    } else {
+                        .upload(path, entry.blob, { contentType: 'image/jpeg', upsert: false });
+                    if (!error && data) {
                         const { data: pub } = supabaseClient.storage.from('ga-images').getPublicUrl(path);
-                        if (pub?.publicUrl) {
-                            urls.push(pub.publicUrl);
-                        } else {
-                            const fallbackUrl = `https://hlfoaynyuzfexhqydesl.supabase.co/storage/v1/object/public/ga-images/${path}`;
-                            urls.push(fallbackUrl);
-                        }
+                        if (pub?.publicUrl) urls.push(pub.publicUrl);
+                    } else if (error) {
+                        console.warn('Upload error for', entry.name, error.message);
                     }
                 } catch(e) { console.warn('Image upload failed:', e); }
             }
