@@ -5685,14 +5685,19 @@
                 try {
                     const safeName = entry.name.replace(/[^a-zA-Z0-9._-]/g,'_');
                     const path = `ga-references/${assessmentId}/${Date.now()}_${safeName}`;
-                    const { data, error } = await supabaseClient.storage
+                    const { error } = await supabaseClient.storage
                         .from('ga-images')
-                        .upload(path, entry.blob, { contentType: 'image/jpeg', upsert: false });
-                    if (!error && data) {
-                        const { data: pub } = supabaseClient.storage.from('ga-images').getPublicUrl(path);
-                        if (pub?.publicUrl) urls.push(pub.publicUrl);
-                    } else if (error) {
+                        .upload(path, entry.blob, { contentType: 'image/jpeg', upsert: true });
+                    if (error) {
                         console.warn('Upload error for', entry.name, error.message);
+                    } else {
+                        const { data: pub } = supabaseClient.storage.from('ga-images').getPublicUrl(path);
+                        if (pub?.publicUrl) {
+                            urls.push(pub.publicUrl);
+                        } else {
+                            const fallbackUrl = `https://hlfoaynyuzfexhqydesl.supabase.co/storage/v1/object/public/ga-images/${path}`;
+                            urls.push(fallbackUrl);
+                        }
                     }
                 } catch(e) { console.warn('Image upload failed:', e); }
             }
