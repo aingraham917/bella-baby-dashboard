@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bella Baby – Learning Hub</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;min-height:100vh;}
@@ -25,7 +27,7 @@
         .error-msg{background:#fee;color:#c33;padding:12px;border-radius:6px;margin-bottom:20px;font-size:14px;display:none;}
         .error-msg.show{display:block;}
 
-        /* ── LAYOUT 1 ── */
+        /* ── LAYOUT ── */
         .main-container{display:flex;min-height:100vh;background:#fff;}
         .dashboard-wrapper{width:100%;max-width:900px;margin:0 auto;display:flex;flex-direction:column;}
         .dashboard{display:none;width:100%;flex-direction:column;}
@@ -246,6 +248,62 @@
         .lib-new{background:#e8f5f5;color:#4ba8a8;}
         .lib-content{display:none;padding:16px 18px;border-top:1px solid #f0f0f0;background:#fafeff;}
         .lib-card.open .lib-content{display:block;}
+
+        /* ── CURRICULUM FORM ── */
+        .curr-form-panel{background:white;border:1px solid #4ba8a8;border-radius:10px;padding:24px;margin-bottom:24px;}
+        .curr-form-panel h3{font-size:16px;font-weight:700;color:#333;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid #e8f5f5;}
+        .cf-row{margin-bottom:16px;}
+        .cf-label{display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:6px;}
+        .cf-label span{font-weight:400;color:#999;font-size:11px;margin-left:4px;}
+        .cf-input{width:100%;padding:10px 12px;border:2px solid #e0e0e0;border-radius:6px;font-size:13px;font-family:inherit;transition:border-color 0.2s;}
+        .cf-input:focus{outline:none;border-color:#4ba8a8;}
+        .cf-select{width:100%;padding:10px 12px;border:2px solid #e0e0e0;border-radius:6px;font-size:13px;background:white;cursor:pointer;}
+        .cf-select:focus{outline:none;border-color:#4ba8a8;}
+        .cf-textarea{width:100%;padding:10px 12px;border:2px solid #e0e0e0;border-radius:6px;font-size:13px;font-family:inherit;min-height:80px;resize:vertical;}
+        .cf-textarea:focus{outline:none;border-color:#4ba8a8;}
+        .cf-radio-group{display:flex;gap:16px;flex-wrap:wrap;}
+        .cf-radio{display:flex;align-items:center;gap:6px;font-size:13px;color:#333;cursor:pointer;padding:8px 14px;border:2px solid #e0e0e0;border-radius:6px;transition:all 0.2s;}
+        .cf-radio:hover{border-color:#4ba8a8;}
+        .cf-radio input{accent-color:#4ba8a8;}
+        .cf-radio.selected{border-color:#4ba8a8;background:#f0fbfb;}
+        .cf-sub-panel{background:#f9f9f9;border:1px solid #e0e0e0;border-radius:8px;padding:16px;margin-top:10px;}
+        .cf-sub-panel.hidden{display:none;}
+        .cf-hint{font-size:11px;color:#999;margin-top:4px;line-height:1.5;}
+        .cf-save-row{display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0;align-items:center;}
+        .cf-save-msg{font-size:13px;padding:8px 12px;border-radius:6px;}
+        .cf-save-msg.success{background:#e8f5e9;color:#2d7a2d;}
+        .cf-save-msg.error{background:#fff0f0;color:#c62828;}
+        .ql-container{font-size:14px;border-bottom-left-radius:6px;border-bottom-right-radius:6px;}
+        .ql-toolbar{border-top-left-radius:6px;border-top-right-radius:6px;border-color:#e0e0e0!important;}
+        .ql-container{border-color:#e0e0e0!important;}
+
+        /* ── QUIZ QUESTION EDITOR ── */
+        .quiz-editor{margin-top:8px;}
+        .quiz-q-card{background:white;border:1px solid #e0e0e0;border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+        .quiz-q-card-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+        .quiz-q-num{font-size:12px;font-weight:700;color:#4ba8a8;text-transform:uppercase;}
+        .quiz-q-type-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;background:#e8f5f5;color:#4ba8a8;}
+        .quiz-q-text{font-size:13px;color:#333;line-height:1.5;margin-bottom:8px;}
+        .quiz-q-opts{display:grid;gap:4px;margin-bottom:8px;}
+        .quiz-q-opt{font-size:12px;padding:5px 10px;border-radius:4px;background:#f5f5f5;color:#555;}
+        .quiz-q-opt.correct{background:#e8f5e9;color:#2d7a2d;font-weight:600;}
+        .add-q-form{background:#f9f9f9;border:1px dashed #ddd;border-radius:8px;padding:16px;margin-top:10px;}
+        .add-q-form.hidden{display:none;}
+        .q-type-select{margin-bottom:12px;}
+
+        /* ── MODULE LIST IN CURRICULUM ── */
+        .mod-curr-card{background:white;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;margin-bottom:8px;}
+        .mod-curr-hdr{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:background 0.2s;}
+        .mod-curr-hdr:hover{background:#f9f9f9;}
+        .mod-curr-title{font-size:13px;font-weight:600;color:#333;}
+        .mod-curr-meta{font-size:11px;color:#999;margin-top:2px;}
+        .mod-curr-body{display:none;padding:14px 16px;border-top:1px solid #f0f0f0;background:#fafeff;}
+        .mod-curr-card.open .mod-curr-body{display:block;}
+        .content-type-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;margin-left:8px;}
+        .ct-video{background:#e8f5f5;color:#4ba8a8;}
+        .ct-pdf{background:#fff0f0;color:#c62828;}
+        .ct-article{background:#fff8e1;color:#b45309;}
+        .ct-text{background:#f3e8ff;color:#7c3aed;}
     </style>
 </head>
 <body>
@@ -378,11 +436,150 @@
         <!-- ─── CURRICULUM MANAGER ─── -->
         <div id="viewCurriculum" style="display:none;">
             <div class="page-title">Manage Curriculum</div>
-            <div class="page-sub">Add and edit paths, sections, modules, and quiz questions.</div>
-            <div class="admin-toolbar">
-                <button class="btn-sm btn-teal" onclick="promptAddPath()">+ New Path</button>
-                <button class="btn-sm btn-teal" onclick="promptAddModule()">+ New Module</button>
+            <div class="page-sub">Add modules, build learning paths, and manage quiz questions.</div>
+
+            <!-- ══ ADD / EDIT MODULE FORM (always visible) ══ -->
+            <div class="curr-form-panel" id="moduleFormPanel">
+                <h3 id="moduleFormTitle">➕ Add New Module</h3>
+                <input type="hidden" id="mfEditId">
+
+                <!-- Module title -->
+                <div class="cf-row">
+                    <label class="cf-label">Module Title *</label>
+                    <input type="text" class="cf-input" id="mfTitle" placeholder="e.g. Introduction to Camera Settings">
+                </div>
+
+                <!-- Description -->
+                <div class="cf-row">
+                    <label class="cf-label">Description <span>(optional — shown to learner)</span></label>
+                    <textarea class="cf-textarea" id="mfDesc" placeholder="Brief description of what this module covers..."></textarea>
+                </div>
+
+                <!-- Content type -->
+                <div class="cf-row">
+                    <label class="cf-label">Content Type *</label>
+                    <div class="cf-radio-group" id="mfContentTypeGroup">
+                        <label class="cf-radio" onclick="selectContentType('video')">
+                            <input type="radio" name="mfContentType" value="video"> 🎬 Video
+                        </label>
+                        <label class="cf-radio" onclick="selectContentType('pdf')">
+                            <input type="radio" name="mfContentType" value="pdf"> 📄 PDF
+                        </label>
+                        <label class="cf-radio" onclick="selectContentType('article')">
+                            <input type="radio" name="mfContentType" value="article"> 🔗 Article / Link
+                        </label>
+                        <label class="cf-radio" onclick="selectContentType('text')">
+                            <input type="radio" name="mfContentType" value="text"> 📝 Written Instructions
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Video URL -->
+                <div class="cf-sub-panel hidden" id="mfVideoPanel">
+                    <label class="cf-label">Video URL</label>
+                    <input type="text" class="cf-input" id="mfVideoUrl" placeholder="Google Drive, Vimeo, or YouTube URL">
+                    <p class="cf-hint">Google Drive: share link or file URL · Vimeo: vimeo.com/123456 · YouTube: youtube.com/watch?v=...</p>
+                </div>
+
+                <!-- PDF URL -->
+                <div class="cf-sub-panel hidden" id="mfPdfPanel">
+                    <label class="cf-label">PDF URL</label>
+                    <input type="text" class="cf-input" id="mfPdfUrl" placeholder="Google Drive share link or direct PDF URL">
+                    <p class="cf-hint">Learners will see a button to open the PDF in a new tab.</p>
+                </div>
+
+                <!-- Article URL -->
+                <div class="cf-sub-panel hidden" id="mfArticlePanel">
+                    <label class="cf-label">Article / Link URL</label>
+                    <input type="text" class="cf-input" id="mfArticleUrl" placeholder="https://...">
+                    <p class="cf-hint">Learners will see a button to open the link in a new tab.</p>
+                </div>
+
+                <!-- Text / Rich content -->
+                <div class="cf-sub-panel hidden" id="mfTextPanel">
+                    <label class="cf-label">Written Instructions</label>
+                    <div id="mfQuillEditor" style="min-height:160px;background:white;border-radius:0 0 6px 6px;"></div>
+                    <input type="hidden" id="mfTextContent">
+                </div>
+
+                <!-- Has quiz -->
+                <div class="cf-row" style="margin-top:16px;">
+                    <label class="cf-label">Does this module have a quiz?</label>
+                    <div class="cf-radio-group">
+                        <label class="cf-radio" onclick="selectQuizYN('yes')">
+                            <input type="radio" name="mfHasQuiz" value="yes"> Yes
+                        </label>
+                        <label class="cf-radio" onclick="selectQuizYN('no')">
+                            <input type="radio" name="mfHasQuiz" value="no"> No
+                        </label>
+                    </div>
+                    <p class="cf-hint" style="margin-top:8px;">Quiz questions can be added after saving the module.</p>
+                </div>
+
+                <!-- Part of a learning path? -->
+                <div class="cf-row">
+                    <label class="cf-label">Is this part of a learning path?</label>
+                    <div class="cf-radio-group">
+                        <label class="cf-radio" onclick="selectPathYN('yes')">
+                            <input type="radio" name="mfPathYN" value="yes"> Yes
+                        </label>
+                        <label class="cf-radio" onclick="selectPathYN('no')">
+                            <input type="radio" name="mfPathYN" value="no"> No — standalone module
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Path selection -->
+                <div class="cf-sub-panel hidden" id="mfPathPanel">
+                    <label class="cf-label">Select Path</label>
+                    <select class="cf-select" id="mfPathSelect" onchange="onPathSelectChange()">
+                        <option value="">— Select a path —</option>
+                        <option value="__new__">+ Create new path...</option>
+                    </select>
+
+                    <!-- New path fields -->
+                    <div id="mfNewPathPanel" style="display:none;margin-top:12px;background:white;border:1px solid #e0e0e0;border-radius:6px;padding:14px;">
+                        <label class="cf-label">New Path Title *</label>
+                        <input type="text" class="cf-input" id="mfNewPathTitle" placeholder="e.g. Advanced Lighting Series" style="margin-bottom:10px;">
+                        <label class="cf-label">Sequential? <span>(learner must complete in order)</span></label>
+                        <div class="cf-radio-group">
+                            <label class="cf-radio" onclick="selectSeqYN('yes')"><input type="radio" name="mfSeq" value="yes"> Yes — sequential</label>
+                            <label class="cf-radio" onclick="selectSeqYN('no')"><input type="radio" name="mfSeq" value="no"> No — open order</label>
+                        </div>
+                    </div>
+
+                    <!-- Section selection (shows after path is chosen) -->
+                    <div id="mfSectionContainer" style="display:none;margin-top:14px;">
+                        <label class="cf-label">Is this part of a section within that path?</label>
+                        <div class="cf-radio-group" style="margin-bottom:10px;">
+                            <label class="cf-radio" onclick="selectSectionYN('yes')"><input type="radio" name="mfSectionYN" value="yes"> Yes</label>
+                            <label class="cf-radio" onclick="selectSectionYN('no')"><input type="radio" name="mfSectionYN" value="no"> No — add directly to path</label>
+                        </div>
+
+                        <div id="mfSectionPanel" style="display:none;">
+                            <label class="cf-label">Select Section</label>
+                            <select class="cf-select" id="mfSectionSelect" onchange="onSectionSelectChange()">
+                                <option value="">— Select a section —</option>
+                                <option value="__new__">+ Create new section...</option>
+                            </select>
+                            <!-- New section fields -->
+                            <div id="mfNewSectionPanel" style="display:none;margin-top:10px;background:white;border:1px solid #e0e0e0;border-radius:6px;padding:12px;">
+                                <label class="cf-label">New Section Title *</label>
+                                <input type="text" class="cf-input" id="mfNewSectionTitle" placeholder="e.g. Camera Basics">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cf-save-row">
+                    <button class="btn-primary" id="mfSaveBtn" onclick="saveModuleForm()">Save Module</button>
+                    <button class="btn-secondary" onclick="clearModuleForm()">Clear</button>
+                    <span class="cf-save-msg" id="mfSaveMsg"></span>
+                </div>
             </div>
+
+            <!-- ══ MODULE LIST ══ -->
+            <div style="font-size:14px;font-weight:700;color:#333;margin-bottom:10px;" id="modListTitle">🗂 All Modules</div>
             <div id="curriculumContent"><div class="loading">Loading curriculum...</div></div>
         </div>
 
@@ -781,13 +978,46 @@ function renderModuleRows(mods, sectionLocked, si, allSections) {
 function buildModContent(mod, source) {
     const prog   = progressMap[mod.id];
     const passed = prog?.status === 'passed';
+    const ct     = mod.content_type || 'video';
     let html = '';
 
-    // Video
-    const embed = buildEmbed(mod.video_url);
-    html += embed
-        ? `<div class="video-wrap">${embed}</div>`
-        : `<div class="no-video">📹 No video attached to this module yet.</div>`;
+    // Content area by type
+    if (ct === 'video') {
+        const embed = buildEmbed(mod.video_url);
+        html += embed
+            ? `<div class="video-wrap">${embed}</div>`
+            : `<div class="no-video">📹 No video attached to this module yet.</div>`;
+    } else if (ct === 'pdf') {
+        if (mod.content_url) {
+            html += `<div style="margin-bottom:16px;">
+                <a href="${esc(mod.content_url)}" target="_blank" rel="noopener"
+                   style="display:inline-flex;align-items:center;gap:8px;padding:12px 20px;background:#fff0f0;color:#c62828;border:2px solid #ffcdd2;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;transition:all 0.2s;"
+                   onmouseover="this.style.background='#ffebee'" onmouseout="this.style.background='#fff0f0'">
+                    📄 Open PDF
+                </a>
+            </div>`;
+        } else {
+            html += `<div class="no-video">📄 No PDF attached yet.</div>`;
+        }
+    } else if (ct === 'article') {
+        if (mod.content_url) {
+            html += `<div style="margin-bottom:16px;">
+                <a href="${esc(mod.content_url)}" target="_blank" rel="noopener"
+                   style="display:inline-flex;align-items:center;gap:8px;padding:12px 20px;background:#fff8e1;color:#b45309;border:2px solid #ffe082;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;transition:all 0.2s;"
+                   onmouseover="this.style.background='#fff3cd'" onmouseout="this.style.background='#fff8e1'">
+                    🔗 Read Article
+                </a>
+            </div>`;
+        } else {
+            html += `<div class="no-video">🔗 No article link attached yet.</div>`;
+        }
+    } else if (ct === 'text') {
+        if (mod.text_content) {
+            html += `<div style="background:white;border:1px solid #e0e0e0;border-radius:8px;padding:20px;margin-bottom:16px;font-size:14px;line-height:1.7;color:#333;" class="ql-editor">${mod.text_content}</div>`;
+        } else {
+            html += `<div class="no-video">📝 No written content attached yet.</div>`;
+        }
+    }
 
     // Description
     if (mod.description) html += `<div class="mod-desc">${esc(mod.description)}</div>`;
@@ -849,9 +1079,9 @@ function toggleModule(id) {
 // QUIZ
 // ══════════════════════════════════════════════
 async function loadQuiz(moduleId) {
-    const loadEl = document.getElementById('ql-' + moduleId);
-    const questEl = document.getElementById('qq-' + moduleId);
-    const submitBtn = document.getElementById('qs-' + moduleId);
+    const loadEl   = document.getElementById('ql-' + moduleId);
+    const questEl  = document.getElementById('qq-' + moduleId);
+    const submitBtn= document.getElementById('qs-' + moduleId);
     if (!loadEl) return;
 
     const { data: qs } = await sb
@@ -868,56 +1098,158 @@ async function loadQuiz(moduleId) {
         return;
     }
 
-    if (questEl) questEl.innerHTML = qs.map((q, i) => `
-        <div class="quiz-q" id="qrow-${q.id}">
-            <p>${i + 1}. ${esc(q.question_text)}</p>
-            <div class="quiz-opts">
-                <label class="quiz-opt"><input type="radio" name="qn-${q.id}" value="a"> ${esc(q.option_a)}</label>
-                <label class="quiz-opt"><input type="radio" name="qn-${q.id}" value="b"> ${esc(q.option_b)}</label>
-                ${q.option_c ? `<label class="quiz-opt"><input type="radio" name="qn-${q.id}" value="c"> ${esc(q.option_c)}</label>` : ''}
-                ${q.option_d ? `<label class="quiz-opt"><input type="radio" name="qn-${q.id}" value="d"> ${esc(q.option_d)}</label>` : ''}
-            </div>
-        </div>`).join('');
+    if (questEl) questEl.innerHTML = qs.map((q, i) => {
+        const type = q.question_type || 'multiple_choice';
+        if (type === 'written') {
+            return `
+                <div class="quiz-q" id="qrow-${q.id}">
+                    <p>${i + 1}. ${esc(q.question_text)}</p>
+                    <div style="font-size:11px;color:#7c3aed;background:#f3e8ff;padding:6px 10px;border-radius:4px;margin-bottom:8px;">
+                        ✍️ Written response — minimum ${q.min_chars || 100} characters. Your answer will be reviewed by your AM.
+                    </div>
+                    <textarea id="wr-${q.id}" class="quiz-opt" style="width:100%;min-height:100px;resize:vertical;cursor:text;display:block;padding:10px;" placeholder="Write your response here..."></textarea>
+                    <div id="wrc-${q.id}" style="font-size:11px;color:#999;margin-top:4px;">0 / ${q.min_chars || 100} characters minimum</div>
+                </div>`;
+        } else if (type === 'select_all') {
+            const opts = ['a','b','c','d'].filter(l => q['option_' + l]);
+            return `
+                <div class="quiz-q" id="qrow-${q.id}">
+                    <p>${i + 1}. ${esc(q.question_text)} <span style="font-size:11px;color:#4ba8a8;font-weight:600;">(Select all that apply)</span></p>
+                    <div class="quiz-opts">
+                        ${opts.map(l => `<label class="quiz-opt" style="cursor:pointer;">
+                            <input type="checkbox" name="qn-${q.id}" value="${l}" style="accent-color:#4ba8a8;"> ${esc(q['option_' + l])}
+                        </label>`).join('')}
+                    </div>
+                </div>`;
+        } else {
+            return `
+                <div class="quiz-q" id="qrow-${q.id}">
+                    <p>${i + 1}. ${esc(q.question_text)}</p>
+                    <div class="quiz-opts">
+                        <label class="quiz-opt"><input type="radio" name="qn-${q.id}" value="a"> ${esc(q.option_a)}</label>
+                        <label class="quiz-opt"><input type="radio" name="qn-${q.id}" value="b"> ${esc(q.option_b)}</label>
+                        ${q.option_c ? `<label class="quiz-opt"><input type="radio" name="qn-${q.id}" value="c"> ${esc(q.option_c)}</label>` : ''}
+                        ${q.option_d ? `<label class="quiz-opt"><input type="radio" name="qn-${q.id}" value="d"> ${esc(q.option_d)}</label>` : ''}
+                    </div>
+                </div>`;
+        }
+    }).join('');
+
+    // Wire up character counters for written responses
+    qs.filter(q => (q.question_type || 'multiple_choice') === 'written').forEach(q => {
+        const ta = document.getElementById('wr-' + q.id);
+        const counter = document.getElementById('wrc-' + q.id);
+        if (ta && counter) {
+            ta.addEventListener('input', () => {
+                const len = ta.value.length;
+                const min = q.min_chars || 100;
+                counter.textContent = `${len} / ${min} characters minimum`;
+                counter.style.color = len >= min ? '#2d7a2d' : '#999';
+            });
+        }
+    });
 
     if (submitBtn) submitBtn.style.display = 'inline-block';
     window['_quiz_' + moduleId] = qs;
 }
 
-function submitQuiz(moduleId, source) {
+async function submitQuiz(moduleId, source) {
     const qs = window['_quiz_' + moduleId];
     if (!qs) return;
 
     let passing = 80;
-    // find module in pathData or allModules
     const mod = findModule(moduleId);
     if (mod) passing = mod.passing_score || 80;
 
+    // Validate written responses meet minimum chars
+    for (const q of qs) {
+        const type = q.question_type || 'multiple_choice';
+        if (type === 'written') {
+            const ta = document.getElementById('wr-' + q.id);
+            const min = q.min_chars || 100;
+            if (!ta || ta.value.trim().length < min) {
+                const resEl = document.getElementById('qr-' + moduleId);
+                resEl.style.display = 'block';
+                resEl.className = 'quiz-result fail';
+                resEl.textContent = `Please write at least ${min} characters for the written response question before submitting.`;
+                return;
+            }
+        }
+    }
+
+    // Separate gradable vs written questions
+    const gradable = qs.filter(q => (q.question_type || 'multiple_choice') !== 'written');
+    const written  = qs.filter(q => (q.question_type || 'multiple_choice') === 'written');
+
     let correct = 0;
-    qs.forEach(q => {
-        const sel = document.querySelector(`input[name="qn-${q.id}"]:checked`);
-        document.querySelectorAll(`#qrow-${q.id} .quiz-opt`).forEach(opt => {
-            opt.querySelector('input').disabled = true;
-            opt.style.cursor = 'default';
-            if (opt.querySelector('input').value === q.correct_answer) opt.classList.add('opt-right-answer');
-        });
-        if (sel) {
-            const selOpt = sel.closest('.quiz-opt');
-            if (sel.value === q.correct_answer) { correct++; selOpt.classList.add('opt-correct'); }
-            else selOpt.classList.add('opt-wrong');
+    gradable.forEach(q => {
+        const type = q.question_type || 'multiple_choice';
+        if (type === 'select_all') {
+            const correctSet = new Set((q.correct_answers || '').split(',').map(s => s.trim()));
+            const selectedSet = new Set(Array.from(document.querySelectorAll(`input[name="qn-${q.id}"]:checked`)).map(i => i.value));
+            const isCorrect = correctSet.size === selectedSet.size && [...correctSet].every(v => selectedSet.has(v));
+            document.querySelectorAll(`#qrow-${q.id} .quiz-opt`).forEach(opt => {
+                const input = opt.querySelector('input');
+                input.disabled = true;
+                const val = input.value;
+                if (correctSet.has(val)) opt.classList.add('opt-right-answer');
+                if (selectedSet.has(val) && !correctSet.has(val)) opt.classList.add('opt-wrong');
+                if (selectedSet.has(val) && correctSet.has(val)) opt.classList.add('opt-correct');
+            });
+            if (isCorrect) correct++;
+        } else {
+            const sel = document.querySelector(`input[name="qn-${q.id}"]:checked`);
+            document.querySelectorAll(`#qrow-${q.id} .quiz-opt`).forEach(opt => {
+                const input = opt.querySelector('input');
+                input.disabled = true;
+                opt.style.cursor = 'default';
+                if (input.value === q.correct_answer) opt.classList.add('opt-right-answer');
+            });
+            if (sel) {
+                const selOpt = sel.closest('.quiz-opt');
+                if (sel.value === q.correct_answer) { correct++; selOpt.classList.add('opt-correct'); }
+                else selOpt.classList.add('opt-wrong');
+            }
         }
     });
 
-    const score  = Math.round((correct / qs.length) * 100);
+    // Save written responses
+    for (const q of written) {
+        const ta = document.getElementById('wr-' + q.id);
+        if (ta && ta.value.trim()) {
+            const text = ta.value.trim();
+            await sb.from('lms_written_responses').insert([{
+                user_email:    currentUser.email.toLowerCase(),
+                module_id:     moduleId,
+                question_id:   q.id,
+                response_text: text,
+                char_count:    text.length
+            }]);
+            // Disable the textarea after submit
+            ta.disabled = true;
+            ta.style.background = '#f9f9f9';
+        }
+    }
+
+    // Score is based only on gradable questions
+    const gradableCount = gradable.length;
+    const score  = gradableCount > 0 ? Math.round((correct / gradableCount) * 100) : 100;
     const passed = score >= passing;
+
     const resEl  = document.getElementById('qr-' + moduleId);
     const subBtn = document.getElementById('qs-' + moduleId);
     const retBtn = document.getElementById('qretry-' + moduleId);
 
     resEl.style.display = 'block';
     resEl.className = 'quiz-result ' + (passed ? 'pass' : 'fail');
-    resEl.textContent = passed
-        ? `✓ Passed! ${score}% (${correct}/${qs.length} correct).`
+
+    let msg = passed
+        ? `✓ Passed! ${score}% (${correct}/${gradableCount} correct)`
         : `✗ ${score}% — you need ${passing}% to pass. Review the highlighted answers and try again.`;
+    if (written.length) msg += passed
+        ? ` · Written response${written.length > 1 ? 's' : ''} submitted for AM review.`
+        : '';
+    resEl.textContent = msg;
 
     if (subBtn) subBtn.style.display = 'none';
     if (retBtn && !passed) retBtn.style.display = 'inline-block';
@@ -1434,6 +1766,276 @@ function filterAdminCards() { loadAdminView(); }
 // ══════════════════════════════════════════════
 // CURRICULUM MANAGER
 // ══════════════════════════════════════════════
+
+// ── Quill instance
+let quillEditor = null;
+
+function initQuill() {
+    if (quillEditor) return;
+    quillEditor = new Quill('#mfQuillEditor', {
+        theme: 'snow',
+        placeholder: 'Enter written instructions here...',
+        modules: {
+            toolbar: [
+                ['bold','italic','underline'],
+                [{ list:'ordered' },{ list:'bullet' }],
+                ['link'],
+                ['clean']
+            ]
+        }
+    });
+}
+
+// ── Content type selector
+function selectContentType(type) {
+    ['video','pdf','article','text'].forEach(t => {
+        document.getElementById('mf' + t.charAt(0).toUpperCase() + t.slice(1) + 'Panel').classList.add('hidden');
+    });
+    document.getElementById('mf' + type.charAt(0).toUpperCase() + type.slice(1) + 'Panel').classList.remove('hidden');
+    document.querySelectorAll('#mfContentTypeGroup .cf-radio').forEach(r => r.classList.remove('selected'));
+    const radio = document.querySelector(`input[name="mfContentType"][value="${type}"]`);
+    if (radio) { radio.checked = true; radio.closest('.cf-radio').classList.add('selected'); }
+    if (type === 'text') setTimeout(initQuill, 50);
+}
+
+function selectQuizYN(val) {
+    document.querySelectorAll('input[name="mfHasQuiz"]').forEach(r => r.closest('.cf-radio').classList.remove('selected'));
+    const r = document.querySelector(`input[name="mfHasQuiz"][value="${val}"]`);
+    if (r) { r.checked = true; r.closest('.cf-radio').classList.add('selected'); }
+}
+
+function selectPathYN(val) {
+    document.querySelectorAll('input[name="mfPathYN"]').forEach(r => r.closest('.cf-radio').classList.remove('selected'));
+    const r = document.querySelector(`input[name="mfPathYN"][value="${val}"]`);
+    if (r) { r.checked = true; r.closest('.cf-radio').classList.add('selected'); }
+    document.getElementById('mfPathPanel').classList.toggle('hidden', val !== 'yes');
+    if (val === 'yes') populatePathSelect();
+}
+
+function selectSeqYN(val) {
+    document.querySelectorAll('input[name="mfSeq"]').forEach(r => r.closest('.cf-radio').classList.remove('selected'));
+    const r = document.querySelector(`input[name="mfSeq"][value="${val}"]`);
+    if (r) { r.checked = true; r.closest('.cf-radio').classList.add('selected'); }
+}
+
+function selectSectionYN(val) {
+    document.querySelectorAll('input[name="mfSectionYN"]').forEach(r => r.closest('.cf-radio').classList.remove('selected'));
+    const r = document.querySelector(`input[name="mfSectionYN"][value="${val}"]`);
+    if (r) { r.checked = true; r.closest('.cf-radio').classList.add('selected'); }
+    document.getElementById('mfSectionPanel').style.display = val === 'yes' ? 'block' : 'none';
+}
+
+async function populatePathSelect(selectedId) {
+    const { data: paths } = await sb.from('lms_paths').select('*').eq('is_active', true).order('title');
+    allPaths = paths || [];
+    const sel = document.getElementById('mfPathSelect');
+    sel.innerHTML = '<option value="">— Select a path —</option>' +
+        paths.map(p => `<option value="${p.id}"${p.id === selectedId ? ' selected' : ''}>${esc(p.title)}</option>`).join('') +
+        '<option value="__new__">+ Create new path...</option>';
+    if (selectedId) onPathSelectChange();
+}
+
+async function onPathSelectChange() {
+    const val = document.getElementById('mfPathSelect').value;
+    document.getElementById('mfNewPathPanel').style.display = val === '__new__' ? 'block' : 'none';
+    document.getElementById('mfSectionContainer').style.display = (val && val !== '__new__') ? 'block' : 'none';
+    if (val && val !== '__new__') await populateSectionSelect(val);
+}
+
+async function populateSectionSelect(pathId, selectedId) {
+    const { data: secs } = await sb.from('lms_path_sections').select('*').eq('path_id', pathId).order('section_order');
+    const sel = document.getElementById('mfSectionSelect');
+    sel.innerHTML = '<option value="">— Select a section —</option>' +
+        (secs || []).map(s => `<option value="${s.id}"${s.id === selectedId ? ' selected' : ''}>${esc(s.title)}</option>`).join('') +
+        '<option value="__new__">+ Create new section...</option>';
+    if (selectedId) onSectionSelectChange();
+}
+
+function onSectionSelectChange() {
+    const val = document.getElementById('mfSectionSelect').value;
+    document.getElementById('mfNewSectionPanel').style.display = val === '__new__' ? 'block' : 'none';
+}
+
+// ── Save module form
+async function saveModuleForm() {
+    const btn     = document.getElementById('mfSaveBtn');
+    const msgEl   = document.getElementById('mfSaveMsg');
+    const editId  = document.getElementById('mfEditId').value;
+    const title   = document.getElementById('mfTitle').value.trim();
+    const desc    = document.getElementById('mfDesc').value.trim() || null;
+    const hasQuiz = document.querySelector('input[name="mfHasQuiz"]:checked')?.value === 'yes';
+    const pathYN  = document.querySelector('input[name="mfPathYN"]:checked')?.value;
+    const contentType = document.querySelector('input[name="mfContentType"]:checked')?.value;
+
+    if (!title) { showCFMsg(msgEl, 'error', 'Module title is required.'); return; }
+    if (!contentType) { showCFMsg(msgEl, 'error', 'Please select a content type.'); return; }
+
+    btn.disabled = true; btn.textContent = 'Saving...';
+
+    try {
+        // Build content URL / text
+        let videoUrl = null, contentUrl = null, textContent = null;
+        if (contentType === 'video') videoUrl = document.getElementById('mfVideoUrl').value.trim() || null;
+        if (contentType === 'pdf')   contentUrl = document.getElementById('mfPdfUrl').value.trim() || null;
+        if (contentType === 'article') contentUrl = document.getElementById('mfArticleUrl').value.trim() || null;
+        if (contentType === 'text' && quillEditor) textContent = quillEditor.root.innerHTML;
+
+        // Upsert module
+        const modData = {
+            title, description: desc,
+            content_type: contentType,
+            video_url: videoUrl,
+            content_url: contentUrl,
+            text_content: textContent,
+            has_quiz: hasQuiz,
+            passing_score: 80,
+            is_active: true,
+            updated_at: new Date().toISOString()
+        };
+
+        let moduleId = editId;
+        if (editId) {
+            await sb.from('lms_modules').update(modData).eq('id', editId);
+        } else {
+            modData.created_by = currentUser.email;
+            const { data, error } = await sb.from('lms_modules').insert([modData]).select();
+            if (error) throw error;
+            moduleId = data[0].id;
+        }
+
+        // Handle path assignment
+        if (pathYN === 'yes' && moduleId) {
+            let pathId = document.getElementById('mfPathSelect').value;
+
+            // Create new path if needed
+            if (pathId === '__new__') {
+                const newPathTitle = document.getElementById('mfNewPathTitle').value.trim();
+                if (!newPathTitle) { showCFMsg(msgEl, 'error', 'New path title is required.'); btn.disabled = false; btn.textContent = editId ? 'Update Module' : 'Save Module'; return; }
+                const isSeq = document.querySelector('input[name="mfSeq"]:checked')?.value !== 'no';
+                const { data: np } = await sb.from('lms_paths').insert([{ title: newPathTitle, is_sequential: isSeq, is_active: true, created_by: currentUser.email }]).select();
+                pathId = np[0].id;
+                allPaths.push(np[0]);
+            }
+
+            if (pathId && pathId !== '__new__') {
+                const sectionYN = document.querySelector('input[name="mfSectionYN"]:checked')?.value;
+                let sectionId = null;
+
+                if (sectionYN === 'yes') {
+                    sectionId = document.getElementById('mfSectionSelect').value;
+                    // Create new section if needed
+                    if (sectionId === '__new__') {
+                        const newSecTitle = document.getElementById('mfNewSectionTitle').value.trim();
+                        if (!newSecTitle) { showCFMsg(msgEl, 'error', 'New section title is required.'); btn.disabled = false; btn.textContent = editId ? 'Update Module' : 'Save Module'; return; }
+                        const { data: existSecs } = await sb.from('lms_path_sections').select('section_order').eq('path_id', pathId).order('section_order', { ascending: false }).limit(1);
+                        const secOrder = (existSecs?.[0]?.section_order || 0) + 1;
+                        const { data: ns } = await sb.from('lms_path_sections').insert([{ path_id: pathId, title: newSecTitle, section_order: secOrder, is_active: true }]).select();
+                        sectionId = ns[0].id;
+                    }
+                }
+
+                // Get next module order
+                const { data: existPMs } = await sb.from('lms_path_modules')
+                    .select('module_order').eq('path_id', pathId)
+                    .eq(sectionId ? 'section_id' : 'path_id', sectionId || pathId)
+                    .order('module_order', { ascending: false }).limit(1);
+                const modOrder = (existPMs?.[0]?.module_order || 0) + 1;
+
+                // Remove existing assignment if editing
+                if (editId) await sb.from('lms_path_modules').delete().eq('module_id', moduleId).eq('path_id', pathId);
+
+                await sb.from('lms_path_modules').insert([{
+                    path_id: pathId,
+                    section_id: sectionId,
+                    module_id: moduleId,
+                    module_order: modOrder,
+                    is_active: true
+                }]);
+            }
+        }
+
+        showCFMsg(msgEl, 'success', editId ? '✓ Module updated!' : '✓ Module saved!');
+        if (!editId) clearModuleForm();
+        await loadCurriculumView();
+
+    } catch(e) {
+        console.error('saveModuleForm', e);
+        showCFMsg(msgEl, 'error', 'Error: ' + e.message);
+    }
+    btn.disabled = false; btn.textContent = document.getElementById('mfEditId').value ? 'Update Module' : 'Save Module';
+}
+
+function showCFMsg(el, type, msg) {
+    el.className = 'cf-save-msg ' + type;
+    el.textContent = msg;
+    if (type === 'success') setTimeout(() => { el.textContent = ''; el.className = 'cf-save-msg'; }, 3000);
+}
+
+function clearModuleForm() {
+    document.getElementById('mfEditId').value = '';
+    document.getElementById('mfTitle').value = '';
+    document.getElementById('mfDesc').value = '';
+    document.getElementById('mfVideoUrl').value = '';
+    document.getElementById('mfPdfUrl').value = '';
+    document.getElementById('mfArticleUrl').value = '';
+    if (quillEditor) quillEditor.root.innerHTML = '';
+    ['video','pdf','article','text'].forEach(t => document.getElementById('mf' + t.charAt(0).toUpperCase() + t.slice(1) + 'Panel').classList.add('hidden'));
+    document.querySelectorAll('.cf-radio').forEach(r => r.classList.remove('selected'));
+    document.querySelectorAll('.cf-radio input').forEach(r => r.checked = false);
+    document.getElementById('mfPathPanel').classList.add('hidden');
+    document.getElementById('mfNewPathPanel').style.display = 'none';
+    document.getElementById('mfSectionContainer').style.display = 'none';
+    document.getElementById('mfSectionPanel').style.display = 'none';
+    document.getElementById('mfNewSectionPanel').style.display = 'none';
+    document.getElementById('mfSaveMsg').textContent = '';
+    document.getElementById('mfSaveMsg').className = 'cf-save-msg';
+    document.getElementById('moduleFormTitle').textContent = '➕ Add New Module';
+    document.getElementById('mfSaveBtn').textContent = 'Save Module';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function editModuleFill(moduleId) {
+    const { data: mod } = await sb.from('lms_modules').select('*').eq('id', moduleId).single();
+    if (!mod) return;
+    clearModuleForm();
+    document.getElementById('mfEditId').value = moduleId;
+    document.getElementById('mfTitle').value = mod.title || '';
+    document.getElementById('mfDesc').value = mod.description || '';
+    document.getElementById('moduleFormTitle').textContent = '✏️ Edit Module';
+    document.getElementById('mfSaveBtn').textContent = 'Update Module';
+
+    // Content type
+    if (mod.content_type) {
+        selectContentType(mod.content_type);
+        if (mod.content_type === 'video' && mod.video_url) document.getElementById('mfVideoUrl').value = mod.video_url;
+        if (mod.content_type === 'pdf' && mod.content_url) document.getElementById('mfPdfUrl').value = mod.content_url;
+        if (mod.content_type === 'article' && mod.content_url) document.getElementById('mfArticleUrl').value = mod.content_url;
+        if (mod.content_type === 'text' && mod.text_content) { setTimeout(() => { initQuill(); quillEditor.root.innerHTML = mod.text_content; }, 100); }
+    }
+    if (mod.has_quiz) selectQuizYN('yes'); else selectQuizYN('no');
+
+    // Check if in a path
+    const { data: pm } = await sb.from('lms_path_modules').select('*, lms_path_sections(*)').eq('module_id', moduleId).limit(1);
+    if (pm?.length) {
+        selectPathYN('yes');
+        await populatePathSelect(pm[0].path_id);
+        document.getElementById('mfPathSelect').value = pm[0].path_id;
+        document.getElementById('mfNewPathPanel').style.display = 'none';
+        document.getElementById('mfSectionContainer').style.display = 'block';
+        if (pm[0].section_id) {
+            selectSectionYN('yes');
+            await populateSectionSelect(pm[0].path_id, pm[0].section_id);
+            document.getElementById('mfSectionSelect').value = pm[0].section_id;
+        } else {
+            selectSectionYN('no');
+        }
+    } else {
+        selectPathYN('no');
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 async function loadCurriculumView() {
     const container = document.getElementById('curriculumContent');
     container.innerHTML = '<div class="loading">Loading...</div>';
@@ -1443,47 +2045,66 @@ async function loadCurriculumView() {
         allModules = mods || [];
         allPaths   = paths || [];
 
-        let html = '';
+        const ctIcon = { video:'🎬', pdf:'📄', article:'🔗', text:'📝' };
+        const ctClass = { video:'ct-video', pdf:'ct-pdf', article:'ct-article', text:'ct-text' };
+        const ctLabel = { video:'Video', pdf:'PDF', article:'Article', text:'Text' };
 
-        // ── Standalone modules section
-        html += `<div style="margin-bottom:24px;">
-            <div style="font-size:14px;font-weight:700;color:#333;margin-bottom:10px;">🗂 All Modules (${allModules.length})</div>
-            <div style="display:grid;gap:8px;">
-                ${allModules.map(m => `
-                    <div style="background:white;border:1px solid #e0e0e0;border-radius:6px;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;">
-                        <div>
-                            <span style="font-size:13px;font-weight:600;color:#333;">${esc(m.title)}</span>
-                            <span style="font-size:11px;color:#999;margin-left:8px;">${m.has_quiz ? '📝 Quiz' : '📹 No quiz'}</span>
+        // Module list with quiz management inline
+        let modHtml = (allModules.length === 0)
+            ? '<p style="color:#999;font-size:13px;padding:16px 0;">No modules yet. Use the form above to add your first module.</p>'
+            : allModules.map(m => {
+                const ct = m.content_type || 'video';
+                return `
+                <div class="mod-curr-card" id="mcc-${m.id}">
+                    <div class="mod-curr-hdr" onclick="toggleModCurrCard('${m.id}')">
+                        <div style="flex:1;">
+                            <span class="mod-curr-title">${esc(m.title)}</span>
+                            <span class="content-type-badge ${ctClass[ct] || 'ct-video'}">${ctIcon[ct] || '🎬'} ${ctLabel[ct] || ct}</span>
+                            ${m.has_quiz ? '<span class="content-type-badge" style="background:#f3e8ff;color:#7c3aed;margin-left:4px;">📝 Quiz</span>' : ''}
                         </div>
                         <div class="curr-actions">
-                            <button class="btn-sm btn-teal" onclick="editModulePrompt('${m.id}')">Edit</button>
-                            <button class="btn-sm" style="background:#fff8e1;color:#b45309;" onclick="manageQuiz('${m.id}','${esc(m.title)}')">Quiz</button>
-                            <button class="btn-sm btn-red" onclick="deleteModule('${m.id}')">Delete</button>
+                            <button class="btn-sm btn-teal" onclick="event.stopPropagation();editModuleFill('${m.id}')">Edit</button>
+                            <button class="btn-sm btn-red" onclick="event.stopPropagation();deleteModule('${m.id}')">Delete</button>
+                            <span style="color:#ccc;margin-left:4px;">▼</span>
                         </div>
-                    </div>`).join('') || '<p style="color:#999;font-size:13px;">No modules yet. Add one above.</p>'}
-            </div>
-        </div>`;
+                    </div>
+                    <div class="mod-curr-body" id="mcb-${m.id}">
+                        <div id="quiz-mgr-${m.id}">
+                            <div class="loading" style="padding:16px;">Loading quiz questions...</div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
 
-        // ── Paths
-        html += `<div style="font-size:14px;font-weight:700;color:#333;margin-bottom:10px;">📚 Learning Paths</div>`;
+        // Path list
+        let pathHtml = '<div style="font-size:14px;font-weight:700;color:#333;margin:20px 0 10px 0;">📚 Learning Paths</div>';
         for (const path of (paths || [])) {
             const { data: sections } = await sb
                 .from('lms_path_sections')
-                .select('*, lms_path_modules(module_order, lms_modules(id,title))')
+                .select('*, lms_path_modules(module_order, lms_modules(id,title,content_type))')
                 .eq('path_id', path.id)
                 .order('section_order');
-            html += buildCurrPath(path, sections || []);
+            pathHtml += buildCurrPath(path, sections || []);
         }
-        if (!paths?.length) html += '<p style="color:#999;font-size:13px;">No paths yet. Add one above.</p>';
+        if (!paths?.length) pathHtml += '<p style="color:#999;font-size:13px;">No paths yet — create one when adding a module above.</p>';
 
-        container.innerHTML = html;
+        container.innerHTML = modHtml + pathHtml;
     } catch(e) {
         container.innerHTML = `<p style="color:#c33;">Error: ${esc(e.message)}</p>`;
     }
 }
 
+function toggleModCurrCard(id) {
+    const card = document.getElementById('mcc-' + id);
+    if (!card) return;
+    const wasOpen = card.classList.contains('open');
+    card.classList.toggle('open');
+    if (!wasOpen) loadQuizManager(id);
+}
+
 function buildCurrPath(path, sections) {
     const totalMods = sections.reduce((t, s) => t + (s.lms_path_modules || []).length, 0);
+    const ctIcon = { video:'🎬', pdf:'📄', article:'🔗', text:'📝' };
     const secHtml = sections.map(sec => {
         const mods = (sec.lms_path_modules || [])
             .sort((a,b) => a.module_order - b.module_order)
@@ -1493,14 +2114,14 @@ function buildCurrPath(path, sections) {
                 <div class="curr-sec-hdr">
                     <span class="curr-sec-title">§${sec.section_order} ${esc(sec.title)}</span>
                     <div class="curr-actions">
-                        <button class="btn-sm btn-teal" onclick="addModuleToSection('${path.id}','${sec.id}')">+ Add Module</button>
                         <button class="btn-sm btn-red" onclick="deleteSection('${sec.id}')">Delete Section</button>
                     </div>
                 </div>
                 ${mods.map(m => `
                     <div class="curr-mod-row">
-                        <span>📹 ${esc(m.title)}</span>
+                        <span>${ctIcon[m.content_type] || '🎬'} ${esc(m.title)}</span>
                         <div class="curr-actions">
+                            <button class="btn-sm btn-teal" onclick="editModuleFill('${m.id}')">Edit</button>
                             <button class="btn-sm btn-red" onclick="removeModuleFromPath('${path.id}','${m.id}')">Remove</button>
                         </div>
                     </div>`).join('') || '<div style="padding:8px 20px 8px 52px;font-size:12px;color:#ccc;">No modules yet</div>'}
@@ -1515,58 +2136,221 @@ function buildCurrPath(path, sections) {
                     <div class="curr-path-meta">${sections.length} sections · ${totalMods} modules</div>
                 </div>
                 <div class="curr-actions">
-                    <button class="btn-sm btn-teal" onclick="promptAddSection('${path.id}')">+ Section</button>
                     <button class="btn-sm btn-red" onclick="deletePath('${path.id}')">Delete Path</button>
                 </div>
             </div>
-            ${secHtml}
+            ${secHtml || '<div style="padding:12px 20px;font-size:13px;color:#999;">No sections yet — add modules via the form above.</div>'}
         </div>`;
 }
 
-// Curriculum actions
-async function promptAddPath() {
-    const title = prompt('New path title (e.g. "Advanced Lighting Series"):');
-    if (!title) return;
-    const desc = prompt('Description (optional):') || '';
-    const seq  = confirm('Should this path be sequential? (OK = yes, must complete in order)');
-    await sb.from('lms_paths').insert([{ title, description: desc, is_sequential: seq, is_active: true, created_by: currentUser.email }]);
+// ── Quiz Manager (inline in module card)
+async function loadQuizManager(moduleId) {
+    const container = document.getElementById('quiz-mgr-' + moduleId);
+    if (!container) return;
+
+    const { data: qs } = await sb.from('lms_quiz_questions').select('*').eq('module_id', moduleId).order('question_order');
+    const questions = qs || [];
+
+    let html = `
+        <div style="margin-bottom:12px;">
+            <div style="font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Quiz Questions (${questions.length})</div>
+            <div class="quiz-editor" id="qe-${moduleId}">
+                ${questions.map((q, i) => buildQuizQCard(q, i)).join('')}
+            </div>
+            <button class="btn-sm btn-teal" style="margin-top:8px;" onclick="showAddQForm('${moduleId}')">+ Add Question</button>
+        </div>
+
+        <!-- Add question form -->
+        <div class="add-q-form hidden" id="aqf-${moduleId}">
+            <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:12px;">Add Question</div>
+
+            <div class="cf-row q-type-select">
+                <label class="cf-label">Question Type</label>
+                <select class="cf-select" id="aqType-${moduleId}" onchange="onQTypeChange('${moduleId}')">
+                    <option value="multiple_choice">Multiple Choice (one correct answer)</option>
+                    <option value="select_all">Select All That Apply</option>
+                    <option value="written">Written Response</option>
+                </select>
+            </div>
+
+            <div class="cf-row">
+                <label class="cf-label">Question Text *</label>
+                <textarea class="cf-textarea" id="aqText-${moduleId}" placeholder="Enter your question here..." style="min-height:60px;"></textarea>
+            </div>
+
+            <!-- Options (for MC and select-all) -->
+            <div id="aqOptionsPanel-${moduleId}">
+                <div class="cf-row">
+                    <label class="cf-label">Answer Options</label>
+                    <input type="text" class="cf-input" id="aqA-${moduleId}" placeholder="Option A *" style="margin-bottom:6px;">
+                    <input type="text" class="cf-input" id="aqB-${moduleId}" placeholder="Option B *" style="margin-bottom:6px;">
+                    <input type="text" class="cf-input" id="aqC-${moduleId}" placeholder="Option C (optional)" style="margin-bottom:6px;">
+                    <input type="text" class="cf-input" id="aqD-${moduleId}" placeholder="Option D (optional)">
+                </div>
+
+                <!-- Correct answer for MC -->
+                <div class="cf-row" id="aqCorrectPanel-${moduleId}">
+                    <label class="cf-label">Correct Answer</label>
+                    <select class="cf-select" id="aqCorrect-${moduleId}">
+                        <option value="a">A</option>
+                        <option value="b">B</option>
+                        <option value="c">C</option>
+                        <option value="d">D</option>
+                    </select>
+                </div>
+
+                <!-- Correct answers for select-all -->
+                <div class="cf-row hidden" id="aqSelectAllPanel-${moduleId}">
+                    <label class="cf-label">Which options are correct? <span>(check all that apply)</span></label>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
+                        <label style="display:flex;align-items:center;gap:5px;font-size:13px;"><input type="checkbox" id="aqSA-a-${moduleId}" style="accent-color:#4ba8a8;"> A</label>
+                        <label style="display:flex;align-items:center;gap:5px;font-size:13px;"><input type="checkbox" id="aqSA-b-${moduleId}" style="accent-color:#4ba8a8;"> B</label>
+                        <label style="display:flex;align-items:center;gap:5px;font-size:13px;"><input type="checkbox" id="aqSA-c-${moduleId}" style="accent-color:#4ba8a8;"> C</label>
+                        <label style="display:flex;align-items:center;gap:5px;font-size:13px;"><input type="checkbox" id="aqSA-d-${moduleId}" style="accent-color:#4ba8a8;"> D</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Written response options -->
+            <div class="cf-row hidden" id="aqWrittenPanel-${moduleId}">
+                <label class="cf-label">Minimum Characters Required <span>(learner must write at least this many characters)</span></label>
+                <input type="number" class="cf-input" id="aqMinChars-${moduleId}" value="100" min="10" max="2000" style="max-width:120px;">
+                <p class="cf-hint">Written responses are never marked wrong. AMs will be notified to review the answer.</p>
+            </div>
+
+            <div style="display:flex;gap:8px;margin-top:14px;">
+                <button class="btn-primary" onclick="saveQuizQuestion('${moduleId}')">Add Question</button>
+                <button class="btn-secondary" onclick="hideAddQForm('${moduleId}')">Cancel</button>
+                <span id="aqMsg-${moduleId}" class="cf-save-msg"></span>
+            </div>
+        </div>`;
+
+    container.innerHTML = html;
+}
+
+function buildQuizQCard(q, i) {
+    const typeLabel = { multiple_choice:'Multiple Choice', select_all:'Select All That Apply', written:'Written Response' }[q.question_type || 'multiple_choice'] || 'Multiple Choice';
+    let optsHtml = '';
+    if (q.question_type === 'written') {
+        optsHtml = `<div class="quiz-q-opt" style="background:#f3e8ff;color:#7c3aed;">Min ${q.min_chars || 100} characters required</div>`;
+    } else if (q.question_type === 'select_all') {
+        const correct = (q.correct_answers || '').split(',').map(s => s.trim());
+        ['a','b','c','d'].forEach(l => {
+            if (q['option_' + l]) {
+                optsHtml += `<div class="quiz-q-opt${correct.includes(l) ? ' correct' : ''}">${l.toUpperCase()}. ${esc(q['option_' + l])}</div>`;
+            }
+        });
+    } else {
+        ['a','b','c','d'].forEach(l => {
+            if (q['option_' + l]) {
+                optsHtml += `<div class="quiz-q-opt${q.correct_answer === l ? ' correct' : ''}">${l.toUpperCase()}. ${esc(q['option_' + l])}</div>`;
+            }
+        });
+    }
+    return `
+        <div class="quiz-q-card">
+            <div class="quiz-q-card-hdr">
+                <div>
+                    <span class="quiz-q-num">Q${i + 1}</span>
+                    <span class="quiz-q-type-badge">${typeLabel}</span>
+                </div>
+                <button class="btn-sm btn-red" onclick="deleteQuizQuestion('${q.id}','${q.module_id}')">Delete</button>
+            </div>
+            <div class="quiz-q-text">${esc(q.question_text)}</div>
+            <div class="quiz-q-opts">${optsHtml}</div>
+        </div>`;
+}
+
+function showAddQForm(moduleId) {
+    const form = document.getElementById('aqf-' + moduleId);
+    if (form) form.classList.remove('hidden');
+}
+function hideAddQForm(moduleId) {
+    const form = document.getElementById('aqf-' + moduleId);
+    if (form) form.classList.add('hidden');
+    // Clear fields
+    ['aqText','aqA','aqB','aqC','aqD'].forEach(id => { const el = document.getElementById(id + '-' + moduleId); if(el) el.value = ''; });
+    ['aqSA-a','aqSA-b','aqSA-c','aqSA-d'].forEach(id => { const el = document.getElementById(id + '-' + moduleId); if(el) el.checked = false; });
+    const msg = document.getElementById('aqMsg-' + moduleId); if(msg) { msg.textContent = ''; msg.className = 'cf-save-msg'; }
+}
+
+function onQTypeChange(moduleId) {
+    const type = document.getElementById('aqType-' + moduleId).value;
+    const optPanel     = document.getElementById('aqOptionsPanel-' + moduleId);
+    const correctPanel = document.getElementById('aqCorrectPanel-' + moduleId);
+    const saPanel      = document.getElementById('aqSelectAllPanel-' + moduleId);
+    const writPanel    = document.getElementById('aqWrittenPanel-' + moduleId);
+
+    optPanel.style.display     = type === 'written' ? 'none' : 'block';
+    writPanel.classList.toggle('hidden', type !== 'written');
+    correctPanel.classList.toggle('hidden', type !== 'multiple_choice');
+    saPanel.classList.toggle('hidden', type !== 'select_all');
+}
+
+async function saveQuizQuestion(moduleId) {
+    const type    = document.getElementById('aqType-' + moduleId).value;
+    const qText   = document.getElementById('aqText-' + moduleId).value.trim();
+    const msgEl   = document.getElementById('aqMsg-' + moduleId);
+
+    if (!qText) { showCFMsg(msgEl, 'error', 'Question text required.'); return; }
+
+    // Get next order
+    const { data: existing } = await sb.from('lms_quiz_questions').select('question_order').eq('module_id', moduleId).order('question_order', { ascending: false }).limit(1);
+    const order = (existing?.[0]?.question_order || 0) + 1;
+
+    const record = {
+        module_id: moduleId,
+        question_text: qText,
+        question_order: order,
+        question_type: type
+    };
+
+    if (type === 'written') {
+        record.min_chars = parseInt(document.getElementById('aqMinChars-' + moduleId).value) || 100;
+        record.option_a = null; record.option_b = null; record.option_c = null; record.option_d = null;
+        record.correct_answer = null; record.correct_answers = null;
+    } else {
+        const a = document.getElementById('aqA-' + moduleId).value.trim();
+        const b = document.getElementById('aqB-' + moduleId).value.trim();
+        if (!a || !b) { showCFMsg(msgEl, 'error', 'Options A and B are required.'); return; }
+        record.option_a = a;
+        record.option_b = b;
+        record.option_c = document.getElementById('aqC-' + moduleId).value.trim() || null;
+        record.option_d = document.getElementById('aqD-' + moduleId).value.trim() || null;
+
+        if (type === 'multiple_choice') {
+            record.correct_answer = document.getElementById('aqCorrect-' + moduleId).value;
+            record.correct_answers = null;
+        } else {
+            const correct = ['a','b','c','d'].filter(l => document.getElementById('aqSA-' + l + '-' + moduleId)?.checked);
+            if (!correct.length) { showCFMsg(msgEl, 'error', 'Select at least one correct answer.'); return; }
+            record.correct_answers = correct.join(',');
+            record.correct_answer = null;
+        }
+    }
+
+    const { error } = await sb.from('lms_quiz_questions').insert([record]);
+    if (error) { showCFMsg(msgEl, 'error', 'Error: ' + error.message); return; }
+
+    // Mark module as having quiz
+    await sb.from('lms_modules').update({ has_quiz: true }).eq('id', moduleId);
+
+    showCFMsg(msgEl, 'success', '✓ Question added!');
+    hideAddQForm(moduleId);
+    loadQuizManager(moduleId);
+    // Refresh module list title
     loadCurriculumView();
 }
 
-async function promptAddModule() {
-    const title = prompt('Module title:');
-    if (!title) return;
-    const videoUrl   = prompt('Video URL (Google Drive, Vimeo, YouTube — leave blank if none):') || null;
-    const desc       = prompt('Description (optional):') || null;
-    const hasQuiz    = confirm('Does this module have a quiz?');
-    await sb.from('lms_modules').insert([{ title, video_url: videoUrl, description: desc, has_quiz: hasQuiz, passing_score: 80, is_active: true, created_by: currentUser.email }]);
-    loadCurriculumView();
-}
-
-async function editModulePrompt(moduleId) {
-    const { data: mod } = await sb.from('lms_modules').select('*').eq('id', moduleId).single();
-    if (!mod) return;
-    const title    = prompt('Module title:', mod.title);
-    if (title === null) return;
-    const videoUrl = prompt('Video URL:', mod.video_url || '');
-    const desc     = prompt('Description:', mod.description || '');
-    const hasQuiz  = confirm('Has quiz? (OK = yes)');
-    await sb.from('lms_modules').update({ title, video_url: videoUrl || null, description: desc || null, has_quiz: hasQuiz, updated_at: new Date().toISOString() }).eq('id', moduleId);
-    loadCurriculumView();
+async function deleteQuizQuestion(questionId, moduleId) {
+    if (!confirm('Delete this question?')) return;
+    await sb.from('lms_quiz_questions').delete().eq('id', questionId);
+    loadQuizManager(moduleId);
 }
 
 async function deleteModule(moduleId) {
-    if (!confirm('Delete this module permanently?')) return;
+    if (!confirm('Delete this module permanently? This cannot be undone.')) return;
     await sb.from('lms_modules').delete().eq('id', moduleId);
-    loadCurriculumView();
-}
-
-async function promptAddSection(pathId) {
-    const title = prompt('Section title:');
-    if (!title) return;
-    const { data: existing } = await sb.from('lms_path_sections').select('section_order').eq('path_id', pathId).order('section_order', { ascending: false }).limit(1);
-    const order = existing?.[0]?.section_order + 1 || 1;
-    await sb.from('lms_path_sections').insert([{ path_id: pathId, title, section_order: order, is_active: true }]);
     loadCurriculumView();
 }
 
@@ -1576,24 +2360,8 @@ async function deleteSection(sectionId) {
     loadCurriculumView();
 }
 
-async function addModuleToSection(pathId, sectionId) {
-    if (!allModules.length) {
-        alert('No modules exist yet. Create a module first.');
-        return;
-    }
-    const options = allModules.map((m, i) => `${i + 1}. ${m.title}`).join('\n');
-    const choice = prompt('Choose a module number to add:\n\n' + options);
-    const idx = parseInt(choice) - 1;
-    if (isNaN(idx) || idx < 0 || idx >= allModules.length) return;
-    const mod = allModules[idx];
-    const { data: existing } = await sb.from('lms_path_modules').select('module_order').eq('path_id', pathId).eq('section_id', sectionId).order('module_order', { ascending: false }).limit(1);
-    const order = existing?.[0]?.module_order + 1 || 1;
-    await sb.from('lms_path_modules').insert([{ path_id: pathId, section_id: sectionId, module_id: mod.id, module_order: order, is_active: true }]);
-    loadCurriculumView();
-}
-
 async function removeModuleFromPath(pathId, moduleId) {
-    if (!confirm('Remove this module from the path? The module itself will not be deleted.')) return;
+    if (!confirm('Remove this module from the path?')) return;
     await sb.from('lms_path_modules').delete().eq('path_id', pathId).eq('module_id', moduleId);
     loadCurriculumView();
 }
@@ -1601,36 +2369,6 @@ async function removeModuleFromPath(pathId, moduleId) {
 async function deletePath(pathId) {
     if (!confirm('Delete this path? Modules will not be deleted, only their path assignments.')) return;
     await sb.from('lms_paths').delete().eq('id', pathId);
-    loadCurriculumView();
-}
-
-async function manageQuiz(moduleId, moduleTitle) {
-    const { data: qs } = await sb.from('lms_quiz_questions').select('*').eq('module_id', moduleId).order('question_order');
-    const count = qs?.length || 0;
-    const action = prompt(`Quiz for "${moduleTitle}"\n${count} question(s) currently.\n\nOptions:\n1. Add a question\n2. Delete all questions\n3. Cancel\n\nEnter 1 or 2:`);
-    if (action === '1') {
-        const qText = prompt('Question text:');
-        if (!qText) return;
-        const a = prompt('Option A:'); if (!a) return;
-        const b = prompt('Option B:'); if (!b) return;
-        const c = prompt('Option C (leave blank to skip):') || null;
-        const d = prompt('Option D (leave blank to skip):') || null;
-        const correct = prompt('Correct answer letter (a, b, c, or d):')?.toLowerCase();
-        if (!['a','b','c','d'].includes(correct)) { alert('Invalid answer letter.'); return; }
-        await sb.from('lms_quiz_questions').insert([{
-            module_id: moduleId, question_text: qText,
-            question_order: count + 1,
-            option_a: a, option_b: b, option_c: c, option_d: d,
-            correct_answer: correct
-        }]);
-        if (c || d) await sb.from('lms_modules').update({ has_quiz: true }).eq('id', moduleId);
-        alert('Question added!');
-    } else if (action === '2') {
-        if (!confirm('Delete ALL questions for this module?')) return;
-        await sb.from('lms_quiz_questions').delete().eq('module_id', moduleId);
-        await sb.from('lms_modules').update({ has_quiz: false }).eq('id', moduleId);
-        alert('Questions deleted.');
-    }
     loadCurriculumView();
 }
 
