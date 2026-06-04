@@ -5469,7 +5469,11 @@
             formCurrentStep = 1;
 
             // Pre-fill all fields from the record
-            const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+            const assessmentFormPage = document.getElementById('assessmentFormPage');
+            const setVal = (id, val) => { 
+                const el = assessmentFormPage.querySelector('#' + id); 
+                if (el) el.value = val || ''; 
+            };
             const _meta = currentUser.user_metadata || currentUser.raw_user_meta_data || {};
             const displayName = _meta.full_name || _meta.name || '';
 
@@ -5496,27 +5500,29 @@
             setVal('fInternalNotes', record['admin_notes'] || '');
 
             // Update header
-            document.getElementById('formPhotogName').textContent = record['Photographer Name'] || 'Edit Assessment';
-            document.getElementById('formPhotogMeta').textContent = (record['Photographer Email'] || '') + (record['Photographer Level'] ? ' · ' + record['Photographer Level'] : '');
+            const formPhotogNameEl = assessmentFormPage.querySelector('#formPhotogName');
+            const formPhotogMetaEl = assessmentFormPage.querySelector('#formPhotogMeta');
+            if (formPhotogNameEl) formPhotogNameEl.textContent = record['Photographer Name'] || 'Edit Assessment';
+            if (formPhotogMetaEl) formPhotogMetaEl.textContent = (record['Photographer Email'] || '') + (record['Photographer Level'] ? ' · ' + record['Photographer Level'] : '');
 
             // Pre-check core skills sub-flags
-            document.querySelectorAll('input[name="g1csflag"]').forEach(cb => cb.checked = false);
-            document.querySelectorAll('input[name="g2csflag"]').forEach(cb => cb.checked = false);
+            assessmentFormPage.querySelectorAll('input[name="g1csflag"]').forEach(cb => cb.checked = false);
+            assessmentFormPage.querySelectorAll('input[name="g2csflag"]').forEach(cb => cb.checked = false);
             const g1flags = (record['Gallery #1 Core Skills Flags'] || '').split(',').map(s => s.trim());
             const g2flags = (record['Gallery #2 Core Skills Flags'] || '').split(',').map(s => s.trim());
-            document.querySelectorAll('input[name="g1csflag"]').forEach(cb => { if (g1flags.includes(cb.value)) cb.checked = true; });
-            document.querySelectorAll('input[name="g2csflag"]').forEach(cb => { if (g2flags.includes(cb.value)) cb.checked = true; });
+            assessmentFormPage.querySelectorAll('input[name="g1csflag"]').forEach(cb => { if (g1flags.includes(cb.value)) cb.checked = true; });
+            assessmentFormPage.querySelectorAll('input[name="g2csflag"]').forEach(cb => { if (g2flags.includes(cb.value)) cb.checked = true; });
 
             // Pre-check technical flags
-            document.querySelectorAll('input[name="techflag"]').forEach(cb => cb.checked = false);
+            assessmentFormPage.querySelectorAll('input[name="techflag"]').forEach(cb => cb.checked = false);
             const tflags = (record['Delivery Standard Flags:'] || '').split(',').map(s => s.trim());
-            document.querySelectorAll('input[name="techflag"]').forEach(cb => { if (tflags.includes(cb.value)) cb.checked = true; });
+            assessmentFormPage.querySelectorAll('input[name="techflag"]').forEach(cb => { if (tflags.includes(cb.value)) cb.checked = true; });
 
             // Show existing uploaded images (read-only previews)
             formPendingImages = []; // clear pending — existing ones are already saved
-            const previewList = document.getElementById('fImagePreviewList');
-            const statusDiv = document.getElementById('fImageUploadStatus');
-            const hintDiv = document.getElementById('fImageReplaceHint');
+            const previewList = assessmentFormPage.querySelector('#fImagePreviewList');
+            const statusDiv = assessmentFormPage.querySelector('#fImageUploadStatus');
+            const hintDiv = assessmentFormPage.querySelector('#fImageReplaceHint');
             if (previewList) {
                 const existingUrls = (record['Reference Images'] || '').split(',').map(u => u.trim()).filter(Boolean);
                 if (existingUrls.length > 0) {
