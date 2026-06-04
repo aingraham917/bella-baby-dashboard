@@ -1637,6 +1637,185 @@
 
             </div><!-- end myAssessmentsPage -->
 
+            <!-- ASSESSMENT FORM PAGE (dedicated form page) -->
+            <div id="assessmentFormPage" class="page-container" style="display: none; flex-direction: row;">
+                <div class="main-content">
+                    
+                <!-- Form Header -->
+                <div style="padding: 0 0 15px 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 25px; display: flex; align-items: center; gap: 15px;">
+                    <button onclick="closeAssessmentForm()" style="padding: 6px 12px; background: #f0f0f0; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; white-space: nowrap;">← Back</button>
+                    <div>
+                        <h3 id="formPhotogName" style="margin: 0; font-size: 16px; color: #333;"></h3>
+                        <p id="formPhotogMeta" style="margin: 0; font-size: 12px; color: #999;"></p>
+                    </div>
+                </div>
+
+                <!-- ── SECTION 1: General Info ── -->
+                <h4 style="margin: 0 0 15px 0; color: #4ba8a8; font-size: 15px; border-bottom: 2px solid #e8f5f5; padding-bottom: 8px;">📋 General Info</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label class="fl">PSS Reviewer Name *
+                            <span id="fPSSNameTooltip" style="display:none; margin-left:6px; cursor:help; background:#fff3cd; border:1px solid #ffc107; border-radius:4px; padding:2px 7px; font-size:11px; font-weight:400; color:#856404;">
+                                ⚠️ Go to Options → Edit Profile to set your name
+                            </span>
+                        </label>
+                        <input type="text" id="fPSSName" class="fi" required placeholder="Your full name">
+                    </div>
+                    <div>
+                        <label class="fl">Assessment Date</label>
+                        <input type="date" id="fDate" class="fi" readonly style="background:#f5f5f5;color:#666;cursor:not-allowed;">
+                    </div>
+                    <div>
+                        <label class="fl">Photographer Name</label>
+                        <input type="text" id="fPhotogName" class="fi" readonly style="background:#f5f5f5;color:#666;cursor:not-allowed;">
+                    </div>
+                    <div>
+                        <label class="fl">Photographer Email</label>
+                        <input type="email" id="fPhotogEmail" class="fi" readonly style="background:#f5f5f5;color:#666;cursor:not-allowed;">
+                    </div>
+                </div>
+                <div style="margin-bottom: 25px;">
+                    <label class="fl">Photographer Level</label>
+                    <select id="fPhotogLevel" class="fi" disabled style="background:#f5f5f5;color:#666;cursor:not-allowed;"></select>
+                    <!-- Hidden real select to hold the value for submission -->
+                    <input type="hidden" id="fPhotogLevelHidden">
+                </div>
+
+                <!-- ── SECTION 2: Gallery #1 ── -->
+                <h4 style="margin: 0 0 15px 0; color: #4ba8a8; font-size: 15px; border-bottom: 2px solid #e8f5f5; padding-bottom: 8px;">🖼️ Gallery #1 Review</h4>
+                <div style="margin-bottom: 15px;">
+                    <label class="fl">Gallery #1 Access Code *</label>
+                    <input type="text" id="fG1Code" class="fi" placeholder="e.g. ABC123" required>
+                </div>
+                <div style="background: #f9f9f9; border-radius: 6px; padding: 15px; margin-bottom: 15px; overflow: visible;">
+                    <p style="font-size: 12px; color: #666; margin: 0 0 12px 0; font-weight: 600;">SCORING: 1 = Below Satisfactory | 2 = Competent | 3 = Proficient | 4 = Master</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; overflow: visible;">
+                        <div>
+                            <div class="tooltip-wrapper">
+                                <label class="fl">Core Skills *</label>
+                                <div class="tooltip-box" title="Technical execution: exposure, focus, white balance, and depth of field consistency across the gallery"></div>
+                            </div>
+                            <input type="number" id="fG1Core" class="fi" min="1" max="4" required oninput="markFormDirty(); onFormCoreChange(1); updateOverviewSummary(); autoSuggestFlags();">
+                        </div>
+                        <div>
+                            <label class="fl">Subject / Posing *</label>
+                            <input type="number" id="fG1Subj" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                        </div>
+                        <div>
+                            <label class="fl">Gallery Experience *</label>
+                            <input type="number" id="fG1GalleryExp" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                        </div>
+                        <div>
+                            <label class="fl">Editing / Standards *</label>
+                            <input type="number" id="fG1Edit" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 13px; color: #666;">Gallery #1 Score:</span>
+                        <span id="fG1ScoreDisplay" style="font-size: 20px; font-weight: 700; color: #4ba8a8;">—</span>
+                    </div>
+                </div>
+                <div id="fG1CoreFlagWrap" style="display:none; background:#fff8e1; border:1px solid #ffe082; border-radius:6px; padding:15px; margin-bottom:15px;">
+                    <p style="font-size: 12px; font-weight: 600; color: #b45309; margin: 0 0 10px 0;">⚠️ Core Skills needs improvement — which specific issues apply?</p>
+                    <label class="fcb"><input type="checkbox" name="g1csflag" value="Exposure"> Exposure (blown highlights or too much shadow)</label>
+                    <label class="fcb"><input type="checkbox" name="g1csflag" value="Focus"> Focus (poor focus or inappropriate depth of field)</label>
+                    <label class="fcb"><input type="checkbox" name="g1csflag" value="White Balance"> White Balance (whites are not white or inconsistent skin tones)</label>
+                    <label class="fcb"><input type="checkbox" name="g1csflag" value="N/A"> N/A — no specific sub-issue</label>
+                </div>
+                <div style="margin-bottom: 25px;">
+                    <label class="fl">Gallery #1 Feedback *</label>
+                    <textarea id="fG1Feedback" class="fi" oninput="markFormDirty()" style="min-height: 90px; resize: vertical;" required placeholder="Provide specific, actionable feedback..."></textarea>
+                </div>
+
+                <!-- ── SECTION 3: Gallery #2 ── -->
+                <h4 style="margin: 0 0 15px 0; color: #4ba8a8; font-size: 15px; border-bottom: 2px solid #e8f5f5; padding-bottom: 8px;">🖼️ Gallery #2 Review</h4>
+                <div style="margin-bottom: 15px;">
+                    <label class="fl">Gallery #2 Access Code *</label>
+                    <input type="text" id="fG2Code" class="fi" placeholder="e.g. XYZ789" required>
+                </div>
+                <div style="background: #f9f9f9; border-radius: 6px; padding: 15px; margin-bottom: 15px; overflow: visible;">
+                    <p style="font-size: 12px; color: #666; margin: 0 0 12px 0; font-weight: 600;">SCORING: 1 = Below Satisfactory | 2 = Competent | 3 = Proficient | 4 = Master</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; overflow: visible;">
+                        <div>
+                            <label class="fl">Core Skills *</label>
+                            <input type="number" id="fG2Core" class="fi" min="1" max="4" required oninput="markFormDirty(); onFormCoreChange(2); updateOverviewSummary(); autoSuggestFlags();">
+                        </div>
+                        <div>
+                            <label class="fl">Subject / Posing *</label>
+                            <input type="number" id="fG2Subj" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                        </div>
+                        <div>
+                            <label class="fl">Gallery Experience *</label>
+                            <input type="number" id="fG2GalleryExp" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                        </div>
+                        <div>
+                            <label class="fl">Editing / Standards *</label>
+                            <input type="number" id="fG2Edit" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 13px; color: #666;">Gallery #2 Score:</span>
+                        <span id="fG2ScoreDisplay" style="font-size: 20px; font-weight: 700; color: #4ba8a8;">—</span>
+                    </div>
+                </div>
+                <div id="fG2CoreFlagWrap" style="display:none; background:#fff8e1; border:1px solid #ffe082; border-radius:6px; padding:15px; margin-bottom:15px;">
+                    <p style="font-size: 12px; font-weight: 600; color: #b45309; margin: 0 0 10px 0;">⚠️ Core Skills needs improvement — which specific issues apply?</p>
+                    <label class="fcb"><input type="checkbox" name="g2csflag" value="Exposure"> Exposure (blown highlights or too much shadow)</label>
+                    <label class="fcb"><input type="checkbox" name="g2csflag" value="Focus"> Focus (poor focus or inappropriate depth of field)</label>
+                    <label class="fcb"><input type="checkbox" name="g2csflag" value="White Balance"> White Balance (whites are not white or inconsistent skin tones)</label>
+                    <label class="fcb"><input type="checkbox" name="g2csflag" value="N/A"> N/A — no specific sub-issue</label>
+                </div>
+                <div style="margin-bottom: 25px;">
+                    <label class="fl">Gallery #2 Feedback *</label>
+                    <textarea id="fG2Feedback" class="fi" oninput="markFormDirty()" style="min-height: 90px; resize: vertical;" required placeholder="Provide specific, actionable feedback..."></textarea>
+                </div>
+
+                <!-- SUBMIT SECTION -->
+                <div style="background: #f9f9f9; border-radius: 8px; padding: 20px; margin-top: 30px; border-top: 2px solid #e0e0e0;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+                        <button onclick="submitAssessment()" id="submitBtn" style="padding: 12px; background: #4ba8a8; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">✓ Submit Assessment</button>
+                        <button onclick="closeAssessmentForm()" style="padding: 12px; background: #f0f0f0; color: #333; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">Cancel</button>
+                    </div>
+                    <div style="text-align: center;">
+                        <button onclick="confirmClearForm()" style="padding: 7px 18px; background: none; color: #999; border: 1px dashed #ccc; border-radius: 6px; cursor: pointer; font-size: 12px;">🗑 Clear all entered fields and start over</button>
+                    </div>
+                </div>
+
+                </div><!-- end main-content -->
+
+                <div class="sidebar" style="flex-shrink: 0;">
+                    <div class="controls-section">
+                        <div class="controls-title">Assessment Scoring</div>
+                        <p style="font-size: 13px; color: #666; line-height: 1.6; margin-bottom: 15px;">
+                            <strong>1</strong> = Below Satisfactory<br>
+                            <strong>2</strong> = Competent<br>
+                            <strong>3</strong> = Proficient<br>
+                            <strong>4</strong> = Master
+                        </p>
+                        <p style="font-size: 12px; color: #999; line-height: 1.5;">Assessment completed. Submit when ready. You can edit assessments anytime until approved.</p>
+                    </div>
+                </div>
+
+            </div><!-- end assessmentFormPage -->
+
+            <!-- RECORD DETAIL PAGE -->
+            <div id="recordDetailPage" class="page-container" style="display: none; flex-direction: row;">
+                <div class="main-content">
+                    <div style="padding: 0 0 15px 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 25px; display: flex; align-items: center; gap: 15px;">
+                        <button onclick="closeRecordDetail()" style="padding: 6px 12px; background: #f0f0f0; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; white-space: nowrap;">← Back</button>
+                    </div>
+                    <div id="recordDetailContent">Loading record...</div>
+                </div>
+
+                <div class="sidebar" style="flex-shrink: 0;">
+                    <div class="controls-section">
+                        <div class="controls-title">Record Actions</div>
+                        <button id="printRecordBtn" onclick="printPhotographerRecords(currentRecord['Photographer Name'])" style="width: 100%; padding: 10px; background: #4ba8a8; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; margin-bottom: 10px;">📄 Print Record</button>
+                        <button id="editRecordBtn" style="width: 100%; padding: 10px; background: #f0f0f0; color: #333; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;">✏️ Edit Assessment</button>
+                    </div>
+                </div>
+            </div><!-- end recordDetailPage -->
+
             <!-- CHARTS PAGE -->
             <div id="chartsPage" class="page-container" style="display: none; flex-direction: row;">
                 <div class="main-content">
@@ -4023,7 +4202,7 @@
 
         function showPage(pageId) {
             // Hide all pages
-            const allPages = ['dashboardPage','manageAssessmentsPage','myAssessmentsPage','chartsPage','adminReportsPage','imageStoagePage','changePasswordPage','trainingLibraryPage'];
+            const allPages = ['dashboardPage','manageAssessmentsPage','myAssessmentsPage','assessmentFormPage','recordDetailPage','chartsPage','adminReportsPage','imageStoagePage','changePasswordPage','trainingLibraryPage'];
             allPages.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
 
             // Show selected page
@@ -5165,8 +5344,8 @@
                 const el = document.getElementById(id);
                 if (el) el.value = '';
             });
-            document.querySelectorAll('#myAssessmentsPage input[type=checkbox]').forEach(cb => cb.checked = false);
-            document.querySelectorAll('#myAssessmentsPage input[type=radio]').forEach(rb => {
+            document.querySelectorAll('#assessmentFormPage input[type=checkbox]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('#assessmentFormPage input[type=radio]').forEach(rb => {
                 if (rb.value === 'none') rb.checked = true; else rb.checked = false;
             });
             document.getElementById('fImagePreviewList').innerHTML = '';
@@ -5179,9 +5358,8 @@
             recalcFormScores();
             updateOverviewSummary();
 
-            // Switch views
-            document.getElementById('assessmentsListView').style.display = 'none';
-            document.getElementById('assessmentFormView').style.display = 'block';
+            // Navigate to form page
+            showPage('assessmentFormPage');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -5209,8 +5387,8 @@
                 return;
             }
 
-            // Navigate to My Assessments page and open the form
-            showPage('myAssessmentsPage');
+            // Navigate to assessment form page
+            showPage('assessmentFormPage');
 
             // Store the record id so Save updates rather than inserts
             window._currentDraftId = recordId;
@@ -5308,9 +5486,6 @@
             recalcFormScores();
             updateOverviewSummary();
 
-            // Show the form
-            document.getElementById('assessmentsListView').style.display = 'none';
-            document.getElementById('assessmentFormView').style.display = 'block';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -5486,8 +5661,7 @@
         }
 
         function closeAssessmentForm() {
-            document.getElementById('assessmentsListView').style.display = 'block';
-            document.getElementById('assessmentFormView').style.display = 'none';
+            showPage('myAssessmentsPage');
             formAssignmentId = null;
             formPendingImages = [];
             // Scroll back to top of page
@@ -6937,6 +7111,11 @@
             modalBody.innerHTML = '';
         }
 
+        function closeRecordDetail() {
+            showPage('dashboardPage');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         let currentRecord = null;
 
         function showRecordDetailsForPhoto(recordIndex, photographerName) {
@@ -6944,8 +7123,8 @@
             const photographerRecords = allRecords.filter(r => r['Photographer Name'] === photographerName);
             
             if (recordIndex < 0 || recordIndex >= photographerRecords.length) {
-                modalBody.innerHTML = '<p>Record not found</p>';
-                recordModal.classList.add('active');
+                document.getElementById('recordDetailContent').innerHTML = '<p>Record not found</p>';
+                showPage('recordDetailPage');
                 return;
             }
             
@@ -6954,15 +7133,15 @@
         }
 
         function showRecordDetails(record) {
-            // Clear modal first
-            modalBody.innerHTML = '';
+            // Clear page content first
+            document.getElementById('recordDetailContent').innerHTML = '';
             
             // Store current record for print functions
             currentRecord = record;
             
             if (!record) {
-                modalBody.innerHTML = '<p>Record not found</p>';
-                recordModal.classList.add('active');
+                document.getElementById('recordDetailContent').innerHTML = '<p>Record not found</p>';
+                showPage('recordDetailPage');
                 return;
             }
 
@@ -7317,10 +7496,16 @@
                 </div>
             `;
 
-            modalBody.innerHTML = html;
-            recordModal.classList.add('active');
-            // Reset scroll to top
-            document.querySelector('.modal-content').scrollTop = 0;
+            document.getElementById('recordDetailContent').innerHTML = html;
+            
+            // Setup edit button
+            const editBtn = document.getElementById('editRecordBtn');
+            if (editBtn) {
+                editBtn.onclick = () => openAssessmentFormForEdit(record.id, null);
+            }
+            
+            showPage('recordDetailPage');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function printCurrentRecord() {
