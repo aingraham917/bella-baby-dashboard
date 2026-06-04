@@ -695,7 +695,7 @@
         }
 
         .record-tooltip {
-            background-color: rgba(59, 130, 246, 0.95);
+            background-color: rgba(135, 180, 230, 0.92);
             color: white;
             padding: 12px 14px;
             border-radius: 8px;
@@ -703,11 +703,10 @@
             white-space: normal;
             width: 240px;
             z-index: 9999;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 12px rgba(135, 180, 230, 0.25);
             line-height: 1.4;
             font-weight: 400;
             pointer-events: none;
-            transform: translateX(-50%) translateY(-100%);
             opacity: 0;
             transition: opacity 0.2s ease;
             text-align: center;
@@ -725,7 +724,7 @@
             margin-left: -6px;
             border-width: 6px;
             border-style: solid;
-            border-color: rgba(59, 130, 246, 0.95) transparent transparent transparent;
+            border-color: rgba(135, 180, 230, 0.92) transparent transparent transparent;
         }
 
         .gallery-feedback {
@@ -7168,9 +7167,28 @@
                     
                     // Position tooltip
                     const rect = label.getBoundingClientRect();
+                    const tooltipWidth = 240;
+                    const tooltipHeight = 80; // approximate height
+                    const centerX = rect.left + rect.width / 2;
+                    const topPos = rect.top - tooltipHeight - 15;
+                    
+                    // Adjust horizontally to prevent clipping
+                    let leftPos = centerX;
+                    const minSpacing = 10;
+                    
+                    // Check if tooltip would go off-screen to the left
+                    if (centerX - tooltipWidth / 2 < minSpacing) {
+                        leftPos = tooltipWidth / 2 + minSpacing;
+                    }
+                    // Check if tooltip would go off-screen to the right
+                    else if (centerX + tooltipWidth / 2 > window.innerWidth - minSpacing) {
+                        leftPos = window.innerWidth - tooltipWidth / 2 - minSpacing;
+                    }
+                    
                     tooltip.style.position = 'fixed';
-                    tooltip.style.left = (rect.left + rect.width / 2) + 'px';
-                    tooltip.style.top = (rect.top - 10) + 'px';
+                    tooltip.style.left = leftPos + 'px';
+                    tooltip.style.top = topPos + 'px';
+                    tooltip.style.transform = 'translateX(-50%) translateY(0)';
                     
                     // Show tooltip with small delay
                     setTimeout(() => tooltip.classList.add('visible'), 10);
