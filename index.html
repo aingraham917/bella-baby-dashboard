@@ -1015,29 +1015,29 @@
         .fi-locked { background: #f0f0f0 !important; color: #aaa !important; border-color: #ddd !important; }
 
         /* Tooltip Styles */
-        .tooltip-wrapper { position: relative; display: inline-block; cursor: help; z-index: 100; }
-        .tooltip-wrapper .fl { border-bottom: 2px dotted #3b82f6; }
+        .tooltip-wrapper { position: relative; display: inline-block; cursor: help; }
+        .tooltip-wrapper .fl { border-bottom: 2px dotted #3b82f6; padding-right: 4px; }
         .tooltip-box { 
-            visibility: hidden;
-            opacity: 0;
+            visibility: visible;
+            opacity: 1;
             background-color: rgba(59, 130, 246, 0.95);
             color: white;
             text-align: center;
             padding: 12px 14px;
             border-radius: 8px;
             position: absolute;
-            z-index: 9999;
+            z-index: 99999;
             width: 280px;
             font-size: 13px;
             line-height: 1.5;
             font-weight: 400;
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-            transition: opacity 0.3s ease, visibility 0.3s ease;
             bottom: calc(100% + 10px);
             left: 50%;
             transform: translateX(-50%);
             white-space: normal;
             word-wrap: break-word;
+            display: block;
         }
 
         .tooltip-box::after {
@@ -1049,11 +1049,6 @@
             border-width: 6px;
             border-style: solid;
             border-color: rgba(59, 130, 246, 0.95) transparent transparent transparent;
-        }
-
-        .tooltip-wrapper:hover .tooltip-box {
-            visibility: visible;
-            opacity: 1;
         }
 
         .tooltip-rubric-link {
