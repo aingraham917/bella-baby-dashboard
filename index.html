@@ -716,7 +716,7 @@
         }
 
         .record-tooltip {
-            background-color: rgba(135, 180, 230, 0.92);
+            background-color: rgba(135, 180, 230, 1);
             color: white;
             padding: 12px 14px;
             border-radius: 8px;
@@ -724,7 +724,7 @@
             white-space: normal;
             width: 240px;
             z-index: 9999;
-            box-shadow: 0 4px 12px rgba(135, 180, 230, 0.25);
+            box-shadow: 0 4px 12px rgba(135, 180, 230, 0.3);
             line-height: 1.4;
             font-weight: 400;
             pointer-events: none;
@@ -745,7 +745,7 @@
             margin-left: -6px;
             border-width: 6px;
             border-style: solid;
-            border-color: rgba(135, 180, 230, 0.92) transparent transparent transparent;
+            border-color: rgba(135, 180, 230, 1) transparent transparent transparent;
         }
 
         .gallery-feedback {
@@ -1408,13 +1408,7 @@
                     <p style="font-size: 12px; color: #666; margin: 0 0 12px 0; font-weight: 600;">SCORING: 1 = Below Satisfactory &nbsp;|&nbsp; 2 = Competent/Flat &nbsp;|&nbsp; 3 = Proficient &nbsp;|&nbsp; 4 = Master</p>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; overflow: visible;">
                         <div>
-                            <div class="tooltip-wrapper">
-                                <label class="fl">Core Skills *</label>
-                                <div class="tooltip-box">
-                                    Technical execution: exposure, focus, white balance, and depth of field consistency across the gallery
-                                    <div class="tooltip-rubric-link"><a href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view" target="_blank">View Rubric</a></div>
-                                </div>
-                            </div>
+                            <label class="fl">Core Skills *</label>
                             <input type="number" id="fG1Core" class="fi" min="1" max="4" required oninput="markFormDirty(); onFormCoreChange(1); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                         <div id="fG1SubjWrap">
@@ -1749,10 +1743,7 @@
                     <p style="font-size: 12px; color: #666; margin: 0 0 12px 0; font-weight: 600;">SCORING: 1 = Below Satisfactory | 2 = Competent | 3 = Proficient | 4 = Master</p>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; overflow: visible;">
                         <div>
-                            <div class="tooltip-wrapper">
-                                <label class="fl">Core Skills *</label>
-                                <div class="tooltip-box" title="Technical execution: exposure, focus, white balance, and depth of field consistency across the gallery"></div>
-                            </div>
+                            <label class="fl">Core Skills *</label>
                             <input type="number" id="fG1Core" class="fi" min="1" max="4" required oninput="markFormDirty(); onFormCoreChange(1); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                         <div>
@@ -1868,7 +1859,8 @@
                 <div class="sidebar" style="flex-shrink: 0;">
                     <div class="controls-section">
                         <div class="controls-title">Record Actions</div>
-                        <button id="printRecordBtn" onclick="printPhotographerRecords(currentRecord['Photographer Name'])" style="width: 100%; padding: 10px; background: #4ba8a8; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; margin-bottom: 10px;">📄 Print Record</button>
+                        <button id="printThisRecordBtn" onclick="printCurrentRecord()" style="width: 100%; padding: 10px; background: #4ba8a8; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; margin-bottom: 10px;">📄 Print This Assessment</button>
+                        <button id="printAllRecordsBtn" onclick="printPhotographerRecords(currentRecord['Photographer Name'])" style="width: 100%; padding: 10px; background: #4ba8a8; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; margin-bottom: 10px;">📄 Print All Assessments</button>
                         <button id="editRecordBtn" style="width: 100%; padding: 10px; background: #f0f0f0; color: #333; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;">✏️ Edit Assessment</button>
                     </div>
                 </div>
@@ -7598,14 +7590,6 @@
                     </div>
                 `;
             }
-
-            // Add print buttons
-            html += `
-                <div class="print-buttons">
-                    <button type="button" class="print-btn" onclick="printCurrentRecord()">Print This Record</button>
-                    <button type="button" class="print-btn" onclick="printPhotographerRecords('${record['Photographer Name'].replace(/'/g, "\\'")}')">Print All Records</button>
-                </div>
-            `;
 
             document.getElementById('recordDetailContent').innerHTML = html;
             
