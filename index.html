@@ -689,42 +689,43 @@
             padding-bottom: 2px;
         }
 
-        .gallery-score-label:hover::after {
-            content: attr(data-tooltip);
-            position: absolute;
+        .gallery-score-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .record-tooltip {
             background-color: rgba(59, 130, 246, 0.95);
             color: white;
             padding: 12px 14px;
             border-radius: 8px;
             font-size: 12px;
             white-space: normal;
-            width: 200px;
-            bottom: calc(100% + 15px);
-            left: 50%;
-            transform: translateX(-50%);
+            width: 240px;
             z-index: 9999;
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
             line-height: 1.4;
             font-weight: 400;
             pointer-events: none;
+            transform: translateX(-50%) translateY(-100%);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            text-align: center;
         }
 
-        .gallery-score-label:hover::before {
+        .record-tooltip.visible {
+            opacity: 1;
+        }
+
+        .record-tooltip::after {
             content: '';
             position: absolute;
-            bottom: calc(100% + 7px);
+            top: 100%;
             left: 50%;
             margin-left: -6px;
             border-width: 6px;
             border-style: solid;
             border-color: rgba(59, 130, 246, 0.95) transparent transparent transparent;
-            z-index: 9999;
-            pointer-events: none;
-        }
-
-        .gallery-score-value {
-            font-weight: 600;
-            color: #333;
         }
 
         .gallery-feedback {
@@ -7153,6 +7154,34 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        function initRecordDetailTooltips() {
+            // Remove any existing tooltips first
+            document.querySelectorAll('.record-tooltip').forEach(el => el.remove());
+            
+            // Find all labels with data-tooltip
+            document.querySelectorAll('[data-tooltip]').forEach(label => {
+                label.addEventListener('mouseenter', (e) => {
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'record-tooltip';
+                    tooltip.textContent = label.getAttribute('data-tooltip');
+                    document.body.appendChild(tooltip);
+                    
+                    // Position tooltip
+                    const rect = label.getBoundingClientRect();
+                    tooltip.style.position = 'fixed';
+                    tooltip.style.left = (rect.left + rect.width / 2) + 'px';
+                    tooltip.style.top = (rect.top - 10) + 'px';
+                    
+                    // Show tooltip with small delay
+                    setTimeout(() => tooltip.classList.add('visible'), 10);
+                });
+                
+                label.addEventListener('mouseleave', () => {
+                    document.querySelectorAll('.record-tooltip').forEach(el => el.remove());
+                });
+            });
+        }
+
         let currentRecord = null;
 
         function showRecordDetailsForPhoto(recordIndex, photographerName) {
@@ -7542,6 +7571,10 @@
             }
             
             showPage('recordDetailPage');
+            
+            // Initialize tooltips after page is shown
+            setTimeout(initRecordDetailTooltips, 100);
+            
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
