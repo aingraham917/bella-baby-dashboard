@@ -5475,7 +5475,17 @@
             setVal('fDate',        record['Date'] || '');
             setVal('fPhotogName',  record['Photographer Name'] || '');
             setVal('fPhotogEmail', record['Photographer Email'] || '');
-            setLevelField(record['Photographer Level'] || '');
+            
+            // Set Photographer Level with scoped queries
+            const level = record['Photographer Level'] || '';
+            const levelSel = assessmentFormPage.querySelector('#fPhotogLevel');
+            const levelHidden = assessmentFormPage.querySelector('#fPhotogLevelHidden');
+            if (levelSel) {
+                levelSel.innerHTML = `<option value="${level || ''}">${level || 'Not specified'}</option>`;
+                levelSel.value = level || '';
+            }
+            if (levelHidden) levelHidden.value = level || '';
+            
             setVal('fG1Code',      record['Gallery #1 Access Code:'] || '');
             setVal('fG1Core',      record['Core Skills (1)'] || '');
             setVal('fG1Subj',      record['Subject and Posing (1)'] || '');
