@@ -1014,44 +1014,40 @@
         .form-step-dot.done { background: #a8d5a3; }
         .fi-locked { background: #f0f0f0 !important; color: #aaa !important; border-color: #ddd !important; }
 
-        /* Tooltip Styles */
-        .tooltip-wrapper { position: relative; display: inline-block; cursor: help; }
-        .tooltip-wrapper .fl { border-bottom: 2px dotted #3b82f6; padding-right: 4px; }
-        .tooltip-box { 
-            visibility: visible;
-            opacity: 1;
+        /* Simple Tooltip Styles - moved to body level via JS */
+        .tooltip-wrapper .fl { border-bottom: 2px dotted #3b82f6; cursor: help; }
+        
+        .bb-tooltip {
+            position: fixed;
             background-color: rgba(59, 130, 246, 0.95);
             color: white;
             text-align: center;
             padding: 12px 14px;
             border-radius: 8px;
-            position: absolute;
             z-index: 99999;
             width: 280px;
             font-size: 13px;
             line-height: 1.5;
             font-weight: 400;
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-            bottom: calc(100% + 10px);
-            left: 50%;
-            transform: translateX(-50%);
             white-space: normal;
             word-wrap: break-word;
-            display: block;
+            pointer-events: none;
+            display: none;
         }
 
-        .tooltip-box::after {
+        .bb-tooltip::after {
             content: "";
             position: absolute;
-            top: 100%;
             left: 50%;
             margin-left: -6px;
             border-width: 6px;
             border-style: solid;
             border-color: rgba(59, 130, 246, 0.95) transparent transparent transparent;
+            top: 100%;
         }
 
-        .tooltip-rubric-link {
+        .bb-tooltip-link {
             display: block;
             margin-top: 10px;
             padding-top: 10px;
@@ -1059,14 +1055,13 @@
             font-size: 12px;
         }
 
-        .tooltip-rubric-link a {
+        .bb-tooltip-link a {
             color: #e0f2fe;
             text-decoration: none;
             font-weight: 600;
-            transition: color 0.2s;
         }
 
-        .tooltip-rubric-link a:hover {
+        .bb-tooltip-link a:hover {
             color: #ffffff;
             text-decoration: underline;
         }
@@ -7642,7 +7637,64 @@
             return score;
         }
 
+        // Initialize Tooltips
+        function initTooltips() {
+            const tooltips = {
+                'Core Skills': 'Technical execution: exposure, focus, white balance, and depth of field consistency across the gallery',
+                'Subject / Posing': 'How subjects appear: comfort level, posing flattery, expressions, and emotional engagement',
+                'Gallery Experience': 'Composition, framing, cropping, and visual variety. Does the gallery tell a complete story with intentional, balanced shots?',
+                'Editing / Standards': 'Post-processing consistency: skin tones, color accuracy, style alignment with Bella Baby standards, and print readiness'
+            };
+
+            // Create tooltip container
+            let tooltipContainer = document.getElementById('bb-tooltip-container');
+            if (!tooltipContainer) {
+                tooltipContainer = document.createElement('div');
+                tooltipContainer.id = 'bb-tooltip-container';
+                document.body.appendChild(tooltipContainer);
+            }
+
+            // Find all tooltip wrappers
+            document.querySelectorAll('.tooltip-wrapper').forEach(wrapper => {
+                const label = wrapper.querySelector('.fl');
+                if (!label) return;
+
+                const labelText = label.textContent.trim().replace(' *', '');
+                const tooltipText = tooltips[labelText];
+                if (!tooltipText) return;
+
+                // Remove old tooltip-box if exists
+                const oldBox = wrapper.querySelector('.tooltip-box');
+                if (oldBox) oldBox.remove();
+
+                // Create tooltip element
+                const tooltip = document.createElement('div');
+                tooltip.className = 'bb-tooltip';
+                tooltip.innerHTML = tooltipText + '<div class="bb-tooltip-link"><a href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view" target="_blank">View Rubric</a></div>';
+                tooltipContainer.appendChild(tooltip);
+
+                // Hover handlers
+                wrapper.addEventListener('mouseenter', () => {
+                    const rect = label.getBoundingClientRect();
+                    tooltip.style.display = 'block';
+                    tooltip.style.left = (rect.left + rect.width / 2) + 'px';
+                    tooltip.style.top = (rect.top - 10) + 'px';
+                    tooltip.style.transform = 'translateX(-50%) translateY(-100%)';
+                });
+
+                wrapper.addEventListener('mouseleave', () => {
+                    tooltip.style.display = 'none';
+                });
+            });
+        }
+
+        // Run after DOM is ready
+        document.addEventListener('DOMContentLoaded', initTooltips);
+
         init();
+        
+        // Also initialize tooltips after a brief delay to ensure DOM is fully ready
+        setTimeout(initTooltips, 100);
     </script>
 </body>
 </html>
