@@ -1306,8 +1306,8 @@
                             <input type="number" id="fG1Subj" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                         <div id="fG1CompWrap">
-                            <label class="fl">Composition &amp; Variety *</label>
-                            <input type="number" id="fG1Comp" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                            <label class="fl">Gallery Experience *</label>
+                            <input type="number" id="fG1GalleryExp" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                         <div id="fG1EditWrap">
                             <label class="fl">Editing / Standards *</label>
@@ -1349,8 +1349,8 @@
                             <input type="number" id="fG2Subj" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                         <div id="fG2CompWrap">
-                            <label class="fl">Composition &amp; Variety *</label>
-                            <input type="number" id="fG2Comp" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                            <label class="fl">Gallery Experience *</label>
+                            <input type="number" id="fG2GalleryExp" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                         <div id="fG2EditWrap">
                             <label class="fl">Editing / Standards *</label>
@@ -1417,9 +1417,9 @@
                         <div style="text-align:center;"><input type="radio" name="flag_1" value="urgent" style="accent-color:#ef4444;"></div>
                         <div style="text-align:center;"><input type="radio" name="flag_1" value="nonurgent" style="accent-color:#f59e0b;"></div>
                     </div>
-                    <!-- Composition -->
+                    <!-- Gallery Experience -->
                     <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; padding: 10px 12px; border-top: 1px solid #e0e0e0; align-items: center;">
-                        <div style="font-size: 13px; color: #333;">Composition, orientation and variety</div>
+                        <div style="font-size: 13px; color: #333;">Gallery Experience</div>
                         <div style="text-align:center;"><input type="radio" name="flag_2" value="none" checked style="accent-color:#4ba8a8;"></div>
                         <div style="text-align:center;"><input type="radio" name="flag_2" value="urgent" style="accent-color:#ef4444;"></div>
                         <div style="text-align:center;"><input type="radio" name="flag_2" value="nonurgent" style="accent-color:#f59e0b;"></div>
@@ -5059,8 +5059,8 @@
             document.getElementById('formPhotogMeta').textContent = photogEmail + (photogLevel ? ' · ' + photogLevel : '');
 
             // Reset all form inputs
-            ['fG1Code','fG1Core','fG1Subj','fG1Comp','fG1Edit','fG1Feedback',
-             'fG2Code','fG2Core','fG2Subj','fG2Comp','fG2Edit','fG2Feedback',
+            ['fG1Code','fG1Core','fG1Subj','fG1GalleryExp','fG1Edit','fG1Feedback',
+             'fG2Code','fG2Core','fG2Subj','fG2GalleryExp','fG2Edit','fG2Feedback',
              'fTechNotes','fInternalNotes'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = '';
@@ -5147,13 +5147,13 @@
             setVal('fG1Code',      record['Gallery #1 Access Code:'] || '');
             setVal('fG1Core',      record['Core Skills (1)'] || '');
             setVal('fG1Subj',      record['Subject and Posing (1)'] || '');
-            setVal('fG1Comp',      record['Composition, orientation and variety (1)'] || '');
+            setVal('fG1GalleryExp', record['Gallery Experience (1)'] || '');
             setVal('fG1Edit',      record['Editing / Bella Baby Standards (1)'] || '');
             setVal('fG1Feedback',  record['Gallery #1 Feedback:'] || '');
             setVal('fG2Code',      record['Gallery #2 Access Code:'] || '');
             setVal('fG2Core',      record['Core Skills (2)'] || '');
             setVal('fG2Subj',      record['Subject and Posing (2)'] || '');
-            setVal('fG2Comp',      record['Composition, orientation and variety (2)'] || '');
+            setVal('fG2GalleryExp', record['Gallery Experience (2)'] || '');
             setVal('fG2Edit',      record['Editing / Bella Baby Standards (2)'] || '');
             setVal('fG2Feedback',  record['Gallery #2 Feedback:'] || '');
             setVal('fTechNotes',   record['Delivery Notes:'] || '');
@@ -5319,7 +5319,7 @@
                     'Gallery #1 Access Code:': g1Code,
                     'Core Skills (1)': g1c.toString(),
                     'Subject and Posing (1)': g1s.toString(),
-                    'Composition, orientation and variety (1)': g1p.toString(),
+                    'Gallery Experience (1)': g1p.toString(),
                     'Editing / Bella Baby Standards (1)': g1e.toString(),
                     'Gallery #1 Score:': g1T.toString(),
                     'Gallery #1 Feedback:': g1fb,
@@ -5327,7 +5327,7 @@
                     'Gallery #2 Access Code:': g2Code,
                     'Core Skills (2)': g2c.toString(),
                     'Subject and Posing (2)': g2s.toString(),
-                    'Composition, orientation and variety (2)': g2p.toString(),
+                    'Gallery Experience (2)': g2p.toString(),
                     'Editing / Bella Baby Standards (2)': g2e.toString(),
                     'Gallery #2 Score:': g2T.toString(),
                     'Gallery #2 Feedback:': g2fb,
@@ -5768,7 +5768,7 @@
                     'Gallery #1 Access Code:': g1Code,
                     'Core Skills (1)': g1c.toString(),
                     'Subject and Posing (1)': g1s.toString(),
-                    'Composition, orientation and variety (1)': g1p.toString(),
+                    'Gallery Experience (1)': g1p.toString(),
                     'Editing / Bella Baby Standards (1)': g1e.toString(),
                     'Gallery #1 Score:': g1T.toString(),
                     'Gallery #1 Feedback:': g1fb,
@@ -5776,7 +5776,7 @@
                     'Gallery #2 Access Code:': g2Code,
                     'Core Skills (2)': g2c.toString(),
                     'Subject and Posing (2)': g2s.toString(),
-                    'Composition, orientation and variety (2)': g2p.toString(),
+                    'Gallery Experience (2)': g2p.toString(),
                     'Editing / Bella Baby Standards (2)': g2e.toString(),
                     'Gallery #2 Score:': g2T.toString(),
                     'Gallery #2 Feedback:': g2fb,
@@ -6071,11 +6071,11 @@
                 data.forEach(record => {
                     const g1Score = (parseInt(record['Core Skills (1)'] || 0) + 
                                    parseInt(record['Subject and Posing (1)'] || 0) + 
-                                   parseInt(record['Composition, orientation and variety (1)'] || 0) + 
+                                   parseInt(record['Gallery Experience (1)'] || 0) + 
                                    parseInt(record['Editing / Bella Baby Standards (1)'] || 0));
                     const g2Score = (parseInt(record['Core Skills (2)'] || 0) + 
                                    parseInt(record['Subject and Posing (2)'] || 0) + 
-                                   parseInt(record['Composition, orientation and variety (2)'] || 0) + 
+                                   parseInt(record['Gallery Experience (2)'] || 0) + 
                                    parseInt(record['Editing / Bella Baby Standards (2)'] || 0));
                     
                     const recordId = record.id;
@@ -6100,8 +6100,8 @@
                                     <div style="color:#555;">G2 Core Skills: ${record['Core Skills (2)'] || '-'}</div>
                                     <div style="color:#555;">G1 Subject/Posing: ${record['Subject and Posing (1)'] || '-'}</div>
                                     <div style="color:#555;">G2 Subject/Posing: ${record['Subject and Posing (2)'] || '-'}</div>
-                                    <div style="color:#555;">G1 Composition: ${record['Composition, orientation and variety (1)'] || '-'}</div>
-                                    <div style="color:#555;">G2 Composition: ${record['Composition, orientation and variety (2)'] || '-'}</div>
+                                    <div style="color:#555;">G1 Gallery Experience: ${record['Gallery Experience (1)'] || '-'}</div>
+                                    <div style="color:#555;">G2 Gallery Experience: ${record['Gallery Experience (2)'] || '-'}</div>
                                     <div style="color:#555;">G1 Editing: ${record['Editing / Bella Baby Standards (1)'] || '-'}</div>
                                     <div style="color:#555;">G2 Editing: ${record['Editing / Bella Baby Standards (2)'] || '-'}</div>
                                 </div>
@@ -6121,7 +6121,7 @@
                                     <div><label style="display:block;font-weight:600;margin-bottom:3px;">Subject &amp; Posing (1-4):</label>
                                     <input type="number" id="edit-g1-subj-${recordId}" min="1" max="4" value="${record['Subject and Posing (1)'] || ''}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;"></div>
                                     <div><label style="display:block;font-weight:600;margin-bottom:3px;">Composition (1-4):</label>
-                                    <input type="number" id="edit-g1-comp-${recordId}" min="1" max="4" value="${record['Composition, orientation and variety (1)'] || ''}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;"></div>
+                                    <input type="number" id="edit-g1-gallery-exp-${recordId}" min="1" max="4" value="${record['Gallery Experience (1)'] || ''}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;"></div>
                                     <div><label style="display:block;font-weight:600;margin-bottom:3px;">Editing (1-4):</label>
                                     <input type="number" id="edit-g1-edit-${recordId}" min="1" max="4" value="${record['Editing / Bella Baby Standards (1)'] || ''}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;"></div>
                                 </div>
@@ -6135,7 +6135,7 @@
                                     <div><label style="display:block;font-weight:600;margin-bottom:3px;">Subject &amp; Posing (1-4):</label>
                                     <input type="number" id="edit-g2-subj-${recordId}" min="1" max="4" value="${record['Subject and Posing (2)'] || ''}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;"></div>
                                     <div><label style="display:block;font-weight:600;margin-bottom:3px;">Composition (1-4):</label>
-                                    <input type="number" id="edit-g2-comp-${recordId}" min="1" max="4" value="${record['Composition, orientation and variety (2)'] || ''}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;"></div>
+                                    <input type="number" id="edit-g2-gallery-exp-${recordId}" min="1" max="4" value="${record['Gallery Experience (2)'] || ''}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;"></div>
                                     <div><label style="display:block;font-weight:600;margin-bottom:3px;">Editing (1-4):</label>
                                     <input type="number" id="edit-g2-edit-${recordId}" min="1" max="4" value="${record['Editing / Bella Baby Standards (2)'] || ''}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;"></div>
                                 </div>
@@ -6172,12 +6172,12 @@
 
                 const g1Core = getVal(`edit-g1-core-${recordId}`);
                 const g1Subj = getVal(`edit-g1-subj-${recordId}`);
-                const g1Comp = getVal(`edit-g1-comp-${recordId}`);
+                const g1GalleryExp = getVal(`edit-g1-gallery-exp-${recordId}`);
                 const g1Edit = getVal(`edit-g1-edit-${recordId}`);
                 const g1Fb   = getVal(`edit-g1-fb-${recordId}`);
                 const g2Core = getVal(`edit-g2-core-${recordId}`);
                 const g2Subj = getVal(`edit-g2-subj-${recordId}`);
-                const g2Comp = getVal(`edit-g2-comp-${recordId}`);
+                const g2GalleryExp = getVal(`edit-g2-gallery-exp-${recordId}`);
                 const g2Edit = getVal(`edit-g2-edit-${recordId}`);
                 const g2Fb   = getVal(`edit-g2-fb-${recordId}`);
                 const notes    = getVal(`edit-notes-${recordId}`);
@@ -6186,23 +6186,23 @@
                 const updateData = {};
                 if (g1Core !== null) updateData['Core Skills (1)'] = g1Core;
                 if (g1Subj !== null) updateData['Subject and Posing (1)'] = g1Subj;
-                if (g1Comp !== null) updateData['Composition, orientation and variety (1)'] = g1Comp;
+                if (g1GalleryExp !== null) updateData['Gallery Experience (1)'] = g1GalleryExp;
                 if (g1Edit !== null) updateData['Editing / Bella Baby Standards (1)'] = g1Edit;
                 if (g1Fb   !== null) updateData['Gallery #1 Feedback:'] = g1Fb;
                 if (g2Core !== null) updateData['Core Skills (2)'] = g2Core;
                 if (g2Subj !== null) updateData['Subject and Posing (2)'] = g2Subj;
-                if (g2Comp !== null) updateData['Composition, orientation and variety (2)'] = g2Comp;
+                if (g2GalleryExp !== null) updateData['Gallery Experience (2)'] = g2GalleryExp;
                 if (g2Edit !== null) updateData['Editing / Bella Baby Standards (2)'] = g2Edit;
                 if (g2Fb   !== null) updateData['Gallery #2 Feedback:'] = g2Fb;
                 if (notes    !== null) updateData['Delivery Notes:'] = notes;
                 if (internal !== null) updateData['admin_notes'] = internal;
 
                 // Recalculate scores
-                if (g1Core !== null || g1Subj !== null || g1Comp !== null || g1Edit !== null) {
-                    updateData['Gallery #1 Score:'] = (parseInt(g1Core||0) + parseInt(g1Subj||0) + parseInt(g1Comp||0) + parseInt(g1Edit||0)).toString();
+                if (g1Core !== null || g1Subj !== null || g1GalleryExp !== null || g1Edit !== null) {
+                    updateData['Gallery #1 Score:'] = (parseInt(g1Core||0) + parseInt(g1Subj||0) + parseInt(g1GalleryExp||0) + parseInt(g1Edit||0)).toString();
                 }
-                if (g2Core !== null || g2Subj !== null || g2Comp !== null || g2Edit !== null) {
-                    updateData['Gallery #2 Score:'] = (parseInt(g2Core||0) + parseInt(g2Subj||0) + parseInt(g2Comp||0) + parseInt(g2Edit||0)).toString();
+                if (g2Core !== null || g2Subj !== null || g2GalleryExp !== null || g2Edit !== null) {
+                    updateData['Gallery #2 Score:'] = (parseInt(g2Core||0) + parseInt(g2Subj||0) + parseInt(g2GalleryExp||0) + parseInt(g2Edit||0)).toString();
                 }
                 if (updateData['Gallery #1 Score:'] && updateData['Gallery #2 Score:']) {
                     const avg = ((parseInt(updateData['Gallery #1 Score:']) + parseInt(updateData['Gallery #2 Score:'])) / 2).toFixed(2);
@@ -6276,8 +6276,8 @@
             editDiv.style.display = isOpening ? 'block' : 'none';
             if (isOpening) {
                 // Attach Core Skills gating now that the fields are visible
-                applyCoreSkillsGating(`edit-g1-core-${recordId}`, [`edit-g1-subj-${recordId}`, `edit-g1-comp-${recordId}`, `edit-g1-edit-${recordId}`]);
-                applyCoreSkillsGating(`edit-g2-core-${recordId}`, [`edit-g2-subj-${recordId}`, `edit-g2-comp-${recordId}`, `edit-g2-edit-${recordId}`]);
+                applyCoreSkillsGating(`edit-g1-core-${recordId}`, [`edit-g1-subj-${recordId}`, `edit-g1-gallery-exp-${recordId}`, `edit-g1-edit-${recordId}`]);
+                applyCoreSkillsGating(`edit-g2-core-${recordId}`, [`edit-g2-subj-${recordId}`, `edit-g2-gallery-exp-${recordId}`, `edit-g2-edit-${recordId}`]);
             }
         }
 
@@ -6441,7 +6441,7 @@
                 data.forEach(record => {
                     const g1Score = (parseInt(record['Core Skills (1)'] || 0) + 
                                    parseInt(record['Subject and Posing (1)'] || 0) + 
-                                   parseInt(record['Composition, orientation and variety (1)'] || 0) + 
+                                   parseInt(record['Gallery Experience (1)'] || 0) + 
                                    parseInt(record['Editing / Bella Baby Standards (1)'] || 0));
                     
                     html += `
@@ -6484,13 +6484,13 @@
                 // Individual field edits - Gallery 1
                 const g1Core = getVal(`edit-g1-core-${recordId}`);
                 const g1Subj = getVal(`edit-g1-subj-${recordId}`);
-                const g1Comp = getVal(`edit-g1-comp-${recordId}`);
+                const g1GalleryExp = getVal(`edit-g1-gallery-exp-${recordId}`);
                 const g1Edit = getVal(`edit-g1-edit-${recordId}`);
                 const g1Fb   = getVal(`edit-g1-fb-${recordId}`);
                 // Gallery 2
                 const g2Core = getVal(`edit-g2-core-${recordId}`);
                 const g2Subj = getVal(`edit-g2-subj-${recordId}`);
-                const g2Comp = getVal(`edit-g2-comp-${recordId}`);
+                const g2GalleryExp = getVal(`edit-g2-gallery-exp-${recordId}`);
                 const g2Edit = getVal(`edit-g2-edit-${recordId}`);
                 const g2Fb   = getVal(`edit-g2-fb-${recordId}`);
                 // Technical notes and internal notes
@@ -6499,24 +6499,24 @@
                 
                 if (g1Core !== null) updateData['Core Skills (1)'] = g1Core;
                 if (g1Subj !== null) updateData['Subject and Posing (1)'] = g1Subj;
-                if (g1Comp !== null) updateData['Composition, orientation and variety (1)'] = g1Comp;
+                if (g1GalleryExp !== null) updateData['Gallery Experience (1)'] = g1GalleryExp;
                 if (g1Edit !== null) updateData['Editing / Bella Baby Standards (1)'] = g1Edit;
                 if (g1Fb   !== null) updateData['Gallery #1 Feedback:'] = g1Fb;
                 if (g2Core !== null) updateData['Core Skills (2)'] = g2Core;
                 if (g2Subj !== null) updateData['Subject and Posing (2)'] = g2Subj;
-                if (g2Comp !== null) updateData['Composition, orientation and variety (2)'] = g2Comp;
+                if (g2GalleryExp !== null) updateData['Gallery Experience (2)'] = g2GalleryExp;
                 if (g2Edit !== null) updateData['Editing / Bella Baby Standards (2)'] = g2Edit;
                 if (g2Fb   !== null) updateData['Gallery #2 Feedback:'] = g2Fb;
                 if (notes    !== null) updateData['Delivery Notes:'] = notes;
                 if (internal !== null) updateData['admin_notes'] = internal;
                 
                 // Recalculate scores if individual fields were edited
-                if (g1Core !== null || g1Subj !== null || g1Comp !== null || g1Edit !== null) {
-                    const s1 = (parseInt(g1Core||0) + parseInt(g1Subj||0) + parseInt(g1Comp||0) + parseInt(g1Edit||0));
+                if (g1Core !== null || g1Subj !== null || g1GalleryExp !== null || g1Edit !== null) {
+                    const s1 = (parseInt(g1Core||0) + parseInt(g1Subj||0) + parseInt(g1GalleryExp||0) + parseInt(g1Edit||0));
                     updateData['Gallery #1 Score:'] = s1.toString();
                 }
-                if (g2Core !== null || g2Subj !== null || g2Comp !== null || g2Edit !== null) {
-                    const s2 = (parseInt(g2Core||0) + parseInt(g2Subj||0) + parseInt(g2Comp||0) + parseInt(g2Edit||0));
+                if (g2Core !== null || g2Subj !== null || g2GalleryExp !== null || g2Edit !== null) {
+                    const s2 = (parseInt(g2Core||0) + parseInt(g2Subj||0) + parseInt(g2GalleryExp||0) + parseInt(g2Edit||0));
                     updateData['Gallery #2 Score:'] = s2.toString();
                 }
                 if (updateData['Gallery #1 Score:'] && updateData['Gallery #2 Score:']) {
@@ -6941,8 +6941,8 @@
                                 <span class="gallery-score-value">${record['Subject and Posing (1)']}</span>
                             </div>
                             <div class="gallery-score-item">
-                                <span class="gallery-score-label">Composition, Orientation & Variety</span>
-                                <span class="gallery-score-value">${record['Composition, orientation and variety (1)']}</span>
+                                <span class="gallery-score-label">Gallery Experience</span>
+                                <span class="gallery-score-value">${record['Gallery Experience (1)']}</span>
                             </div>
                             <div class="gallery-score-item">
                                 <span class="gallery-score-label">Editing / Bella Baby Standards</span>
@@ -6999,8 +6999,8 @@
                                 <span class="gallery-score-value">${record['Subject and Posing (2)']}</span>
                             </div>
                             <div class="gallery-score-item">
-                                <span class="gallery-score-label">Composition, Orientation & Variety</span>
-                                <span class="gallery-score-value">${record['Composition, orientation and variety (2)']}</span>
+                                <span class="gallery-score-label">Gallery Experience</span>
+                                <span class="gallery-score-value">${record['Gallery Experience (2)']}</span>
                             </div>
                             <div class="gallery-score-item">
                                 <span class="gallery-score-label">Editing / Bella Baby Standards</span>
@@ -7277,7 +7277,7 @@
                             <div class="scores-grid">
                                 <div class="score-item"><span>Core Skills</span><span class="score-val">${record['Core Skills (1)'] || '—'}</span></div>
                                 <div class="score-item"><span>Subject and Posing</span><span class="score-val">${record['Subject and Posing (1)'] || '—'}</span></div>
-                                <div class="score-item"><span>Composition, Orientation &amp; Variety</span><span class="score-val">${record['Composition, orientation and variety (1)'] || '—'}</span></div>
+                                <div class="score-item"><span>Gallery Experience</span><span class="score-val">${record['Gallery Experience (1)'] || '—'}</span></div>
                                 <div class="score-item"><span>Editing / Bella Baby Standards</span><span class="score-val">${record['Editing / Bella Baby Standards (1)'] || '—'}</span></div>
                             </div>
                             <div class="score-total">Score: ${record['Gallery #1 Score:']}</div>
@@ -7290,7 +7290,7 @@
                             <div class="scores-grid">
                                 <div class="score-item"><span>Core Skills</span><span class="score-val">${record['Core Skills (2)'] || '—'}</span></div>
                                 <div class="score-item"><span>Subject and Posing</span><span class="score-val">${record['Subject and Posing (2)'] || '—'}</span></div>
-                                <div class="score-item"><span>Composition, Orientation &amp; Variety</span><span class="score-val">${record['Composition, orientation and variety (2)'] || '—'}</span></div>
+                                <div class="score-item"><span>Gallery Experience</span><span class="score-val">${record['Gallery Experience (2)'] || '—'}</span></div>
                                 <div class="score-item"><span>Editing / Bella Baby Standards</span><span class="score-val">${record['Editing / Bella Baby Standards (2)'] || '—'}</span></div>
                             </div>
                             <div class="score-total">Score: ${record['Gallery #2 Score:']}</div>
@@ -7399,7 +7399,7 @@
                     html += '<div class="scores-grid">';
                     html += '<div class="score-item"><span>Core Skills</span><span class="score-val">' + (record['Core Skills (1)'] || '&mdash;') + '</span></div>';
                     html += '<div class="score-item"><span>Subject and Posing</span><span class="score-val">' + (record['Subject and Posing (1)'] || '&mdash;') + '</span></div>';
-                    html += '<div class="score-item"><span>Composition &amp; Variety</span><span class="score-val">' + (record['Composition, orientation and variety (1)'] || '&mdash;') + '</span></div>';
+                    html += '<div class="score-item"><span>Gallery Experience</span><span class="score-val">' + (record['Gallery Experience (1)'] || '&mdash;') + '</span></div>';
                     html += '<div class="score-item"><span>Editing / Standards</span><span class="score-val">' + (record['Editing / Bella Baby Standards (1)'] || '&mdash;') + '</span></div>';
                     html += '</div><div class="score-total">Score: ' + record['Gallery #1 Score:'] + '</div>';
                     if (record['Gallery #1 Feedback:']) html += '<div class="feedback">' + record['Gallery #1 Feedback:'] + '</div>';
@@ -7410,7 +7410,7 @@
                     html += '<div class="scores-grid">';
                     html += '<div class="score-item"><span>Core Skills</span><span class="score-val">' + (record['Core Skills (2)'] || '&mdash;') + '</span></div>';
                     html += '<div class="score-item"><span>Subject and Posing</span><span class="score-val">' + (record['Subject and Posing (2)'] || '&mdash;') + '</span></div>';
-                    html += '<div class="score-item"><span>Composition &amp; Variety</span><span class="score-val">' + (record['Composition, orientation and variety (2)'] || '&mdash;') + '</span></div>';
+                    html += '<div class="score-item"><span>Gallery Experience</span><span class="score-val">' + (record['Gallery Experience (2)'] || '&mdash;') + '</span></div>';
                     html += '<div class="score-item"><span>Editing / Standards</span><span class="score-val">' + (record['Editing / Bella Baby Standards (2)'] || '&mdash;') + '</span></div>';
                     html += '</div><div class="score-total">Score: ' + record['Gallery #2 Score:'] + '</div>';
                     if (record['Gallery #2 Feedback:']) html += '<div class="feedback">' + record['Gallery #2 Feedback:'] + '</div>';
