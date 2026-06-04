@@ -5471,7 +5471,7 @@
 
             // PSS name: use record value if it's not an email, else fall back to display name
             const recordPSSName = record['PSS Reviewer Name'] || '';
-            setPSSNameField(isEmail(recordPSSName) ? displayName : (recordPSSName || displayName));
+            setVal('fPSSName', recordPSSName || displayName);
             setVal('fDate',        record['Date'] || '');
             setVal('fPhotogName',  record['Photographer Name'] || '');
             setVal('fPhotogEmail', record['Photographer Email'] || '');
