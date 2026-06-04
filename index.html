@@ -1015,7 +1015,7 @@
         .fi-locked { background: #f0f0f0 !important; color: #aaa !important; border-color: #ddd !important; }
 
         /* Tooltip Styles */
-        .tooltip-wrapper { position: relative; display: inline-block; cursor: help; }
+        .tooltip-wrapper { position: relative; display: inline-block; cursor: help; z-index: 100; }
         .tooltip-wrapper .fl { border-bottom: 2px dotted #3b82f6; }
         .tooltip-box { 
             visibility: hidden;
@@ -1026,16 +1026,18 @@
             padding: 12px 14px;
             border-radius: 8px;
             position: absolute;
-            z-index: 10000;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 260px;
+            z-index: 9999;
+            width: 280px;
             font-size: 13px;
             line-height: 1.5;
             font-weight: 400;
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
             transition: opacity 0.3s ease, visibility 0.3s ease;
+            bottom: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: normal;
+            word-wrap: break-word;
         }
 
         .tooltip-box::after {
@@ -1354,9 +1356,9 @@
                     <label class="fl">Gallery #1 Access Code *</label>
                     <input type="text" id="fG1Code" class="fi" placeholder="e.g. ABC123" required>
                 </div>
-                <div style="background: #f9f9f9; border-radius: 6px; padding: 15px; margin-bottom: 15px;">
+                <div style="background: #f9f9f9; border-radius: 6px; padding: 15px; margin-bottom: 15px; overflow: visible;">
                     <p style="font-size: 12px; color: #666; margin: 0 0 12px 0; font-weight: 600;">SCORING: 1 = Below Satisfactory &nbsp;|&nbsp; 2 = Competent/Flat &nbsp;|&nbsp; 3 = Proficient &nbsp;|&nbsp; 4 = Master</p>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; overflow: visible;">
                         <div>
                             <div class="tooltip-wrapper">
                                 <label class="fl">Core Skills *</label>
@@ -1421,9 +1423,9 @@
                     <label class="fl">Gallery #2 Access Code *</label>
                     <input type="text" id="fG2Code" class="fi" placeholder="e.g. XYZ789" required>
                 </div>
-                <div style="background: #f9f9f9; border-radius: 6px; padding: 15px; margin-bottom: 15px;">
+                <div style="background: #f9f9f9; border-radius: 6px; padding: 15px; margin-bottom: 15px; overflow: visible;">
                     <p style="font-size: 12px; color: #666; margin: 0 0 12px 0; font-weight: 600;">SCORING: 1 = Below Satisfactory &nbsp;|&nbsp; 2 = Competent/Flat &nbsp;|&nbsp; 3 = Proficient &nbsp;|&nbsp; 4 = Master</p>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; overflow: visible;">
                         <div>
                             <div class="tooltip-wrapper">
                                 <label class="fl">Core Skills *</label>
