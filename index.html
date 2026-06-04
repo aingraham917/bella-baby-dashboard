@@ -5514,6 +5514,24 @@
             setVal('fTechNotes',   record['Delivery Notes:'] || '');
             setVal('fInternalNotes', record['admin_notes'] || '');
 
+            // If record is approved, protect access codes from editing (in this view only)
+            if (record.status === 'approved') {
+                const g1CodeField = assessmentFormPage.querySelector('#fG1Code');
+                const g2CodeField = assessmentFormPage.querySelector('#fG2Code');
+                if (g1CodeField) {
+                    g1CodeField.readOnly = true;
+                    g1CodeField.style.background = '#f5f5f5';
+                    g1CodeField.style.color = '#666';
+                    g1CodeField.style.cursor = 'not-allowed';
+                }
+                if (g2CodeField) {
+                    g2CodeField.readOnly = true;
+                    g2CodeField.style.background = '#f5f5f5';
+                    g2CodeField.style.color = '#666';
+                    g2CodeField.style.cursor = 'not-allowed';
+                }
+            }
+
             // Update header
             const formPhotogNameEl = assessmentFormPage.querySelector('#formPhotogName');
             const formPhotogMetaEl = assessmentFormPage.querySelector('#formPhotogMeta');
