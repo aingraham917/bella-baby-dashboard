@@ -683,6 +683,43 @@
 
         .gallery-score-label {
             color: #666;
+            position: relative;
+            cursor: help;
+            border-bottom: 2px dotted #3b82f6;
+            padding-bottom: 2px;
+        }
+
+        .gallery-score-label:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            background-color: rgba(59, 130, 246, 0.95);
+            color: white;
+            padding: 12px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: normal;
+            width: 200px;
+            bottom: calc(100% + 15px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            line-height: 1.4;
+            font-weight: 400;
+            pointer-events: none;
+        }
+
+        .gallery-score-label:hover::before {
+            content: '';
+            position: absolute;
+            bottom: calc(100% + 7px);
+            left: 50%;
+            margin-left: -6px;
+            border-width: 6px;
+            border-style: solid;
+            border-color: rgba(59, 130, 246, 0.95) transparent transparent transparent;
+            z-index: 9999;
+            pointer-events: none;
         }
 
         .gallery-score-value {
@@ -7196,14 +7233,14 @@
                             // Show purple CS badge instead of the number
                             html += `
                                 <div class="gallery-score-item">
-                                    <span class="gallery-score-label">Core Skills</span>
+                                    <span class="gallery-score-label" data-tooltip="Technical execution: exposure, focus, white balance, and depth of field consistency across the gallery">Core Skills</span>
                                     <span class="gallery-score-value" style="background: #8b5cf6; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">CS</span>
                                 </div>
                             `;
                         } else {
                             html += `
                                 <div class="gallery-score-item">
-                                    <span class="gallery-score-label">Core Skills</span>
+                                    <span class="gallery-score-label" data-tooltip="Technical execution: exposure, focus, white balance, and depth of field consistency across the gallery">Core Skills</span>
                                     <span class="gallery-score-value">${record['Core Skills (1)']}</span>
                                 </div>
                             `;
@@ -7212,19 +7249,19 @@
                         // Show all 4 categories
                         html += `
                             <div class="gallery-score-item">
-                                <span class="gallery-score-label">Core Skills</span>
+                                <span class="gallery-score-label" data-tooltip="Technical execution: exposure, focus, white balance, and depth of field consistency across the gallery">Core Skills</span>
                                 <span class="gallery-score-value">${record['Core Skills (1)']}</span>
                             </div>
                             <div class="gallery-score-item">
-                                <span class="gallery-score-label">Subject and Posing</span>
+                                <span class="gallery-score-label" data-tooltip="How subjects appear: comfort level, posing flattery, expressions, and emotional engagement">Subject and Posing</span>
                                 <span class="gallery-score-value">${record['Subject and Posing (1)']}</span>
                             </div>
                             <div class="gallery-score-item">
-                                <span class="gallery-score-label">Gallery Experience</span>
+                                <span class="gallery-score-label" data-tooltip="Composition, framing, cropping, and visual variety. Does the gallery tell a complete story with intentional, balanced shots?">Gallery Experience</span>
                                 <span class="gallery-score-value">${record['Gallery Experience (1)']}</span>
                             </div>
                             <div class="gallery-score-item">
-                                <span class="gallery-score-label">Editing / Bella Baby Standards</span>
+                                <span class="gallery-score-label" data-tooltip="Post-processing consistency: skin tones, color accuracy, style alignment with Bella Baby standards, and print readiness">Editing / Bella Baby Standards</span>
                                 <span class="gallery-score-value">${record['Editing / Bella Baby Standards (1)']}</span>
                             </div>
                         `;
@@ -7254,14 +7291,14 @@
                             // Show purple CS badge instead of the number
                             html += `
                                 <div class="gallery-score-item">
-                                    <span class="gallery-score-label">Core Skills</span>
+                                    <span class="gallery-score-label" data-tooltip="Technical execution: exposure, focus, white balance, and depth of field consistency across the gallery">Core Skills</span>
                                     <span class="gallery-score-value" style="background: #8b5cf6; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">CS</span>
                                 </div>
                             `;
                         } else {
                             html += `
                                 <div class="gallery-score-item">
-                                    <span class="gallery-score-label">Core Skills</span>
+                                    <span class="gallery-score-label" data-tooltip="Technical execution: exposure, focus, white balance, and depth of field consistency across the gallery">Core Skills</span>
                                     <span class="gallery-score-value">${record['Core Skills (2)']}</span>
                                 </div>
                             `;
@@ -7270,19 +7307,19 @@
                         // Show all 4 categories
                         html += `
                             <div class="gallery-score-item">
-                                <span class="gallery-score-label">Core Skills</span>
+                                <span class="gallery-score-label" data-tooltip="Technical execution: exposure, focus, white balance, and depth of field consistency across the gallery">Core Skills</span>
                                 <span class="gallery-score-value">${record['Core Skills (2)']}</span>
                             </div>
                             <div class="gallery-score-item">
-                                <span class="gallery-score-label">Subject and Posing</span>
+                                <span class="gallery-score-label" data-tooltip="How subjects appear: comfort level, posing flattery, expressions, and emotional engagement">Subject and Posing</span>
                                 <span class="gallery-score-value">${record['Subject and Posing (2)']}</span>
                             </div>
                             <div class="gallery-score-item">
-                                <span class="gallery-score-label">Gallery Experience</span>
+                                <span class="gallery-score-label" data-tooltip="Composition, framing, cropping, and visual variety. Does the gallery tell a complete story with intentional, balanced shots?">Gallery Experience</span>
                                 <span class="gallery-score-value">${record['Gallery Experience (2)']}</span>
                             </div>
                             <div class="gallery-score-item">
-                                <span class="gallery-score-label">Editing / Bella Baby Standards</span>
+                                <span class="gallery-score-label" data-tooltip="Post-processing consistency: skin tones, color accuracy, style alignment with Bella Baby standards, and print readiness">Editing / Bella Baby Standards</span>
                                 <span class="gallery-score-value">${record['Editing / Bella Baby Standards (2)']}</span>
                             </div>
                         `;
