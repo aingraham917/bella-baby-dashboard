@@ -7376,10 +7376,10 @@
                     
                     html += `
                             </div>
+                            ${formatFlagsForDisplay(record['Gallery #1 Core Skills Flags'], record['Gallery #1 Gallery Experience Flags'])}
                             <div style="padding: 12px; background: ${getScoreBgColor(record['Gallery #1 Score:'], 'growth_assessment')}; border-radius: 6px; margin-top: 12px; font-weight: 600; color: ${getScoreColor(record['Gallery #1 Score:'], 'growth_assessment')};">
                                 Score: ${record['Gallery #1 Score:']}
                             </div>
-                            ${formatFlagsForDisplay(record['Gallery #1 Core Skills Flags'], record['Gallery #1 Gallery Experience Flags'])}
                             ${record['Gallery #1 Feedback:'] ? `<div class="gallery-feedback">${record['Gallery #1 Feedback:']}</div>` : ''}
                         </div>
                     `;
@@ -7435,10 +7435,10 @@
                     
                     html += `
                             </div>
+                            ${formatFlagsForDisplay(record['Gallery #2 Core Skills Flags'], record['Gallery #2 Gallery Experience Flags'])}
                             <div style="padding: 12px; background: ${getScoreBgColor(record['Gallery #2 Score:'], 'growth_assessment')}; border-radius: 6px; margin-top: 12px; font-weight: 600; color: ${getScoreColor(record['Gallery #2 Score:'], 'growth_assessment')};">
                                 Score: ${record['Gallery #2 Score:']}
                             </div>
-                            ${formatFlagsForDisplay(record['Gallery #2 Core Skills Flags'], record['Gallery #2 Gallery Experience Flags'])}
                             ${record['Gallery #2 Feedback:'] ? `<div class="gallery-feedback">${record['Gallery #2 Feedback:']}</div>` : ''}
                         </div>
                     `;
@@ -7906,30 +7906,27 @@
 
 
         function formatFlagsForDisplay(coreSkillsFlags, galleryExpFlags) {
-            const flags = [];
+            const html = [];
             
             if (coreSkillsFlags) {
                 const csFlags = coreSkillsFlags.split(',').map(f => f.trim()).filter(f => f);
                 if (csFlags.length > 0) {
-                    flags.push(`<strong>Core Skills:</strong> ${csFlags.join(', ')}`);
+                    html.push(`<div style="margin-bottom: 6px; padding: 6px 10px; background: #f0f4ff; border-left: 3px solid #8b9dd6; font-size: 12px; color: #4a5578;">
+                        Specific concerns within Core Skills: ${csFlags.join(', ')}
+                    </div>`);
                 }
             }
             
             if (galleryExpFlags) {
                 const geFlags = galleryExpFlags.split(',').map(f => f.trim()).filter(f => f);
                 if (geFlags.length > 0) {
-                    flags.push(`<strong>Gallery Experience:</strong> ${geFlags.join(', ')}`);
+                    html.push(`<div style="margin-bottom: 6px; padding: 6px 10px; background: #f0f4ff; border-left: 3px solid #8b9dd6; font-size: 12px; color: #4a5578;">
+                        Specific concerns within Gallery Experience: ${geFlags.join(', ')}
+                    </div>`);
                 }
             }
             
-            if (flags.length === 0) return '';
-            
-            return `<div style="margin-top: 8px; padding: 8px 12px; background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; font-size: 12px; color: #333;">
-                        <strong style="color: #b45309;">🚩 Flagged Items:</strong>
-                        <div style="margin-top: 4px;">
-                            ${flags.map(f => `<div style="margin: 2px 0;">• ${f}</div>`).join('')}
-                        </div>
-                    </div>`;
+            return html.join('');
         }
         
         function formatDate(dateStr) {
