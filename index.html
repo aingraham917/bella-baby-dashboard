@@ -6989,72 +6989,6 @@
             }
         }
 
-        function calculateTeamStats(records) {
-            if (!records || records.length === 0) {
-                return {
-                    avgGrowthScore: 0,
-                    avgLegacyScore: 0,
-                    byLevel: {}
-                };
-            }
-            
-            const stats = {
-                avgGrowthScore: 0,
-                avgLegacyScore: 0,
-                byLevel: {}
-            };
-            
-            let growthCount = 0;
-            let growthSum = 0;
-            let legacyCount = 0;
-            let legacySum = 0;
-            
-            records.forEach(record => {
-                const level = record['Photographer Level'] || 'Unknown';
-                
-                if (!stats.byLevel[level]) {
-                    stats.byLevel[level] = { count: 0, growthSum: 0, legacySum: 0 };
-                }
-                
-                stats.byLevel[level].count++;
-                
-                // Growth assessment scores
-                if (record['Gallery #1 Score:']) {
-                    const g1 = parseFloat(record['Gallery #1 Score:']) || 0;
-                    growthSum += g1;
-                    growthCount++;
-                    stats.byLevel[level].growthSum += g1;
-                }
-                
-                if (record['Gallery #2 Score:']) {
-                    const g2 = parseFloat(record['Gallery #2 Score:']) || 0;
-                    growthSum += g2;
-                    growthCount++;
-                    stats.byLevel[level].growthSum += g2;
-                }
-                
-                // Legacy scores (if available)
-                if (record['overall_score']) {
-                    const legacyScore = parseFloat(record['overall_score']) || 0;
-                    legacySum += legacyScore;
-                    legacyCount++;
-                    stats.byLevel[level].legacySum += legacyScore;
-                }
-            });
-            
-            stats.avgGrowthScore = growthCount > 0 ? (growthSum / growthCount).toFixed(1) : 0;
-            stats.avgLegacyScore = legacyCount > 0 ? (legacySum / legacyCount).toFixed(1) : 0;
-            
-            // Calculate averages per level
-            Object.keys(stats.byLevel).forEach(level => {
-                const levelData = stats.byLevel[level];
-                levelData.avgGrowth = levelData.growthSum > 0 ? (levelData.growthSum / levelData.count).toFixed(1) : 0;
-                levelData.avgLegacy = levelData.legacySum > 0 ? (levelData.legacySum / levelData.count).toFixed(1) : 0;
-            });
-            
-            return stats;
-        }
-
         function displayRecords() {
             try { updateHeaderTagline(); } catch(e) { console.error('updateHeaderTagline error:', e); }
             // updateCharts is called separately after loadRecords — skip here to avoid errors
@@ -7192,67 +7126,7 @@
             }
 
             // Admin/trainer/AM view: grouped nested cards
-            let html = '';
-            
-            // Add team status card if AM is viewing their team
-            if (amViewMode === 'team' && getCurrentUserRole() === 'am' && filtered.length > 0) {
-                const teamStats = calculateTeamStats(filtered);
-                const levelRows = Object.entries(teamStats.byLevel)
-                    .sort((a, b) => {
-                        const order = { 'Pre-Foundation': 0, 'Foundation': 1, 'Ambassador': 2, 'Advanced Ambassador': 3 };
-                        return (order[a[0]] ?? 999) - (order[b[0]] ?? 999);
-                    })
-                    .map(([level, data]) => `
-                        <tr style="border-bottom: 1px solid #f0f0f0;">
-                            <td style="padding: 8px 12px; font-size: 12px; color: #666;">${level}</td>
-                            <td style="padding: 8px 12px; text-align: center; font-size: 12px; color: #333;"><strong>${data.count}</strong></td>
-                            <td style="padding: 8px 12px; text-align: center; font-size: 12px; color: #003d7a;"><strong>${data.avgGrowth}</strong> / 16</td>
-                            ${teamStats.avgLegacyScore > 0 ? `<td style="padding: 8px 12px; text-align: center; font-size: 12px; color: #1a472a;"><strong>${data.avgLegacy}</strong></td>` : ''}
-                        </tr>
-                    `).join('');
-                
-                const legacyHeader = teamStats.avgLegacyScore > 0 ? '<th style="padding: 8px 12px; font-size: 12px; font-weight: 600; text-align: center;">Legacy Avg</th>' : '';
-                
-                html = `
-                    <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 18px; margin-bottom: 20px;">
-                        <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 700; color: #333;">📊 Team Status</h3>
-                        
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 18px;">
-                            <div style="background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 6px; padding: 12px; text-align: center;">
-                                <div style="font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 6px;">Avg Growth Score</div>
-                                <div style="font-size: 26px; font-weight: 700; color: #003d7a;">${teamStats.avgGrowthScore}</div>
-                                <div style="font-size: 10px; color: #999; margin-top: 4px;">/ 16</div>
-                            </div>
-                            ${teamStats.avgLegacyScore > 0 ? `
-                            <div style="background: #f0f8f0; border: 1px solid #b3dfb8; border-radius: 6px; padding: 12px; text-align: center;">
-                                <div style="font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 6px;">Avg Legacy Score</div>
-                                <div style="font-size: 26px; font-weight: 700; color: #1a472a;">${teamStats.avgLegacyScore}</div>
-                            </div>
-                            ` : ''}
-                            <div style="background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px; text-align: center;">
-                                <div style="font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 6px;">Total Photographers</div>
-                                <div style="font-size: 26px; font-weight: 700; color: #333;">${Object.keys(teamStats.byLevel).reduce((sum, level) => sum + teamStats.byLevel[level].count, 0)}</div>
-                            </div>
-                        </div>
-                        
-                        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-                            <thead>
-                                <tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;">
-                                    <th style="padding: 8px 12px; font-weight: 600; text-align: left;">Level</th>
-                                    <th style="padding: 8px 12px; font-weight: 600; text-align: center;">Count</th>
-                                    <th style="padding: 8px 12px; font-weight: 600; text-align: center;">Growth Avg</th>
-                                    ${legacyHeader}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${levelRows}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            }
-            
-            recordsContainer.innerHTML = html + pagePhotographers.map(([photographerName, records]) => {
+            recordsContainer.innerHTML = pagePhotographers.map(([photographerName, records]) => {
                 const sixMonthAvg = calculate6MonthAverage(records);
                 const expandId = `expand-${photographerName.replace(/\s+/g, '-')}`;
                 const mostRecentDate = formatDate(records[0].Date);
