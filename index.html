@@ -7194,8 +7194,8 @@
             // Admin/trainer/AM view: grouped nested cards
             let html = '';
             
-            // Add team status card if viewing team
-            if (amViewMode === 'team' && filtered.length > 0) {
+            // Add team status card if AM is viewing their team
+            if (amViewMode === 'team' && getCurrentUserRole() === 'am' && filtered.length > 0) {
                 const teamStats = calculateTeamStats(filtered);
                 const levelRows = Object.entries(teamStats.byLevel)
                     .sort((a, b) => {
