@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bella Baby QC Dashboard</title>
+    <title>Bella Baby Professional Development Hub</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -7379,6 +7379,7 @@
                             <div style="padding: 12px; background: ${getScoreBgColor(record['Gallery #1 Score:'], 'growth_assessment')}; border-radius: 6px; margin-top: 12px; font-weight: 600; color: ${getScoreColor(record['Gallery #1 Score:'], 'growth_assessment')};">
                                 Score: ${record['Gallery #1 Score:']}
                             </div>
+                            ${formatFlagsForDisplay(record['Gallery #1 Core Skills Flags'], record['Gallery #1 Gallery Experience Flags'])}
                             ${record['Gallery #1 Feedback:'] ? `<div class="gallery-feedback">${record['Gallery #1 Feedback:']}</div>` : ''}
                         </div>
                     `;
@@ -7437,6 +7438,7 @@
                             <div style="padding: 12px; background: ${getScoreBgColor(record['Gallery #2 Score:'], 'growth_assessment')}; border-radius: 6px; margin-top: 12px; font-weight: 600; color: ${getScoreColor(record['Gallery #2 Score:'], 'growth_assessment')};">
                                 Score: ${record['Gallery #2 Score:']}
                             </div>
+                            ${formatFlagsForDisplay(record['Gallery #2 Core Skills Flags'], record['Gallery #2 Gallery Experience Flags'])}
                             ${record['Gallery #2 Feedback:'] ? `<div class="gallery-feedback">${record['Gallery #2 Feedback:']}</div>` : ''}
                         </div>
                     `;
@@ -7903,7 +7905,33 @@
         }
 
 
-        function formatDate(dateStr) {
+        function formatFlagsForDisplay(coreSkillsFlags, galleryExpFlags) {
+            const flags = [];
+            
+            if (coreSkillsFlags) {
+                const csFlags = coreSkillsFlags.split(',').map(f => f.trim()).filter(f => f);
+                if (csFlags.length > 0) {
+                    flags.push(`<strong>Core Skills:</strong> ${csFlags.join(', ')}`);
+                }
+            }
+            
+            if (galleryExpFlags) {
+                const geFlags = galleryExpFlags.split(',').map(f => f.trim()).filter(f => f);
+                if (geFlags.length > 0) {
+                    flags.push(`<strong>Gallery Experience:</strong> ${geFlags.join(', ')}`);
+                }
+            }
+            
+            if (flags.length === 0) return '';
+            
+            return `<div style="margin-top: 8px; padding: 8px 12px; background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; font-size: 12px; color: #333;">
+                        <strong style="color: #b45309;">🚩 Flagged Items:</strong>
+                        <div style="margin-top: 4px;">
+                            ${flags.map(f => `<div style="margin: 2px 0;">• ${f}</div>`).join('')}
+                        </div>
+                    </div>`;
+        }
+        
             if (!dateStr) return 'N/A';
             const date = new Date(dateStr);
             return date.toLocaleDateString('en-US', {
