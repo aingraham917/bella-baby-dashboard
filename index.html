@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1.6 Dashboard</title>
+    <title>Bella Baby QC Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -4281,6 +4281,9 @@
 
             // Close options dropdown
             document.getElementById('optionsDropdown').style.display = 'none';
+
+            // Update QC drawer visibility
+            setTimeout(updateQCDrawerVisibility, 50);
         }
 
         // Options Menu Functions
@@ -8411,27 +8414,18 @@
             arrow.textContent = open ? '▲' : '▼';
         }
 
-        // Show/hide QC drawer based on active page and role
         function updateQCDrawerVisibility() {
             const drawer = document.getElementById('qcDrawer');
             if (!drawer) return;
             const isDashboard = document.getElementById('dashboardPage')?.style.display !== 'none';
             const isUserRole = getCurrentUserRole() === 'user';
             drawer.style.display = (isDashboard && isUserRole) ? 'block' : 'none';
-            // Close panel when hidden
             if (drawer.style.display === 'none') {
                 const panel = document.getElementById('qcDrawerPanel');
                 const arrow = document.getElementById('qcDrawerArrow');
                 if (panel) panel.style.display = 'none';
                 if (arrow) arrow.textContent = '▲';
             }
-        }
-
-        // Patch showPage to update drawer visibility
-        const _origShowPage = showPage;
-        function showPage(pageId) {
-            _origShowPage(pageId);
-            setTimeout(updateQCDrawerVisibility, 50);
         }
     </script>
 
