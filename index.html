@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2.0 Dashboard</title>
+    <title>2.1 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -5676,34 +5676,37 @@
             saveBtn.textContent = 'Saving...';
             saveBtn.disabled = true;
 
+            const fval = (id) => (f.querySelector('#' + id)?.value || '').trim();
+            const fint = (id) => parseInt(f.querySelector('#' + id)?.value) || 0;
+
             try {
                 // Collect all current form values (same as submit but status = 'draft')
-                const pssName     = f.querySelector('#fPSSName').value.trim();
-                const date        = f.querySelector('#fDate').value;
-                const photogName  = f.querySelector('#fPhotogName').value.trim();
-                const photogEmail = f.querySelector('#fPhotogEmail').value.trim();
-                const photogLvl   = (f.querySelector('#fPhotogLevelHidden')?.value) || f.querySelector('#fPhotogLevel')?.value || '';
+                const pssName     = fval('fPSSName');
+                const date        = fval('fDate');
+                const photogName  = fval('fPhotogName');
+                const photogEmail = fval('fPhotogEmail');
+                const photogLvl   = fval('fPhotogLevelHidden') || fval('fPhotogLevel');
 
-                const g1Code = f.querySelector('#fG1Code').value.trim();
-                const g1c = parseInt(f.querySelector('#fG1Core').value) || 0;
-                const g1s = parseInt(f.querySelector('#fG1Subj').value) || 0;
-                const g1p = parseInt(f.querySelector('#fG1GalleryExp').value) || 0;
-                const g1e = parseInt(f.querySelector('#fG1Edit').value) || 0;
+                const g1Code = fval('fG1Code');
+                const g1c = fint('fG1Core');
+                const g1s = fint('fG1Subj');
+                const g1p = fint('fG1GalleryExp');
+                const g1e = fint('fG1Edit');
                 const g1T = g1c + g1s + g1p + g1e;
-                const g1fb = f.querySelector('#fG1Feedback').value.trim();
+                const g1fb = fval('fG1Feedback');
 
-                const g2Code = f.querySelector('#fG2Code').value.trim();
-                const g2c = parseInt(f.querySelector('#fG2Core').value) || 0;
-                const g2s = parseInt(f.querySelector('#fG2Subj').value) || 0;
-                const g2p = parseInt(f.querySelector('#fG2GalleryExp').value) || 0;
-                const g2e = parseInt(f.querySelector('#fG2Edit').value) || 0;
+                const g2Code = fval('fG2Code');
+                const g2c = fint('fG2Core');
+                const g2s = fint('fG2Subj');
+                const g2p = fint('fG2GalleryExp');
+                const g2e = fint('fG2Edit');
                 const g2T = g2c + g2s + g2p + g2e;
-                const g2fb = f.querySelector('#fG2Feedback').value.trim();
+                const g2fb = fval('fG2Feedback');
 
                 const g1csFlags = Array.from(f.querySelectorAll('input[name="g1csflag"]:checked')).map(c=>c.value).join(', ');
                 const g2csFlags = Array.from(f.querySelectorAll('input[name="g2csflag"]:checked')).map(c=>c.value).join(', ');
                 const techFlags = Array.from(f.querySelectorAll('input[name="techflag"]:checked')).map(c=>c.value).join(', ');
-                const techNotes = f.querySelector('#fTechNotes').value.trim();
+                const techNotes = fval('fTechNotes');
 
                 const avg = (g1T + g2T) > 0 ? ((g1T + g2T) / 2).toFixed(2) : '';
 
@@ -5736,7 +5739,7 @@
                     'Delivery Notes:': techNotes,
                     'status': 'draft',
                     'admin_notes': '',
-                    'admin_notes': f.querySelector('#fInternalNotes') ? f.querySelector('#fInternalNotes').value.trim() : ''
+                    'admin_notes': fval('fInternalNotes')
                 };
 
                 if (window._currentDraftId) {
@@ -6129,29 +6132,33 @@
             submitBtn.disabled = true;
             submitBtn.textContent = 'Submitting...';
 
+            // Safe field reader — returns '' when field doesn't exist in this form
+            const fval = (id) => (f.querySelector('#' + id)?.value || '').trim();
+            const fint = (id) => parseInt(f.querySelector('#' + id)?.value) || 0;
+
             try {
                 // Collect values
-                const pssName    = f.querySelector('#fPSSName').value.trim();
-                const date       = f.querySelector('#fDate').value;
-                const photogName = f.querySelector('#fPhotogName').value.trim();
-                const photogEmail= f.querySelector('#fPhotogEmail').value.trim();
-                const photogLvl  = (f.querySelector('#fPhotogLevelHidden')?.value) || f.querySelector('#fPhotogLevel')?.value || '';
+                const pssName    = fval('fPSSName');
+                const date       = fval('fDate');
+                const photogName = fval('fPhotogName');
+                const photogEmail= fval('fPhotogEmail');
+                const photogLvl  = fval('fPhotogLevelHidden') || fval('fPhotogLevel');
 
-                const g1Code = f.querySelector('#fG1Code').value.trim();
-                const g1c = parseInt(f.querySelector('#fG1Core').value) || 0;
-                const g1s = parseInt(f.querySelector('#fG1Subj').value) || 0;
-                const g1p = parseInt(f.querySelector('#fG1GalleryExp').value) || 0;
-                const g1e = parseInt(f.querySelector('#fG1Edit').value) || 0;
+                const g1Code = fval('fG1Code');
+                const g1c = fint('fG1Core');
+                const g1s = fint('fG1Subj');
+                const g1p = fint('fG1GalleryExp');
+                const g1e = fint('fG1Edit');
                 const g1T = g1c + g1s + g1p + g1e;
-                const g1fb   = f.querySelector('#fG1Feedback').value.trim();
+                const g1fb = fval('fG1Feedback');
 
-                const g2Code = f.querySelector('#fG2Code').value.trim();
-                const g2c = parseInt(f.querySelector('#fG2Core').value) || 0;
-                const g2s = parseInt(f.querySelector('#fG2Subj').value) || 0;
-                const g2p = parseInt(f.querySelector('#fG2GalleryExp').value) || 0;
-                const g2e = parseInt(f.querySelector('#fG2Edit').value) || 0;
+                const g2Code = fval('fG2Code');
+                const g2c = fint('fG2Core');
+                const g2s = fint('fG2Subj');
+                const g2p = fint('fG2GalleryExp');
+                const g2e = fint('fG2Edit');
                 const g2T = g2c + g2s + g2p + g2e;
-                const g2fb   = f.querySelector('#fG2Feedback').value.trim();
+                const g2fb = fval('fG2Feedback');
 
                 const avg = ((g1T + g2T) / 2).toFixed(2);
                 const avgN = parseFloat(avg);
@@ -6161,11 +6168,11 @@
                 else if (avgN >= 8)  levelStr = 'Needs Improvement (8-10.5)';
                 else                 levelStr = 'Below Standards (0-7.5)';
 
-                // Core skills sub-flags
+                // Core skills sub-flags (only present in PSS form)
                 const g1csFlags = Array.from(f.querySelectorAll('input[name="g1csflag"]:checked')).map(c=>c.value).join(', ');
                 const g2csFlags = Array.from(f.querySelectorAll('input[name="g2csflag"]:checked')).map(c=>c.value).join(', ');
 
-                // Category flags
+                // Category flags (only present in PSS form)
                 const flagNames = ['Core Skills','Subject and Posing','Composition orientation and variety','Editing or Bella Baby Standards'];
                 const appliedFlags = [];
                 flagNames.forEach((name, i) => {
@@ -6175,9 +6182,9 @@
                 });
                 const imageCategoryFlags = appliedFlags.length > 0 ? 'Yes' : 'No';
 
-                // Technical flags
+                // Technical flags (only present in PSS form)
                 const techFlags = Array.from(f.querySelectorAll('input[name="techflag"]:checked')).map(c=>c.value).join(', ');
-                const techNotes = f.querySelector('#fTechNotes').value.trim();
+                const techNotes = fval('fTechNotes');
 
                 const gaData = {
                     'Date': date,
@@ -6213,7 +6220,7 @@
                     'Reference Images': '',
                     'status': 'pending',
                     'admin_notes': '',
-                    'admin_notes': f.querySelector('#fInternalNotes') ? f.querySelector('#fInternalNotes').value.trim() : ''
+                    'admin_notes': fval('fInternalNotes')
                 };
 
                 let savedId = null;
