@@ -4946,6 +4946,13 @@
             trainerViewMode = 'all';
             loginForm.reset();
 
+            // Reset login button in case it was stuck mid-login
+            const loginBtn = loginForm.querySelector('button');
+            if (loginBtn) {
+                loginBtn.textContent = 'Sign In';
+                loginBtn.disabled = false;
+            }
+
             // Reset to dashboard page so next login starts fresh
             showPage('dashboardPage');
 
