@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2.5 Dashboard</title>
+    <title>2.6 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -5003,13 +5003,20 @@
                 const qcRecords = qcResult.data || [];
                 let gaRecords = gaResult.data || [];
                 
-                // Filter pending records based on role
+                // Filter records based on role and status
                 const isSuperAdmin = ['super_admin', 'admin'].includes(currentUserRole);
+                const isPhotographer = currentUserRole === 'user';
+
                 if (!isSuperAdmin) {
-                    // Non-admins: hide draft/pending/rejected UNLESS it's their own submission
                     gaRecords = gaRecords.filter(r => {
+                        // Photographers only ever see approved records
+                        if (isPhotographer) return r.status === 'approved';
+
+                        // PSS/Trainer: can see their own pending/rejected/approved, not drafts
                         const isOwn = currentUser && (r['PSS Email Address'] || '').toLowerCase().trim() === currentUser.email.toLowerCase().trim();
-                        if (isOwn) return r.status !== 'draft'; // PSS sees their own pending/rejected/approved, just not drafts
+                        if (isOwn) return r.status !== 'draft';
+
+                        // Everyone else: no pending/rejected/draft
                         return r.status !== 'pending' && r.status !== 'rejected' && r.status !== 'draft';
                     });
                 }
