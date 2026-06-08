@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1.6 Dashboard</title>
+    <title>1.7 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -5558,6 +5558,11 @@
             const formPhotogMetaEl = assessmentFormPage.querySelector('#formPhotogMeta');
             if (formPhotogNameEl) formPhotogNameEl.textContent = record['Photographer Name'] || 'Edit Assessment';
             if (formPhotogMetaEl) formPhotogMetaEl.textContent = (record['Photographer Email'] || '') + (record['Photographer Level'] ? ' · ' + record['Photographer Level'] : '');
+
+            // Apply Core Skills gating now that values are pre-filled
+            // (oninput doesn't fire on programmatic value set, so we call manually)
+            onFormCoreChange(1);
+            onFormCoreChange(2);
 
             // Pre-check core skills sub-flags
             assessmentFormPage.querySelectorAll('input[name="g1csflag"]').forEach(cb => cb.checked = false);
