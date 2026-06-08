@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1.7 Dashboard</title>
+    <title>1.8 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -5858,12 +5858,21 @@
 
         // ── SCORING LOGIC ────────────────────────────────────────────────────────
 
-        function onFormCoreChange(gallery) {
-            const coreEl = document.getElementById('fG' + gallery + 'Core');
+        function getActiveAssessmentForm() {
+            const formPage = document.getElementById('assessmentFormPage');
+            if (formPage && formPage.style.display !== 'none') return formPage;
+            const myPage = document.getElementById('myAssessmentsPage');
+            if (myPage && myPage.style.display !== 'none') return myPage;
+            return document;
+        }
+
+        function onFormCoreChange(gallery, container) {
+            container = container || getActiveAssessmentForm();
+            const coreEl = container.querySelector('#fG' + gallery + 'Core');
+            if (!coreEl) return;
             const val = parseInt(coreEl.value);
             const locked = val === 1 || val === 2;
 
-            // Each entry: { input: actual field ID suffix, wrap: wrap div ID suffix }
             const deps = [
                 { input: 'Subj',       wrap: 'Subj' },
                 { input: 'GalleryExp', wrap: 'Comp' },
@@ -5871,8 +5880,8 @@
             ];
 
             deps.forEach(d => {
-                const inp  = document.getElementById('fG' + gallery + d.input);
-                const wrap = document.getElementById('fG' + gallery + d.wrap + 'Wrap');
+                const inp  = container.querySelector('#fG' + gallery + d.input);
+                const wrap = container.querySelector('#fG' + gallery + d.wrap + 'Wrap');
                 if (!inp) return;
                 if (locked) {
                     inp.value    = 0;
@@ -5887,58 +5896,60 @@
                 }
             });
 
-            // Show/hide core skills sub-flags
-            const flagWrap = document.getElementById('fG' + gallery + 'CoreFlagWrap');
+            const flagWrap = container.querySelector('#fG' + gallery + 'CoreFlagWrap');
             if (flagWrap) flagWrap.style.display = locked ? 'block' : 'none';
 
             recalcFormScores();
         }
 
-        function resetGalleryGating(gallery) {
+        function resetGalleryGating(gallery, container) {
+            container = container || getActiveAssessmentForm();
             [
                 { input: 'Subj',       wrap: 'Subj' },
                 { input: 'GalleryExp', wrap: 'Comp' },
                 { input: 'Edit',       wrap: 'Edit' }
             ].forEach(d => {
-                const inp  = document.getElementById('fG' + gallery + d.input);
+                const inp  = container.querySelector('#fG' + gallery + d.input);
                 if (inp) { inp.readOnly = false; inp.classList.remove('fi-locked'); }
-                const wrap = document.getElementById('fG' + gallery + d.wrap + 'Wrap');
+                const wrap = container.querySelector('#fG' + gallery + d.wrap + 'Wrap');
                 if (wrap) wrap.style.opacity = '1';
             });
-            const fw = document.getElementById('fG' + gallery + 'CoreFlagWrap');
+            const fw = container.querySelector('#fG' + gallery + 'CoreFlagWrap');
             if (fw) fw.style.display = 'none';
         }
 
         function recalcFormScores() {
-            const g1c = parseInt(document.getElementById('fG1Core')?.value) || 0;
-            const g1s = parseInt(document.getElementById('fG1Subj')?.value) || 0;
-            const g1p = parseInt(document.getElementById('fG1GalleryExp')?.value) || 0;
-            const g1e = parseInt(document.getElementById('fG1Edit')?.value) || 0;
+            const f = getActiveAssessmentForm();
+            const g1c = parseInt(f.querySelector('#fG1Core')?.value) || 0;
+            const g1s = parseInt(f.querySelector('#fG1Subj')?.value) || 0;
+            const g1p = parseInt(f.querySelector('#fG1GalleryExp')?.value) || 0;
+            const g1e = parseInt(f.querySelector('#fG1Edit')?.value) || 0;
             const g1Total = g1c + g1s + g1p + g1e;
 
-            const g2c = parseInt(document.getElementById('fG2Core')?.value) || 0;
-            const g2s = parseInt(document.getElementById('fG2Subj')?.value) || 0;
-            const g2p = parseInt(document.getElementById('fG2GalleryExp')?.value) || 0;
-            const g2e = parseInt(document.getElementById('fG2Edit')?.value) || 0;
+            const g2c = parseInt(f.querySelector('#fG2Core')?.value) || 0;
+            const g2s = parseInt(f.querySelector('#fG2Subj')?.value) || 0;
+            const g2p = parseInt(f.querySelector('#fG2GalleryExp')?.value) || 0;
+            const g2e = parseInt(f.querySelector('#fG2Edit')?.value) || 0;
             const g2Total = g2c + g2s + g2p + g2e;
 
-            const d1 = document.getElementById('fG1ScoreDisplay');
-            const d2 = document.getElementById('fG2ScoreDisplay');
+            const d1 = f.querySelector('#fG1ScoreDisplay');
+            const d2 = f.querySelector('#fG2ScoreDisplay');
             if (d1) d1.textContent = g1c > 0 ? g1Total : '—';
             if (d2) d2.textContent = g2c > 0 ? g2Total : '—';
         }
 
         function updateOverviewSummary() {
-            const g1c = parseInt(document.getElementById('fG1Core')?.value) || 0;
-            const g1s = parseInt(document.getElementById('fG1Subj')?.value) || 0;
-            const g1p = parseInt(document.getElementById('fG1GalleryExp')?.value) || 0;
-            const g1e = parseInt(document.getElementById('fG1Edit')?.value) || 0;
+            const f = getActiveAssessmentForm();
+            const g1c = parseInt(f.querySelector('#fG1Core')?.value) || 0;
+            const g1s = parseInt(f.querySelector('#fG1Subj')?.value) || 0;
+            const g1p = parseInt(f.querySelector('#fG1GalleryExp')?.value) || 0;
+            const g1e = parseInt(f.querySelector('#fG1Edit')?.value) || 0;
             const g1T = g1c + g1s + g1p + g1e;
 
-            const g2c = parseInt(document.getElementById('fG2Core')?.value) || 0;
-            const g2s = parseInt(document.getElementById('fG2Subj')?.value) || 0;
-            const g2p = parseInt(document.getElementById('fG2GalleryExp')?.value) || 0;
-            const g2e = parseInt(document.getElementById('fG2Edit')?.value) || 0;
+            const g2c = parseInt(f.querySelector('#fG2Core')?.value) || 0;
+            const g2s = parseInt(f.querySelector('#fG2Subj')?.value) || 0;
+            const g2p = parseInt(f.querySelector('#fG2GalleryExp')?.value) || 0;
+            const g2e = parseInt(f.querySelector('#fG2Edit')?.value) || 0;
             const g2T = g2c + g2s + g2p + g2e;
 
             const avg = (g1T + g2T) / 2;
@@ -5950,10 +5961,10 @@
             else if (avg >= 8)   { levelLabel = 'Needs Improvement (8–10.5)'; levelColor = '#b8860b'; }
             else if (avg > 0)    { levelLabel = 'Below Standards (≤7.5)'; levelColor = '#c92a2a'; }
 
-            const s1 = document.getElementById('fSumG1');
-            const s2 = document.getElementById('fSumG2');
-            const sa = document.getElementById('fSumAvg');
-            const sl = document.getElementById('fSumLevel');
+            const s1 = f.querySelector('#fSumG1');
+            const s2 = f.querySelector('#fSumG2');
+            const sa = f.querySelector('#fSumAvg');
+            const sl = f.querySelector('#fSumLevel');
             if (s1) s1.textContent = g1c > 0 ? g1T : '—';
             if (s2) s2.textContent = g2c > 0 ? g2T : '—';
             if (sa) { sa.textContent = (g1c > 0 && g2c > 0) ? avgFmt : '—'; sa.style.color = levelColor; }
