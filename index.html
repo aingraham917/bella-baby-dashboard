@@ -686,7 +686,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 6px;
         }
 
         .rfy-title {
@@ -694,12 +694,13 @@
             font-weight: 700;
             color: #333;
             margin: 0;
+            line-height: 1.4;
         }
 
         .rfy-subtitle {
             font-size: 13px;
             color: #999;
-            margin: 5px 0 0 0;
+            margin: 0 0 20px 0;
         }
 
         .rfy-carousel-wrap {
@@ -709,69 +710,110 @@
 
         .rfy-carousel {
             display: flex;
-            gap: 16px;
+            gap: 18px;
             overflow: hidden;
             scroll-behavior: smooth;
-            padding: 0;
-            margin: 0;
-            list-style: none;
+            padding: 4px 2px 8px 2px;
         }
 
         .rfy-resource-card {
-            flex: 0 0 calc(50% - 8px);
+            flex: 0 0 calc(50% - 9px);
             background: white;
             border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 16px;
+            border-radius: 12px;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            gap: 10px;
             text-decoration: none;
             color: inherit;
             transition: box-shadow 0.2s, border-color 0.2s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
         }
 
         .rfy-resource-card:hover {
-            box-shadow: 0 4px 12px rgba(75, 168, 168, 0.1);
+            box-shadow: 0 6px 18px rgba(75, 168, 168, 0.15);
             border-color: #4ba8a8;
         }
 
-        .rfy-card-icon {
-            font-size: 24px;
+        .rfy-card-thumb {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #f0f0f0;
+            overflow: hidden;
+            flex-shrink: 0;
         }
 
-        .rfy-card-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: #333;
-            margin: 0;
-            line-height: 1.4;
+        .rfy-card-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
-        .rfy-card-desc {
-            font-size: 13px;
-            color: #666;
-            margin: 0;
-            line-height: 1.5;
+        .rfy-play-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.25);
+            transition: background 0.2s;
+        }
+
+        .rfy-resource-card:hover .rfy-play-overlay {
+            background: rgba(0,0,0,0.4);
+        }
+
+        .rfy-play-btn {
+            width: 52px;
+            height: 52px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #c92a2a;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .rfy-card-body {
+            padding: 18px 20px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
             flex: 1;
         }
 
-        .rfy-card-meta {
-            font-size: 11px;
-            color: #999;
+        .rfy-card-category {
+            font-size: 10px;
+            font-weight: 700;
+            color: #4ba8a8;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin: 0;
+            letter-spacing: 0.8px;
+            margin: 0 0 10px 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .rfy-card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 16px 0;
+            line-height: 1.45;
+            flex: 1;
         }
 
         .rfy-btn {
             align-self: flex-start;
-            padding: 8px 14px;
+            padding: 9px 16px;
             font-size: 12px;
-            background: #e8f5f5;
-            color: #4ba8a8;
+            background: #4ba8a8;
+            color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
             transition: background 0.2s;
@@ -779,43 +821,44 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            margin-top: auto;
         }
 
         .rfy-btn:hover {
-            background: #d0e8e8;
+            background: #3a9090;
         }
 
         .rfy-controls {
             position: absolute;
-            top: -50px;
+            top: -46px;
             right: 0;
             display: flex;
             gap: 8px;
         }
 
         .rfy-arrow {
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             border: 1px solid #e0e0e0;
             background: white;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 15px;
             color: #666;
             transition: all 0.2s;
         }
 
         .rfy-arrow:hover {
-            background: #f9f9f9;
+            background: #f0f9f9;
             border-color: #4ba8a8;
             color: #4ba8a8;
         }
 
         .rfy-arrow:disabled {
-            opacity: 0.5;
+            opacity: 0.35;
             cursor: not-allowed;
         }
 
@@ -828,9 +871,8 @@
 
         @media (max-width: 768px) {
             .rfy-resource-card {
-                flex: 0 0 100%;
+                flex: 0 0 85%;
             }
-        }
         }
 
         .info-icon {
@@ -8519,11 +8561,28 @@
             }
         }
 
+        function getResourceType(url) {
+            if (!url) return 'article';
+            if (url.includes('youtube.com') || url.includes('youtu.be')) return 'video';
+            if (url.includes('drive.google.com') || url.includes('docs.google.com')) return 'guide';
+            if (url.includes('sites.google.com')) return 'guide';
+            return 'article';
+        }
+
+        function getYouTubeId(url) {
+            if (url.includes('youtu.be/')) {
+                return url.split('youtu.be/')[1].split('?')[0].split('&')[0];
+            }
+            const m = url.match(/[?&]v=([^&]+)/);
+            return m ? m[1] : null;
+        }
+
         function renderResourcesCarousel(container, resources, context = 'photographer') {
             if (!resources || resources.length === 0) {
                 container.innerHTML = '';
                 return;
             }
+            console.log('🎠 renderResourcesCarousel v2 called with', resources.length, 'resources');
 
             const carouselId = context === 'lms' ? 'lmsCarousel' : 'photogCarousel';
             const controlsId = context === 'lms' ? 'lmsControls' : 'photogControls';
@@ -8532,7 +8591,7 @@
                 <div class="rfy-header">
                     <h3 class="rfy-title">📚 Recommended For You</h3>
                 </div>
-                <p class="rfy-subtitle" style="margin: -15px 0 20px 0; color: #999; font-size: 13px;">Based on your recent assessment flags</p>
+                <p class="rfy-subtitle">Based on your recent assessment flags</p>
                 <div class="rfy-carousel-wrap">
                     <div class="rfy-controls" id="${controlsId}">
                         <button class="rfy-arrow" id="${controlsId}Left" onclick="scrollResourceCarousel('${carouselId}', -1)">←</button>
@@ -8542,15 +8601,40 @@
             `;
 
             resources.forEach(resource => {
-                const buttonText = '📖 View';
-                
+                const type    = getResourceType(resource.url);
+                const safeUrl = escapeHtml(resource.url);
+                console.log('🎠 Resource:', resource.title, '| URL:', resource.url, '| Type:', type);
+
+                const btnLabel = type === 'video'   ? '▶ Watch Video'   :
+                                 type === 'guide'   ? '📄 View Guide'    :
+                                                      '📖 Read Article';
+
+                let thumbHtml = '';
+                if (type === 'video') {
+                    const ytId = getYouTubeId(resource.url);
+                    if (ytId) {
+                        thumbHtml = `
+                            <div class="rfy-card-thumb">
+                                <img src="https://img.youtube.com/vi/${ytId}/hqdefault.jpg"
+                                     alt="${escapeHtml(resource.title)}"
+                                     onerror="this.parentElement.style.display='none'">
+                                <div class="rfy-play-overlay">
+                                    <div class="rfy-play-btn">▶</div>
+                                </div>
+                            </div>`;
+                    }
+                }
+
                 html += `
-                    <a href="${escapeHtml(resource.url)}" target="_blank" class="rfy-resource-card" title="Open in new window">
-                        <h4 class="rfy-card-title">${escapeHtml(resource.title)}</h4>
-                        ${resource.keyword ? `<p class="rfy-card-meta">${escapeHtml(resource.keyword)}</p>` : ''}
-                        <button class="rfy-btn" onclick="event.preventDefault(); window.open('${escapeHtml(resource.url)}', '_blank');">
-                            ${buttonText} →
-                        </button>
+                    <a href="${safeUrl}" target="_blank" class="rfy-resource-card">
+                        ${thumbHtml}
+                        <div class="rfy-card-body">
+                            ${resource.keyword ? `<p class="rfy-card-category">${escapeHtml(resource.keyword)}</p>` : ''}
+                            <h4 class="rfy-card-title">${escapeHtml(resource.title)}</h4>
+                            <button class="rfy-btn" onclick="event.preventDefault(); window.open('${safeUrl}', '_blank');">
+                                ${btnLabel}
+                            </button>
+                        </div>
                     </a>
                 `;
             });
@@ -8561,8 +8645,6 @@
             `;
 
             container.innerHTML = html;
-
-            // Set up arrow state after rendering
             setTimeout(() => updateCarouselArrowState(carouselId, controlsId), 100);
         }
 
