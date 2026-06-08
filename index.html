@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2.4 Dashboard</title>
+    <title>2.5 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -8348,111 +8348,96 @@
             if (!container) return;
 
             try {
-                // Get current user's email
-                const userEmail = sessionStorage.getItem('userEmail');
-                if (!userEmail) return;
+                // Must be logged in
+                if (!currentUser) return;
+                const email = currentUser.email.toLowerCase().trim();
 
-                // Get user's recent assessments
-                const { data: recentAssessments } = await supabase
-                    .from('qc_records')
-                    .select('*')
-                    .eq('photographer_email', userEmail)
-                    .order('created_at', { ascending: false })
-                    .limit(10);
+                // Use already-loaded records — no extra DB query needed
+                const myRecords = allRecords.filter(r =>
+                    (r['Photographer Email'] || '').toLowerCase().trim() === email
+                ).slice(0, 10);
 
-                if (!recentAssessments || recentAssessments.length === 0) {
+                if (!myRecords.length) {
                     container.innerHTML = '';
                     return;
                 }
 
-                // Extract all flagged values from assessments
+                // Extract all flag keywords from this photographer's records
                 const flaggedValues = new Set();
 
-                recentAssessments.forEach(assessment => {
-                    // Scan all columns for flag-like values
-                    Object.entries(assessment).forEach(([colName, value]) => {
-                        // Look for columns with "flagged", "Flags", or technical flag indicators
-                        if ((colName.includes('flag') || colName.includes('Flag')) && value && value !== 'No Flag' && value !== 'No Technical Flags') {
-                            // Add the actual value from the column
-                            if (typeof value === 'string') {
-                                // For comma-separated values, add each
-                                const parts = value.split(',').map(v => v.trim());
-                                parts.forEach(part => {
-                                    // Clean up parenthetical notes like "Notes (Insufficient or Missing)"
-                                    const cleanFlag = part.split('(')[0].trim();
-                                    if (cleanFlag && cleanFlag !== 'Score of 1: Urgent' && cleanFlag !== 'Score of 2: Non-Urgent') {
-                                        flaggedValues.add(cleanFlag);
-                                    }
-                                });
-                            }
+                myRecords.forEach(record => {
+                    // Technical / Delivery Standard flags (stored as short keys e.g. "Metadata", "Image Order")
+                    const techFlags = record['Delivery Standard Flags:'] || '';
+                    if (techFlags && techFlags !== 'No Delivery Standard Flags') {
+                        techFlags.split(',').map(f => f.trim()).filter(Boolean).forEach(f => flaggedValues.add(f));
+                    }
+
+                    // Core Skills sub-flags (e.g. "Focus, Exposure")
+                    ['Gallery #1 Core Skills Flags', 'Gallery #2 Core Skills Flags'].forEach(col => {
+                        const flags = record[col] || '';
+                        if (flags) {
+                            flags.split(',').map(f => f.trim()).filter(Boolean).forEach(f => flaggedValues.add(f));
                         }
                     });
                 });
 
-                // If no flags, don't show resources
-                if (flaggedValues.size === 0) {
+                if (!flaggedValues.size) {
                     container.innerHTML = '';
                     return;
                 }
 
-                // Fetch all active flag resources with review_flags
-                const { data: allResources } = await supabase
+                // Fetch active resources from flag_resources table
+                const { data: allResources, error } = await supabaseClient
                     .from('flag_resources')
                     .select('*')
                     .eq('active', true);
 
-                if (!allResources || allResources.length === 0) {
+                if (error || !allResources?.length) {
                     container.innerHTML = '';
                     return;
                 }
 
-                // Filter to matching resources based on review_flags
+                // Match: check if any extracted flag appears in the resource's review_flags
+                // Uses containment so "Metadata" matches "Metadata (Missing)" etc.
                 const matchedResources = [];
+                const seenTitles = new Set();
+
                 allResources.forEach(row => {
-                    const reviewFlags = row.review_flags || '';
-                    const flagList = reviewFlags.split(';').map(f => f.trim());
-                    
-                    // Check if any of the user's flagged values match this resource's review_flags
-                    let isMatch = false;
-                    flaggedValues.forEach(flagValue => {
-                        if (flagList.includes(flagValue)) {
-                            isMatch = true;
-                        }
-                    });
+                    const reviewFlags = (row.review_flags || '').split(';').map(f => f.trim()).filter(Boolean);
+                    const isMatch = [...flaggedValues].some(flagVal =>
+                        reviewFlags.some(rf =>
+                            rf.toLowerCase().includes(flagVal.toLowerCase()) ||
+                            flagVal.toLowerCase().includes(rf.toLowerCase())
+                        )
+                    );
 
                     if (isMatch) {
-                        const keyword = row.keyword || '';
-                        // Add first resource if it exists
-                        if (row.resource_name_1 && row.resource_url_1) {
-                            matchedResources.push({
-                                title: row.resource_name_1,
-                                url: row.resource_url_1,
-                                keyword: keyword,
-                                message: row.message || ''
-                            });
-                        }
-                        // Add second resource if it exists
-                        if (row.resource_name_2 && row.resource_url_2) {
-                            matchedResources.push({
-                                title: row.resource_name_2,
-                                url: row.resource_url_2,
-                                keyword: keyword,
-                                message: row.message || ''
-                            });
-                        }
+                        [
+                            { name: row.resource_name_1, url: row.resource_url_1 },
+                            { name: row.resource_name_2, url: row.resource_url_2 }
+                        ].forEach(({ name, url }) => {
+                            if (name && url && !seenTitles.has(name)) {
+                                seenTitles.add(name);
+                                matchedResources.push({
+                                    title: name,
+                                    url: url,
+                                    keyword: row.keyword || ''
+                                });
+                            }
+                        });
                     }
                 });
 
-                if (matchedResources.length === 0) {
+                if (!matchedResources.length) {
                     container.innerHTML = '';
                     return;
                 }
 
-                // Render carousel
                 renderResourcesCarousel(container, matchedResources, 'photographer');
 
-            } catch (error) {
-                console.error('Error loading recommended resources:', error);
+            } catch (err) {
+                console.error('Carousel error:', err);
+                container.innerHTML = '';
             }
         }
 
