@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2.7 Dashboard</title>
+    <title>2.8 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -7896,6 +7896,53 @@
                                 Score: ${record['Gallery #2 Score:']}
                             </div>
                             ${record['Gallery #2 Feedback:'] ? `<div class="gallery-feedback">${record['Gallery #2 Feedback:']}</div>` : ''}
+                        </div>
+                    `;
+                }
+
+                // Compute flags from legacy scores
+                const legacyCategories = [
+                    { label: 'Theme/Subject',        g1: record['Gallery #1 Theme/Subject'],        g2: record['Gallery #2 Theme/Subject'] },
+                    { label: 'Exposure',             g1: record['Gallery #1 Exposure'],             g2: record['Gallery #2 Exposure'] },
+                    { label: 'Focus',                g1: record['Gallery #1 Focus'],                g2: record['Gallery #2 Focus'] },
+                    { label: 'White Balance',        g1: record['Gallery #1 White Balance'],        g2: record['Gallery #2 White Balance'] },
+                    { label: 'Posing',               g1: record['Gallery #1 Posing'],               g2: record['Gallery #2 Posing'] },
+                    { label: 'Variety',              g1: record['Gallery #1 Variety'],              g2: record['Gallery #2 Variety'] },
+                    { label: 'Environment',          g1: record['Gallery #1 Environment'],          g2: record['Gallery #2 Environment'] },
+                    { label: 'Editing',              g1: record['Gallery #1 Editing'],              g2: record['Gallery #2 Editing'] },
+                    { label: 'Calming and Soothing', g1: record['Gallery #1 Calming and soothing'], g2: record['Gallery #2 Calming and soothing'] },
+                    { label: 'Composition/Cropping', g1: record['Gallery #1 Composition/Cropping'], g2: record['Gallery #2 Composition/Cropping'] }
+                ];
+
+                const urgentFlags = [], nonUrgentFlags = [];
+                legacyCategories.forEach(({ label, g1, g2 }) => {
+                    const s1 = parseInt(g1) || 0;
+                    const s2 = parseInt(g2) || 0;
+                    if (s1 === 1 || s2 === 1) {
+                        urgentFlags.push(label);
+                    } else if (s1 === 2 && s2 === 2) {
+                        nonUrgentFlags.push(label);
+                    }
+                });
+
+                if (urgentFlags.length || nonUrgentFlags.length) {
+                    html += `
+                        <div style="background:#fff8f8;border:1px solid #f5c6c6;border-radius:8px;padding:16px 18px;margin-bottom:16px;">
+                            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;margin-bottom:12px;">Category Flags</div>
+                            ${urgentFlags.length ? `
+                                <div style="margin-bottom:8px;">
+                                    <span style="font-size:11px;font-weight:700;color:#c92a2a;text-transform:uppercase;letter-spacing:0.5px;">⚑ Urgent</span>
+                                    <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:6px;">
+                                        ${urgentFlags.map(f => `<span style="background:#ffeaea;color:#c92a2a;border:1px solid #f5c6c6;border-radius:4px;padding:3px 10px;font-size:12px;font-weight:600;">${f}</span>`).join('')}
+                                    </div>
+                                </div>` : ''}
+                            ${nonUrgentFlags.length ? `
+                                <div>
+                                    <span style="font-size:11px;font-weight:700;color:#b45309;text-transform:uppercase;letter-spacing:0.5px;">⚐ Non-Urgent</span>
+                                    <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:6px;">
+                                        ${nonUrgentFlags.map(f => `<span style="background:#fff8e1;color:#b45309;border:1px solid #ffe082;border-radius:4px;padding:3px 10px;font-size:12px;font-weight:600;">${f}</span>`).join('')}
+                                    </div>
+                                </div>` : ''}
                         </div>
                     `;
                 }
