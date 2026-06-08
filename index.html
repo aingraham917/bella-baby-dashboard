@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bella Baby QC Dashboard</title>
+    <title>2.9 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -8433,6 +8433,30 @@
                             flags.split(',').map(f => f.trim()).filter(Boolean).forEach(f => flaggedValues.add(f));
                         }
                     });
+
+                    // Legacy QC records: compute flags from category scores
+                    // Score of 1 in either gallery = flagged; score of 2 in both = flagged
+                    if (record.record_type === 'legacy') {
+                        const legacyCategories = [
+                            { label: 'Theme/Subject',        g1: record['Gallery #1 Theme/Subject'],        g2: record['Gallery #2 Theme/Subject'] },
+                            { label: 'Exposure',             g1: record['Gallery #1 Exposure'],             g2: record['Gallery #2 Exposure'] },
+                            { label: 'Focus',                g1: record['Gallery #1 Focus'],                g2: record['Gallery #2 Focus'] },
+                            { label: 'White Balance',        g1: record['Gallery #1 White Balance'],        g2: record['Gallery #2 White Balance'] },
+                            { label: 'Posing',               g1: record['Gallery #1 Posing'],               g2: record['Gallery #2 Posing'] },
+                            { label: 'Variety',              g1: record['Gallery #1 Variety'],              g2: record['Gallery #2 Variety'] },
+                            { label: 'Environment',          g1: record['Gallery #1 Environment'],          g2: record['Gallery #2 Environment'] },
+                            { label: 'Editing',              g1: record['Gallery #1 Editing'],              g2: record['Gallery #2 Editing'] },
+                            { label: 'Calming and Soothing', g1: record['Gallery #1 Calming and soothing'], g2: record['Gallery #2 Calming and soothing'] },
+                            { label: 'Composition/Cropping', g1: record['Gallery #1 Composition/Cropping'], g2: record['Gallery #2 Composition/Cropping'] }
+                        ];
+                        legacyCategories.forEach(({ label, g1, g2 }) => {
+                            const s1 = parseInt(g1) || 0;
+                            const s2 = parseInt(g2) || 0;
+                            if (s1 === 1 || s2 === 1 || (s1 === 2 && s2 === 2)) {
+                                flaggedValues.add(label);
+                            }
+                        });
+                    }
                 });
 
                 if (!flaggedValues.size) {
