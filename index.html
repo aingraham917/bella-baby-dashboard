@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1.4 Dashboard</title>
+    <title>1.5 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -245,14 +245,14 @@
         .dashboard-content {
             display: flex;
             flex: 1;
-            flex-direction: row;
+            flex-direction: column;
+            overflow-y: auto;
         }
 
         .main-content {
             flex: 1;
             min-width: 0;
-            padding: 25px 30px;
-            overflow-y: auto;
+            padding: 20px 25px 60px 25px;
             width: 100%;
             box-sizing: border-box;
         }
@@ -322,12 +322,6 @@
             flex-direction: column;
             width: 100%;
             min-height: 400px;
-        }
-
-        .page-container > div:not(.main-content) {
-            padding: 25px 30px;
-            flex: 1;
-            overflow-y: auto;
         }
 
         .filter-buttons {
@@ -1359,13 +1353,14 @@
 
                 <!-- DASHBOARD PAGE -->
                 <div id="dashboardPage" class="page-container" style="display: flex; flex-direction: column;">
+                    <div class="main-content">
 
                     <!-- TOP CONTROLS BAR -->
-                    <div style="background:white;border:1px solid #e0e0e0;border-radius:8px;padding:14px 18px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
+                    <div style="background:white;border:1px solid #e0e0e0;border-radius:8px;padding:8px 12px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
 
                         <!-- Search -->
-                        <div style="position:relative;flex:1;min-width:180px;">
-                            <input type="text" id="searchInput" class="search-input" placeholder="Search photographer name..." style="padding-right:30px;width:100%;box-sizing:border-box;">
+                        <div style="position:relative;flex:1;min-width:160px;">
+                            <input type="text" id="searchInput" class="search-input" placeholder="Search photographer name..." style="padding-right:30px;width:100%;box-sizing:border-box;padding-top:6px;padding-bottom:6px;">
                             <button id="searchClearBtn" onclick="clearSearch()" title="Clear search"
                                 style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#aaa;font-size:16px;line-height:1;padding:0;">✕</button>
                         </div>
@@ -1389,7 +1384,7 @@
                         </div>
 
                         <!-- Sort -->
-                        <select id="sortSelect" class="sort-select" style="min-width:160px;">
+                        <select id="sortSelect" class="sort-select" style="min-width:150px;padding-top:6px;padding-bottom:6px;">
                             <option value="a-z">A - Z</option>
                             <option value="z-a">Z - A</option>
                             <option value="score-high">Score High to Low</option>
@@ -1402,30 +1397,10 @@
                         <div class="loading">Loading records...</div>
                     </div>
 
-                    <!-- QC LEGEND (collapsed by default, togglable) -->
-                    <div style="margin-top:24px;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;">
-                        <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'; this.querySelector('.toggle-arrow').textContent=this.nextElementSibling.style.display==='none'?'▶':'▼';"
-                            style="width:100%;text-align:left;padding:12px 18px;background:#f9f9f9;border:none;cursor:pointer;font-size:13px;font-weight:600;color:#555;display:flex;justify-content:space-between;align-items:center;">
-                            <span>ℹ️ How to Understand Your QC</span>
-                            <span class="toggle-arrow">▶</span>
-                        </button>
-                        <div style="display:none;padding:16px 18px;">
-                            <p style="font-size:13px;color:#666;margin:0 0 14px 0;"><strong>General Info:</strong> Review the notes from your reviewer and focus on categories with a score of 1 before those with a 2 or higher.</p>
-                            <div class="scale-explanation">
-                                <div class="scale-item"><span class="scale-badge score-1">1</span><div><div class="scale-label">Below Standards</div><div class="scale-description">Category didn't meet minimum standards.</div></div></div>
-                                <div class="scale-item"><span class="scale-badge score-2">2</span><div><div class="scale-label">Needs Improvement</div><div class="scale-description">Consistency or technique needs work.</div></div></div>
-                                <div class="scale-item"><span class="scale-badge score-3">3</span><div><div class="scale-label">Proficient</div><div class="scale-description">Solid work that meets expectations.</div></div></div>
-                                <div class="scale-item"><span class="scale-badge score-4">4</span><div><div class="scale-label">Master</div><div class="scale-description">Confident, consistent, polished execution.</div></div></div>
-                            </div>
-                            <div style="margin-top:16px;">
-                                <a href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view?usp=sharing" target="_blank" class="rubric-link-btn" style="display:inline-block;background:#4ba8a8;color:white;padding:10px 16px;border-radius:4px;text-decoration:none;font-size:13px;font-weight:500;">📋 Growth Assessment Rubric</a>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- RECOMMENDED FOR YOU CAROUSEL -->
                     <div class="recommended-for-you" id="photographerRecommendedResources"></div>
 
+                    </div><!-- end main-content -->
                 </div>
 
             <!-- MANAGE ASSESSMENTS PAGE -->
@@ -4824,6 +4799,8 @@
             if (chartsPageBtn) {
                 chartsPageBtn.style.display = currentUserRole !== 'user' ? 'block' : 'none';
             }
+            // Update QC drawer visibility after dashboard renders
+            setTimeout(updateQCDrawerVisibility, 100);
         }
 
         function showAMViewToggle() {
@@ -8424,6 +8401,60 @@
         
         // Also initialize tooltips after a brief delay to ensure DOM is fully ready
         setTimeout(initTooltips, 100);
+
+        // ── QC DRAWER ──
+        function toggleQCDrawer() {
+            const panel = document.getElementById('qcDrawerPanel');
+            const arrow = document.getElementById('qcDrawerArrow');
+            const open = panel.style.display === 'block';
+            panel.style.display = open ? 'none' : 'block';
+            arrow.textContent = open ? '▲' : '▼';
+        }
+
+        // Show/hide QC drawer based on active page and role
+        function updateQCDrawerVisibility() {
+            const drawer = document.getElementById('qcDrawer');
+            if (!drawer) return;
+            const isDashboard = document.getElementById('dashboardPage')?.style.display !== 'none';
+            const isUserRole = getCurrentUserRole() === 'user';
+            drawer.style.display = (isDashboard && isUserRole) ? 'block' : 'none';
+            // Close panel when hidden
+            if (drawer.style.display === 'none') {
+                const panel = document.getElementById('qcDrawerPanel');
+                const arrow = document.getElementById('qcDrawerArrow');
+                if (panel) panel.style.display = 'none';
+                if (arrow) arrow.textContent = '▲';
+            }
+        }
+
+        // Patch showPage to update drawer visibility
+        const _origShowPage = showPage;
+        function showPage(pageId) {
+            _origShowPage(pageId);
+            setTimeout(updateQCDrawerVisibility, 50);
+        }
     </script>
+
+<!-- FLOATING QC DRAWER (photographer view only) -->
+<div id="qcDrawer" style="display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:760px;z-index:900;font-family:inherit;">
+    <button onclick="toggleQCDrawer()" id="qcDrawerTab"
+        style="display:block;width:100%;padding:8px 20px;background:#4ba8a8;color:white;border:none;border-radius:12px 12px 0 0;cursor:pointer;font-size:13px;font-weight:600;text-align:center;box-shadow:0 -2px 8px rgba(0,0,0,0.12);">
+        ℹ️ How to Understand Your QC &nbsp;<span id="qcDrawerArrow">▲</span>
+    </button>
+    <div id="qcDrawerPanel" style="display:none;background:white;border:1px solid #ddd;border-bottom:none;padding:18px 24px;box-shadow:0 -4px 16px rgba(0,0,0,0.1);max-height:55vh;overflow-y:auto;">
+        <p style="font-size:13px;color:#666;margin:0 0 14px 0;"><strong>General Info:</strong> Review the notes from your reviewer and focus on categories with a score of 1 before those with a 2 or higher.</p>
+        <div class="scale-explanation">
+            <div class="scale-item"><span class="scale-badge score-1">1</span><div><div class="scale-label">Below Standards</div><div class="scale-description">Category didn't meet minimum standards.</div></div></div>
+            <div class="scale-item"><span class="scale-badge score-2">2</span><div><div class="scale-label">Needs Improvement</div><div class="scale-description">Consistency or technique needs work.</div></div></div>
+            <div class="scale-item"><span class="scale-badge score-3">3</span><div><div class="scale-label">Proficient</div><div class="scale-description">Solid work that meets expectations.</div></div></div>
+            <div class="scale-item"><span class="scale-badge score-4">4</span><div><div class="scale-label">Master</div><div class="scale-description">Confident, consistent, polished execution.</div></div></div>
+        </div>
+        <div style="margin-top:16px;padding-bottom:4px;">
+            <a href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view?usp=sharing" target="_blank"
+               style="display:inline-block;background:#4ba8a8;color:white;padding:9px 16px;border-radius:4px;text-decoration:none;font-size:13px;font-weight:500;">📋 Growth Assessment Rubric</a>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
