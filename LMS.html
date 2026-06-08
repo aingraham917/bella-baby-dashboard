@@ -3272,33 +3272,71 @@ async function loadLMSRecommendedResources() {
         const flaggedKeywords = new Set();
 
         recentAssessments.forEach(assessment => {
-            // Check Core Skills sub-flags
-            if (assessment.core_skills_flags) {
-                const flags = assessment.core_skills_flags;
-                if (Array.isArray(flags)) {
-                    flags.forEach(flag => {
-                        if (flag && flag !== 'N/A') flaggedKeywords.add(flag);
-                    });
-                } else if (typeof flags === 'object') {
-                    Object.keys(flags).forEach(key => {
-                        const flag = flags[key];
-                        if (flag && flag !== 'N/A') flaggedKeywords.add(flag);
-                    });
-                }
-            }
+            // Check "Which categories are flagged?" columns
+            const categoryColumns = [
+                'Which categories are flagged? Focus',
+                'Which categories are flagged? Exposure',
+                'Which categories are flagged? Calming and Soothing',
+                'Which categories are flagged? Posing',
+                'Which categories are flagged? White Balance',
+                'Which categories are flagged? Composition/Cropping',
+                'Which categories are flagged? Theme/Subject',
+                'Which categories are flagged? Variety',
+                'Which categories are flagged? Environment',
+                'Which categories are flagged? Editing'
+            ];
 
-            // Check Delivery Standard flags
-            if (assessment.delivery_standard_flags) {
-                const flags = assessment.delivery_standard_flags;
-                if (Array.isArray(flags)) {
-                    flags.forEach(flag => {
-                        if (flag) flaggedKeywords.add(flag);
-                    });
-                } else if (typeof flags === 'object') {
-                    Object.keys(flags).forEach(key => {
-                        if (flags[key]) flaggedKeywords.add(key);
-                    });
+            categoryColumns.forEach(colName => {
+                const value = assessment[colName];
+                if (value && value !== 'No Flag') {
+                    const categoryMatch = colName.match(/\? (.+)$/);
+                    if (categoryMatch) {
+                        const category = categoryMatch[1];
+                        const keywordMap = {
+                            'Focus': 'Focus',
+                            'Exposure': 'Exposure',
+                            'Calming and Soothing': 'Calming',
+                            'Posing': 'Posing',
+                            'White Balance': 'Balance',
+                            'Composition/Cropping': 'Composition',
+                            'Theme/Subject': 'Theme',
+                            'Variety': 'Variety',
+                            'Environment': 'Environment',
+                            'Editing': 'Editing'
+                        };
+                        if (keywordMap[category]) {
+                            flaggedKeywords.add(keywordMap[category]);
+                        }
+                    }
                 }
+            });
+
+            // Check Technical Flags column
+            const technicalFlags = assessment['Technical Flags:'];
+            if (technicalFlags && technicalFlags !== 'No Technical Flags' && technicalFlags !== 'null') {
+                const flags = technicalFlags.split(',').map(f => f.trim());
+                flags.forEach(flag => {
+                    const flagName = flag.split('(')[0].trim();
+                    const technicalKeywordMap = {
+                        'Notes': 'Notes',
+                        'Metadata': 'Metadata',
+                        'Image Order': 'Image Order',
+                        'Image Count': 'Count',
+                        'Image Number Sequence': 'Image Number Sequence',
+                        'Image Aspect Ratio': 'Aspect',
+                        'Capitalization': 'Capitalization',
+                        'Spelling': 'Spelling',
+                        'Baby Naming': 'Baby Naming',
+                        'Safety Concerns': 'Safety Concerns',
+                        'Bella Style': 'Bella Style',
+                        'Intro': 'Intro',
+                        'Copyright': 'Copyright',
+                        'Size': 'Size'
+                    };
+                    if (technicalKeywordMap[flagName]) {
+                        flaggedKeywords.add(technicalKeywordMap[flagName]);
+                    }
+                });
             }
         });
 
