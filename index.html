@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2.1 Dashboard</title>
+    <title>Bella Baby QC Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -1318,6 +1318,8 @@
                     <div style="position: relative;">
                         <button id="optionsBtn" style="padding: 8px 15px; background: #4ba8a8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">Options</button>
                         <div id="optionsDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; margin-top: 5px;">
+                            <!-- View Rubric (Non-photographer roles only) -->
+                            <a id="viewRubricOption" href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view?usp=sharing" target="_blank" class="options-menu-item" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; text-decoration: none; color: inherit; box-sizing: border-box;">📋 View Rubric</a>
                             <!-- Assessments (PSS: trainer, area_manager) -->
                             <button id="assessmentsOption" class="options-menu-item" onclick="openAssessments()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📋 My Assessments</button>
                             
@@ -1551,7 +1553,6 @@
                     <label class="fcb"><input type="checkbox" name="g1csflag" value="Exposure"> Exposure (blown highlights or too much shadow)</label>
                     <label class="fcb"><input type="checkbox" name="g1csflag" value="Focus"> Focus (poor focus or inappropriate depth of field)</label>
                     <label class="fcb"><input type="checkbox" name="g1csflag" value="White Balance"> White Balance (whites are not white or inconsistent skin tones)</label>
-                    <label class="fcb"><input type="checkbox" name="g1csflag" value="N/A"> N/A — no specific sub-issue</label>
                 </div>
                 <div style="margin-bottom: 25px;">
                     <label class="fl">Gallery #1 Feedback *</label>
@@ -1618,7 +1619,6 @@
                     <label class="fcb"><input type="checkbox" name="g2csflag" value="Exposure"> Exposure (blown highlights or too much shadow)</label>
                     <label class="fcb"><input type="checkbox" name="g2csflag" value="Focus"> Focus (poor focus or inappropriate depth of field)</label>
                     <label class="fcb"><input type="checkbox" name="g2csflag" value="White Balance"> White Balance (whites are not white or inconsistent skin tones)</label>
-                    <label class="fcb"><input type="checkbox" name="g2csflag" value="N/A"> N/A — no specific sub-issue</label>
                 </div>
                 <div style="margin-bottom: 25px;">
                     <label class="fl">Gallery #2 Feedback *</label>
@@ -1850,7 +1850,6 @@
                     <label class="fcb"><input type="checkbox" name="g1csflag" value="Exposure"> Exposure (blown highlights or too much shadow)</label>
                     <label class="fcb"><input type="checkbox" name="g1csflag" value="Focus"> Focus (poor focus or inappropriate depth of field)</label>
                     <label class="fcb"><input type="checkbox" name="g1csflag" value="White Balance"> White Balance (whites are not white or inconsistent skin tones)</label>
-                    <label class="fcb"><input type="checkbox" name="g1csflag" value="N/A"> N/A — no specific sub-issue</label>
                 </div>
                 <div style="margin-bottom: 25px;">
                     <label class="fl">Gallery #1 Feedback *</label>
@@ -1893,7 +1892,6 @@
                     <label class="fcb"><input type="checkbox" name="g2csflag" value="Exposure"> Exposure (blown highlights or too much shadow)</label>
                     <label class="fcb"><input type="checkbox" name="g2csflag" value="Focus"> Focus (poor focus or inappropriate depth of field)</label>
                     <label class="fcb"><input type="checkbox" name="g2csflag" value="White Balance"> White Balance (whites are not white or inconsistent skin tones)</label>
-                    <label class="fcb"><input type="checkbox" name="g2csflag" value="N/A"> N/A — no specific sub-issue</label>
                 </div>
                 <div style="margin-bottom: 25px;">
                     <label class="fl">Gallery #2 Feedback *</label>
@@ -2617,7 +2615,8 @@
         }
 
         function canEdit() {
-            return getCurrentUserRole() === 'super_admin';
+            const role = getCurrentUserRole();
+            return role === 'super_admin' || role === 'admin';
         }
 
         function canViewReports() {
@@ -4971,6 +4970,12 @@
                 console.log('Loaded total records:', allRecords.length);
                 
                 // Show/hide options dropdown menu items based on role
+                // View Rubric (non-photographer roles only)
+                const viewRubricOption = document.getElementById('viewRubricOption');
+                if (viewRubricOption) {
+                    viewRubricOption.style.display = currentUserRole !== 'user' ? 'block' : 'none';
+                }
+
                 // Assessments (PSS: trainer, area_manager)
                 const assessmentsOption = document.getElementById('assessmentsOption');
                 if (assessmentsOption) {
@@ -5788,10 +5793,14 @@
         }
 
         function closeAssessmentForm() {
-            showPage('myAssessmentsPage');
+            if (window._editFromRecordDetail && currentRecord) {
+                window._editFromRecordDetail = false;
+                showRecordDetails(currentRecord);
+            } else {
+                showPage('myAssessmentsPage');
+            }
             formAssignmentId = null;
             formPendingImages = [];
-            // Scroll back to top of page
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -6137,6 +6146,29 @@
             const fint = (id) => parseInt(f.querySelector('#' + id)?.value) || 0;
 
             try {
+                // Validate core skills sub-flags when section is visible
+                const g1CoreVal = fint('fG1Core');
+                const g2CoreVal = fint('fG2Core');
+
+                if (g1CoreVal === 1 || g1CoreVal === 2) {
+                    const g1checked = f.querySelectorAll('input[name="g1csflag"]:checked').length;
+                    if (g1checked === 0) {
+                        alert('Gallery #1: Please select at least one Core Skills issue before submitting.');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Submit for Review ✓';
+                        return;
+                    }
+                }
+                if (g2CoreVal === 1 || g2CoreVal === 2) {
+                    const g2checked = f.querySelectorAll('input[name="g2csflag"]:checked').length;
+                    if (g2checked === 0) {
+                        alert('Gallery #2: Please select at least one Core Skills issue before submitting.');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Submit for Review ✓';
+                        return;
+                    }
+                }
+
                 // Collect values
                 const pssName    = fval('fPSSName');
                 const date       = fval('fDate');
@@ -6271,9 +6303,17 @@
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Submit for Review ✓';
                     submitBtn.style.background = '#4ba8a8';
-                    // Return to assignments list
-                    await loadPSSAssignments();
-                    closeAssessmentForm();
+
+                    if (window._editFromRecordDetail && currentRecord) {
+                        // Opened from record detail — go back there with refreshed data
+                        window._editFromRecordDetail = false;
+                        const refreshed = allRecords.find(r => r.id === currentRecord.id);
+                        showRecordDetails(refreshed || currentRecord);
+                    } else {
+                        // PSS submission flow — return to assignments list
+                        await loadPSSAssignments();
+                        closeAssessmentForm();
+                    }
                 }, 1200);
 
             } catch (err) {
@@ -7827,10 +7867,18 @@
 
             document.getElementById('recordDetailContent').innerHTML = html;
             
-            // Setup edit button
+            // Setup edit button — admin/super_admin only
             const editBtn = document.getElementById('editRecordBtn');
             if (editBtn) {
-                editBtn.onclick = () => openAssessmentFormForEdit(record.id, null);
+                if (canEdit()) {
+                    editBtn.style.display = '';
+                    editBtn.onclick = () => {
+                        window._editFromRecordDetail = true;
+                        openAssessmentFormForEdit(record.id, null);
+                    };
+                } else {
+                    editBtn.style.display = 'none';
+                }
             }
             
             showPage('recordDetailPage');
