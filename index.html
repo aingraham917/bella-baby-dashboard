@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bella Baby QC Dashboard</title>
+    <title>1.6 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -5612,8 +5612,8 @@
 
             // Clear user-input fields only — skip anything that is readonly or disabled
             const userFields = [
-                'fG1Code','fG1Core','fG1Subj','fG1Comp','fG1Edit','fG1Feedback',
-                'fG2Code','fG2Core','fG2Subj','fG2Comp','fG2Edit','fG2Feedback',
+                'fG1Code','fG1Core','fG1Subj','fG1GalleryExp','fG1Edit','fG1Feedback',
+                'fG2Code','fG2Core','fG2Subj','fG2GalleryExp','fG2Edit','fG2Feedback',
                 'fTechNotes','fInternalNotes'
             ];
             userFields.forEach(id => {
@@ -5681,7 +5681,7 @@
                 const g1Code = document.getElementById('fG1Code').value.trim();
                 const g1c = parseInt(document.getElementById('fG1Core').value) || 0;
                 const g1s = parseInt(document.getElementById('fG1Subj').value) || 0;
-                const g1p = parseInt(document.getElementById('fG1Comp').value) || 0;
+                const g1p = parseInt(document.getElementById('fG1GalleryExp').value) || 0;
                 const g1e = parseInt(document.getElementById('fG1Edit').value) || 0;
                 const g1T = g1c + g1s + g1p + g1e;
                 const g1fb = document.getElementById('fG1Feedback').value.trim();
@@ -5689,7 +5689,7 @@
                 const g2Code = document.getElementById('fG2Code').value.trim();
                 const g2c = parseInt(document.getElementById('fG2Core').value) || 0;
                 const g2s = parseInt(document.getElementById('fG2Subj').value) || 0;
-                const g2p = parseInt(document.getElementById('fG2Comp').value) || 0;
+                const g2p = parseInt(document.getElementById('fG2GalleryExp').value) || 0;
                 const g2e = parseInt(document.getElementById('fG2Edit').value) || 0;
                 const g2T = g2c + g2s + g2p + g2e;
                 const g2fb = document.getElementById('fG2Feedback').value.trim();
@@ -5857,19 +5857,25 @@
             const coreEl = document.getElementById('fG' + gallery + 'Core');
             const val = parseInt(coreEl.value);
             const locked = val === 1 || val === 2;
-            const deps = ['Subj','Comp','Edit'];
+
+            // Each entry: { input: actual field ID suffix, wrap: wrap div ID suffix }
+            const deps = [
+                { input: 'Subj',       wrap: 'Subj' },
+                { input: 'GalleryExp', wrap: 'Comp' },
+                { input: 'Edit',       wrap: 'Edit' }
+            ];
 
             deps.forEach(d => {
-                const inp = document.getElementById('fG' + gallery + d);
-                const wrap = document.getElementById('fG' + gallery + d + 'Wrap');
+                const inp  = document.getElementById('fG' + gallery + d.input);
+                const wrap = document.getElementById('fG' + gallery + d.wrap + 'Wrap');
                 if (!inp) return;
                 if (locked) {
-                    inp.value = 0;
+                    inp.value    = 0;
                     inp.readOnly = true;
                     inp.classList.add('fi-locked');
                     if (wrap) wrap.style.opacity = '0.4';
                 } else {
-                    inp.value = '';
+                    inp.value    = '';
                     inp.readOnly = false;
                     inp.classList.remove('fi-locked');
                     if (wrap) wrap.style.opacity = '1';
@@ -5884,10 +5890,14 @@
         }
 
         function resetGalleryGating(gallery) {
-            ['Subj','Comp','Edit'].forEach(d => {
-                const inp = document.getElementById('fG' + gallery + d);
+            [
+                { input: 'Subj',       wrap: 'Subj' },
+                { input: 'GalleryExp', wrap: 'Comp' },
+                { input: 'Edit',       wrap: 'Edit' }
+            ].forEach(d => {
+                const inp  = document.getElementById('fG' + gallery + d.input);
                 if (inp) { inp.readOnly = false; inp.classList.remove('fi-locked'); }
-                const wrap = document.getElementById('fG' + gallery + d + 'Wrap');
+                const wrap = document.getElementById('fG' + gallery + d.wrap + 'Wrap');
                 if (wrap) wrap.style.opacity = '1';
             });
             const fw = document.getElementById('fG' + gallery + 'CoreFlagWrap');
@@ -5897,13 +5907,13 @@
         function recalcFormScores() {
             const g1c = parseInt(document.getElementById('fG1Core')?.value) || 0;
             const g1s = parseInt(document.getElementById('fG1Subj')?.value) || 0;
-            const g1p = parseInt(document.getElementById('fG1Comp')?.value) || 0;
+            const g1p = parseInt(document.getElementById('fG1GalleryExp')?.value) || 0;
             const g1e = parseInt(document.getElementById('fG1Edit')?.value) || 0;
             const g1Total = g1c + g1s + g1p + g1e;
 
             const g2c = parseInt(document.getElementById('fG2Core')?.value) || 0;
             const g2s = parseInt(document.getElementById('fG2Subj')?.value) || 0;
-            const g2p = parseInt(document.getElementById('fG2Comp')?.value) || 0;
+            const g2p = parseInt(document.getElementById('fG2GalleryExp')?.value) || 0;
             const g2e = parseInt(document.getElementById('fG2Edit')?.value) || 0;
             const g2Total = g2c + g2s + g2p + g2e;
 
@@ -5916,13 +5926,13 @@
         function updateOverviewSummary() {
             const g1c = parseInt(document.getElementById('fG1Core')?.value) || 0;
             const g1s = parseInt(document.getElementById('fG1Subj')?.value) || 0;
-            const g1p = parseInt(document.getElementById('fG1Comp')?.value) || 0;
+            const g1p = parseInt(document.getElementById('fG1GalleryExp')?.value) || 0;
             const g1e = parseInt(document.getElementById('fG1Edit')?.value) || 0;
             const g1T = g1c + g1s + g1p + g1e;
 
             const g2c = parseInt(document.getElementById('fG2Core')?.value) || 0;
             const g2s = parseInt(document.getElementById('fG2Subj')?.value) || 0;
-            const g2p = parseInt(document.getElementById('fG2Comp')?.value) || 0;
+            const g2p = parseInt(document.getElementById('fG2GalleryExp')?.value) || 0;
             const g2e = parseInt(document.getElementById('fG2Edit')?.value) || 0;
             const g2T = g2c + g2s + g2p + g2e;
 
@@ -5946,8 +5956,8 @@
         }
 
         function autoSuggestFlags() {
-            const g1ids = ['fG1Core', 'fG1Subj', 'fG1Comp', 'fG1Edit'];
-            const g2ids = ['fG2Core', 'fG2Subj', 'fG2Comp', 'fG2Edit'];
+            const g1ids = ['fG1Core', 'fG1Subj', 'fG1GalleryExp', 'fG1Edit'];
+            const g2ids = ['fG2Core', 'fG2Subj', 'fG2GalleryExp', 'fG2Edit'];
 
             for (let i = 0; i < 4; i++) {
                 const s1 = parseInt(document.getElementById(g1ids[i])?.value) || 0;
@@ -6110,7 +6120,7 @@
                 const g1Code = document.getElementById('fG1Code').value.trim();
                 const g1c = parseInt(document.getElementById('fG1Core').value) || 0;
                 const g1s = parseInt(document.getElementById('fG1Subj').value) || 0;
-                const g1p = parseInt(document.getElementById('fG1Comp').value) || 0;
+                const g1p = parseInt(document.getElementById('fG1GalleryExp').value) || 0;
                 const g1e = parseInt(document.getElementById('fG1Edit').value) || 0;
                 const g1T = g1c + g1s + g1p + g1e;
                 const g1fb   = document.getElementById('fG1Feedback').value.trim();
@@ -6118,7 +6128,7 @@
                 const g2Code = document.getElementById('fG2Code').value.trim();
                 const g2c = parseInt(document.getElementById('fG2Core').value) || 0;
                 const g2s = parseInt(document.getElementById('fG2Subj').value) || 0;
-                const g2p = parseInt(document.getElementById('fG2Comp').value) || 0;
+                const g2p = parseInt(document.getElementById('fG2GalleryExp').value) || 0;
                 const g2e = parseInt(document.getElementById('fG2Edit').value) || 0;
                 const g2T = g2c + g2s + g2p + g2e;
                 const g2fb   = document.getElementById('fG2Feedback').value.trim();
