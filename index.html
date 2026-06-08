@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2.2 Dashboard</title>
+    <title>Bella Baby QC Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -4233,6 +4233,41 @@
             }
         }
 
+        async function saveProfileName() {
+            const first = document.getElementById('profileFirstName').value.trim();
+            const last  = document.getElementById('profileLastName').value.trim();
+            const msgDiv = document.getElementById('profileNameModalMsg');
+
+            // Validate both fields
+            if (!first) {
+                document.getElementById('profileFirstName').style.borderColor = '#c92a2a';
+                msgDiv.innerHTML = '<p style="color:#c92a2a;font-size:13px;margin:0 0 8px 0;">Please enter your first name.</p>';
+                return;
+            }
+            if (!last) {
+                document.getElementById('profileLastName').style.borderColor = '#c92a2a';
+                msgDiv.innerHTML = '<p style="color:#c92a2a;font-size:13px;margin:0 0 8px 0;">Please enter your last name.</p>';
+                return;
+            }
+
+            const fullName = first + ' ' + last;
+            msgDiv.innerHTML = '';
+
+            try {
+                const { error } = await supabaseClient.auth.updateUser({ data: { full_name: fullName } });
+                if (error) throw error;
+
+                // Update local state
+                if (currentUser.user_metadata) currentUser.user_metadata.full_name = fullName;
+                userEmail.textContent = fullName;
+
+                // Close modal
+                document.getElementById('profileNameModal').style.display = 'none';
+            } catch (err) {
+                msgDiv.innerHTML = `<p style="color:#c92a2a;font-size:13px;margin:0 0 8px 0;">Error saving name: ${err.message}</p>`;
+            }
+        }
+
         async function handleUpdateDisplayName() {
             const nameField = document.getElementById('cpDisplayName');
             const msgDiv = document.getElementById('profileNameMessage');
@@ -4769,6 +4804,14 @@
                 } catch (error) {
                     console.log('Could not auto-create user role (may already exist)', error);
                 }
+            }
+
+            // Prompt for name if not yet set
+            if (!_meta.full_name && !_meta.name) {
+                setTimeout(() => {
+                    const modal = document.getElementById('profileNameModal');
+                    if (modal) modal.style.display = 'flex';
+                }, 600);
             }
             
             // Set AM team if user is an AM
@@ -8519,6 +8562,36 @@
             }
         }
     </script>
+
+<!-- PROFILE NAME PROMPT MODAL -->
+<div id="profileNameModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;display:flex;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:12px;padding:36px 32px;max-width:420px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.2);font-family:inherit;">
+        <div style="text-align:center;margin-bottom:24px;">
+            <img src="https://i.ibb.co/39k5ZmTb/Bella-Baby-Logo.png" alt="Bella Baby" style="height:48px;margin-bottom:16px;">
+            <h2 style="margin:0 0 8px 0;font-size:20px;color:#333;">Welcome! Let's set up your profile.</h2>
+            <p style="margin:0;font-size:13px;color:#999;">Your name appears on assessments and throughout the hub. Please enter your full name to continue.</p>
+        </div>
+        <div id="profileNameModalMsg" style="margin-bottom:12px;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div>
+                <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">First Name *</label>
+                <input type="text" id="profileFirstName" placeholder="e.g. Hannah"
+                    style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:6px;font-size:14px;box-sizing:border-box;"
+                    oninput="this.style.borderColor='#e0e0e0'; this.value=this.value.replace(/\b\w/g,c=>c.toUpperCase())" onkeydown="if(event.key==='Enter')document.getElementById('profileLastName').focus()">
+            </div>
+            <div>
+                <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Last Name *</label>
+                <input type="text" id="profileLastName" placeholder="e.g. Nguyen"
+                    style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:6px;font-size:14px;box-sizing:border-box;"
+                    oninput="this.style.borderColor='#e0e0e0'; this.value=this.value.replace(/\b\w/g,c=>c.toUpperCase())" onkeydown="if(event.key==='Enter')saveProfileName()">
+            </div>
+        </div>
+        <button onclick="saveProfileName()"
+            style="width:100%;padding:12px;background:#4ba8a8;color:white;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;">
+            Save &amp; Continue →
+        </button>
+    </div>
+</div>
 
 <!-- FLOATING QC DRAWER (photographer view only) -->
 <div id="qcDrawer" style="display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:760px;z-index:900;font-family:inherit;">
