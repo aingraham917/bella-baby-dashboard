@@ -686,6 +686,162 @@
             color: #666;
             margin-right: auto;
         }
+
+        /* ── RESOURCES CAROUSEL ── */
+        .recommended-for-you {
+            margin-top: 50px;
+            padding: 0;
+        }
+
+        .rfy-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .rfy-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin: 0;
+        }
+
+        .rfy-subtitle {
+            font-size: 13px;
+            color: #999;
+            margin: 5px 0 0 0;
+        }
+
+        .rfy-carousel-wrap {
+            position: relative;
+            width: 100%;
+        }
+
+        .rfy-carousel {
+            display: flex;
+            gap: 16px;
+            overflow: hidden;
+            scroll-behavior: smooth;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .rfy-resource-card {
+            flex: 0 0 calc(50% - 8px);
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-decoration: none;
+            color: inherit;
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .rfy-resource-card:hover {
+            box-shadow: 0 4px 12px rgba(75, 168, 168, 0.1);
+            border-color: #4ba8a8;
+        }
+
+        .rfy-card-icon {
+            font-size: 24px;
+        }
+
+        .rfy-card-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .rfy-card-desc {
+            font-size: 13px;
+            color: #666;
+            margin: 0;
+            line-height: 1.5;
+            flex: 1;
+        }
+
+        .rfy-card-meta {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+
+        .rfy-btn {
+            align-self: flex-start;
+            padding: 8px 14px;
+            font-size: 12px;
+            background: #e8f5f5;
+            color: #4ba8a8;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .rfy-btn:hover {
+            background: #d0e8e8;
+        }
+
+        .rfy-controls {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            display: flex;
+            gap: 8px;
+        }
+
+        .rfy-arrow {
+            width: 36px;
+            height: 36px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .rfy-arrow:hover {
+            background: #f9f9f9;
+            border-color: #4ba8a8;
+            color: #4ba8a8;
+        }
+
+        .rfy-arrow:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .rfy-empty {
+            padding: 30px;
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .rfy-resource-card {
+                flex: 0 0 100%;
+            }
+        }
         }
 
         .info-icon {
@@ -1353,6 +1509,9 @@
                     </div>
 
                     <div id="assignmentsList">Loading assignments...</div>
+
+                    <!-- RECOMMENDED FOR YOU SECTION -->
+                    <div class="recommended-for-you" id="photographerRecommendedResources"></div>
                 </div>
 
                 <!-- FULL ASSESSMENT FORM VIEW (hidden by default) -->
@@ -6989,6 +7148,72 @@
             }
         }
 
+        function calculateTeamStats(records) {
+            if (!records || records.length === 0) {
+                return {
+                    avgGrowthScore: 0,
+                    avgLegacyScore: 0,
+                    byLevel: {}
+                };
+            }
+            
+            const stats = {
+                avgGrowthScore: 0,
+                avgLegacyScore: 0,
+                byLevel: {}
+            };
+            
+            let growthCount = 0;
+            let growthSum = 0;
+            let legacyCount = 0;
+            let legacySum = 0;
+            
+            records.forEach(record => {
+                const level = record['Photographer Level'] || 'Unknown';
+                
+                if (!stats.byLevel[level]) {
+                    stats.byLevel[level] = { count: 0, growthSum: 0, legacySum: 0 };
+                }
+                
+                stats.byLevel[level].count++;
+                
+                // Growth assessment scores
+                if (record['Gallery #1 Score:']) {
+                    const g1 = parseFloat(record['Gallery #1 Score:']) || 0;
+                    growthSum += g1;
+                    growthCount++;
+                    stats.byLevel[level].growthSum += g1;
+                }
+                
+                if (record['Gallery #2 Score:']) {
+                    const g2 = parseFloat(record['Gallery #2 Score:']) || 0;
+                    growthSum += g2;
+                    growthCount++;
+                    stats.byLevel[level].growthSum += g2;
+                }
+                
+                // Legacy scores (if available)
+                if (record['overall_score']) {
+                    const legacyScore = parseFloat(record['overall_score']) || 0;
+                    legacySum += legacyScore;
+                    legacyCount++;
+                    stats.byLevel[level].legacySum += legacyScore;
+                }
+            });
+            
+            stats.avgGrowthScore = growthCount > 0 ? (growthSum / growthCount).toFixed(1) : 0;
+            stats.avgLegacyScore = legacyCount > 0 ? (legacySum / legacyCount).toFixed(1) : 0;
+            
+            // Calculate averages per level
+            Object.keys(stats.byLevel).forEach(level => {
+                const levelData = stats.byLevel[level];
+                levelData.avgGrowth = levelData.growthSum > 0 ? (levelData.growthSum / levelData.count).toFixed(1) : 0;
+                levelData.avgLegacy = levelData.legacySum > 0 ? (levelData.legacySum / levelData.count).toFixed(1) : 0;
+            });
+            
+            return stats;
+        }
+
         function displayRecords() {
             try { updateHeaderTagline(); } catch(e) { console.error('updateHeaderTagline error:', e); }
             // updateCharts is called separately after loadRecords — skip here to avoid errors
@@ -7126,7 +7351,67 @@
             }
 
             // Admin/trainer/AM view: grouped nested cards
-            recordsContainer.innerHTML = pagePhotographers.map(([photographerName, records]) => {
+            let html = '';
+            
+            // Add team status card if AM is viewing their team
+            if (amViewMode === 'team' && getCurrentUserRole() === 'am' && filtered.length > 0) {
+                const teamStats = calculateTeamStats(filtered);
+                const levelRows = Object.entries(teamStats.byLevel)
+                    .sort((a, b) => {
+                        const order = { 'Pre-Foundation': 0, 'Foundation': 1, 'Ambassador': 2, 'Advanced Ambassador': 3 };
+                        return (order[a[0]] ?? 999) - (order[b[0]] ?? 999);
+                    })
+                    .map(([level, data]) => `
+                        <tr style="border-bottom: 1px solid #f0f0f0;">
+                            <td style="padding: 8px 12px; font-size: 12px; color: #666;">${level}</td>
+                            <td style="padding: 8px 12px; text-align: center; font-size: 12px; color: #333;"><strong>${data.count}</strong></td>
+                            <td style="padding: 8px 12px; text-align: center; font-size: 12px; color: #003d7a;"><strong>${data.avgGrowth}</strong> / 16</td>
+                            ${teamStats.avgLegacyScore > 0 ? `<td style="padding: 8px 12px; text-align: center; font-size: 12px; color: #1a472a;"><strong>${data.avgLegacy}</strong></td>` : ''}
+                        </tr>
+                    `).join('');
+                
+                const legacyHeader = teamStats.avgLegacyScore > 0 ? '<th style="padding: 8px 12px; font-size: 12px; font-weight: 600; text-align: center;">Legacy Avg</th>' : '';
+                
+                html = `
+                    <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 18px; margin-bottom: 20px;">
+                        <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 700; color: #333;">📊 Team Status</h3>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 18px;">
+                            <div style="background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 6px; padding: 12px; text-align: center;">
+                                <div style="font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 6px;">Avg Growth Score</div>
+                                <div style="font-size: 26px; font-weight: 700; color: #003d7a;">${teamStats.avgGrowthScore}</div>
+                                <div style="font-size: 10px; color: #999; margin-top: 4px;">/ 16</div>
+                            </div>
+                            ${teamStats.avgLegacyScore > 0 ? `
+                            <div style="background: #f0f8f0; border: 1px solid #b3dfb8; border-radius: 6px; padding: 12px; text-align: center;">
+                                <div style="font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 6px;">Avg Legacy Score</div>
+                                <div style="font-size: 26px; font-weight: 700; color: #1a472a;">${teamStats.avgLegacyScore}</div>
+                            </div>
+                            ` : ''}
+                            <div style="background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px; text-align: center;">
+                                <div style="font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 6px;">Total Photographers</div>
+                                <div style="font-size: 26px; font-weight: 700; color: #333;">${Object.keys(teamStats.byLevel).reduce((sum, level) => sum + teamStats.byLevel[level].count, 0)}</div>
+                            </div>
+                        </div>
+                        
+                        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                            <thead>
+                                <tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;">
+                                    <th style="padding: 8px 12px; font-weight: 600; text-align: left;">Level</th>
+                                    <th style="padding: 8px 12px; font-weight: 600; text-align: center;">Count</th>
+                                    <th style="padding: 8px 12px; font-weight: 600; text-align: center;">Growth Avg</th>
+                                    ${legacyHeader}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${levelRows}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+            
+            recordsContainer.innerHTML = html + pagePhotographers.map(([photographerName, records]) => {
                 const sixMonthAvg = calculate6MonthAverage(records);
                 const expandId = `expand-${photographerName.replace(/\s+/g, '-')}`;
                 const mostRecentDate = formatDate(records[0].Date);
@@ -7168,6 +7453,11 @@
             }).join('');
 
             recordsContainer.innerHTML += paginationHTML;
+
+            // Load recommended resources for photographers
+            if (getCurrentUserRole() === 'photographer') {
+                setTimeout(loadPhotographerRecommendedResources, 200);
+            }
         }
 
         function changePage(page) {
@@ -8041,6 +8331,223 @@
 
         // Run after DOM is ready
         document.addEventListener('DOMContentLoaded', initTooltips);
+
+        // ══════════════════════════════════════════════════════════════
+        // RESOURCES CAROUSEL SYSTEM - Using flag_resources Table
+        // ══════════════════════════════════════════════════════════════
+
+        async function loadPhotographerRecommendedResources() {
+            const container = document.getElementById('photographerRecommendedResources');
+            if (!container) return;
+
+            try {
+                // Get current user's email
+                const userEmail = sessionStorage.getItem('userEmail');
+                if (!userEmail) return;
+
+                // Get user's recent assessments and extract all flagged items
+                const { data: recentAssessments } = await supabase
+                    .from('qc_records')
+                    .select('*')
+                    .eq('photographer_email', userEmail)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+
+                if (!recentAssessments || recentAssessments.length === 0) {
+                    container.innerHTML = '';
+                    return;
+                }
+
+                // Extract all flagged keywords from assessments
+                const flaggedKeywords = new Set();
+
+                // Check Core Skills sub-flags (Exposure, Focus, White Balance)
+                recentAssessments.forEach(assessment => {
+                    if (assessment.core_skills_flags) {
+                        const flags = assessment.core_skills_flags;
+                        if (Array.isArray(flags)) {
+                            flags.forEach(flag => {
+                                if (flag && flag !== 'N/A') flaggedKeywords.add(flag);
+                            });
+                        } else if (typeof flags === 'object') {
+                            Object.keys(flags).forEach(key => {
+                                const flag = flags[key];
+                                if (flag && flag !== 'N/A') flaggedKeywords.add(flag);
+                            });
+                        }
+                    }
+
+                    // Check Delivery Standard flags
+                    if (assessment.delivery_standard_flags) {
+                        const flags = assessment.delivery_standard_flags;
+                        if (Array.isArray(flags)) {
+                            flags.forEach(flag => {
+                                if (flag) flaggedKeywords.add(flag);
+                            });
+                        } else if (typeof flags === 'object') {
+                            Object.keys(flags).forEach(key => {
+                                if (flags[key]) flaggedKeywords.add(key);
+                            });
+                        }
+                    }
+
+                    // Check category-level flags
+                    if (assessment.category_flags) {
+                        const flags = assessment.category_flags;
+                        Object.entries(flags).forEach(([key, value]) => {
+                            if (value !== 'none' && value) {
+                                // Map category indices to human-readable names
+                                const categoryNames = ['Core Skills', 'Subject/Posing', 'Gallery Experience', 'Editing/Standards'];
+                                if (categoryNames[key]) {
+                                    flaggedKeywords.add(categoryNames[key]);
+                                }
+                            }
+                        });
+                    }
+                });
+
+                // If no flags, don't show resources
+                if (flaggedKeywords.size === 0) {
+                    container.innerHTML = '';
+                    return;
+                }
+
+                // Fetch all active flag resources
+                const { data: allResources } = await supabase
+                    .from('flag_resources')
+                    .select('*')
+                    .eq('active', true);
+
+                if (!allResources || allResources.length === 0) {
+                    container.innerHTML = '';
+                    return;
+                }
+
+                // Filter to matching resources and flatten them
+                const matchedResources = [];
+                allResources.forEach(row => {
+                    const keyword = row.keyword || '';
+                    if (flaggedKeywords.has(keyword)) {
+                        // Add first resource if it exists
+                        if (row.resource_name_1 && row.resource_url_1) {
+                            matchedResources.push({
+                                title: row.resource_name_1,
+                                url: row.resource_url_1,
+                                keyword: keyword,
+                                message: row.message || ''
+                            });
+                        }
+                        // Add second resource if it exists
+                        if (row.resource_name_2 && row.resource_url_2) {
+                            matchedResources.push({
+                                title: row.resource_name_2,
+                                url: row.resource_url_2,
+                                keyword: keyword,
+                                message: row.message || ''
+                            });
+                        }
+                    }
+                });
+
+                if (matchedResources.length === 0) {
+                    container.innerHTML = '';
+                    return;
+                }
+
+                // Render carousel
+                renderResourcesCarousel(container, matchedResources, 'photographer');
+
+            } catch (error) {
+                console.error('Error loading recommended resources:', error);
+            }
+        }
+
+        function renderResourcesCarousel(container, resources, context = 'photographer') {
+            if (!resources || resources.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const carouselId = context === 'lms' ? 'lmsCarousel' : 'photogCarousel';
+            const controlsId = context === 'lms' ? 'lmsControls' : 'photogControls';
+
+            let html = `
+                <div class="rfy-header">
+                    <h3 class="rfy-title">📚 Recommended For You</h3>
+                </div>
+                <p class="rfy-subtitle" style="margin: -15px 0 20px 0; color: #999; font-size: 13px;">Based on your recent assessment flags</p>
+                <div class="rfy-carousel-wrap">
+                    <div class="rfy-controls" id="${controlsId}">
+                        <button class="rfy-arrow" id="${controlsId}Left" onclick="scrollResourceCarousel('${carouselId}', -1)">←</button>
+                        <button class="rfy-arrow" id="${controlsId}Right" onclick="scrollResourceCarousel('${carouselId}', 1)">→</button>
+                    </div>
+                    <div class="rfy-carousel" id="${carouselId}">
+            `;
+
+            resources.forEach(resource => {
+                const buttonText = '📖 View';
+                
+                html += `
+                    <a href="${escapeHtml(resource.url)}" target="_blank" class="rfy-resource-card" title="Open in new window">
+                        <h4 class="rfy-card-title">${escapeHtml(resource.title)}</h4>
+                        ${resource.keyword ? `<p class="rfy-card-meta">${escapeHtml(resource.keyword)}</p>` : ''}
+                        <button class="rfy-btn" onclick="event.preventDefault(); window.open('${escapeHtml(resource.url)}', '_blank');">
+                            ${buttonText} →
+                        </button>
+                    </a>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+
+            // Set up arrow state after rendering
+            setTimeout(() => updateCarouselArrowState(carouselId, controlsId), 100);
+        }
+
+        function scrollResourceCarousel(carouselId, direction) {
+            const carousel = document.getElementById(carouselId);
+            if (!carousel) return;
+
+            const cardWidth = carousel.querySelector('.rfy-resource-card').offsetWidth;
+            const gap = 16;
+            const scrollAmount = cardWidth + gap;
+
+            carousel.scrollBy({
+                left: direction * scrollAmount,
+                behavior: 'smooth'
+            });
+
+            // Update arrow states after scroll
+            const controlsId = carouselId.replace('Carousel', 'Controls');
+            setTimeout(() => updateCarouselArrowState(carouselId, controlsId), 400);
+        }
+
+        function updateCarouselArrowState(carouselId, controlsId) {
+            const carousel = document.getElementById(carouselId);
+            const leftBtn = document.getElementById(controlsId + 'Left');
+            const rightBtn = document.getElementById(controlsId + 'Right');
+
+            if (!carousel || !leftBtn || !rightBtn) return;
+
+            const scrollLeft = carousel.scrollLeft;
+            const scrollWidth = carousel.scrollWidth;
+            const clientWidth = carousel.clientWidth;
+
+            leftBtn.disabled = scrollLeft <= 0;
+            rightBtn.disabled = scrollLeft + clientWidth >= scrollWidth - 10;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
 
         init();
         
