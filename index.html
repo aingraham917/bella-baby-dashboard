@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bella Baby GA 1.1 Dashboard</title>
+    <title>1.2 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -8357,90 +8357,37 @@
                     return;
                 }
 
-                // Extract all flagged keywords
-                const flaggedKeywords = new Set();
+                // Extract all flagged values from assessments
+                const flaggedValues = new Set();
 
                 recentAssessments.forEach(assessment => {
-                    // Check "Which categories are flagged?" columns
-                    const categoryColumns = [
-                        'Which categories are flagged? Focus',
-                        'Which categories are flagged? Exposure',
-                        'Which categories are flagged? Calming and Soothing',
-                        'Which categories are flagged? Posing',
-                        'Which categories are flagged? White Balance',
-                        'Which categories are flagged? Composition/Cropping',
-                        'Which categories are flagged? Theme/Subject',
-                        'Which categories are flagged? Variety',
-                        'Which categories are flagged? Environment',
-                        'Which categories are flagged? Editing'
-                    ];
-
-                    categoryColumns.forEach(colName => {
-                        const value = assessment[colName];
-                        if (value && value !== 'No Flag') {
-                            // Extract the category name from column name
-                            const categoryMatch = colName.match(/\? (.+)$/);
-                            if (categoryMatch) {
-                                const category = categoryMatch[1];
-                                // Map to keyword in flag_resources
-                                const keywordMap = {
-                                    'Focus': 'Focus',
-                                    'Exposure': 'Exposure',
-                                    'Calming and Soothing': 'Calming',
-                                    'Posing': 'Posing',
-                                    'White Balance': 'Balance',
-                                    'Composition/Cropping': 'Composition',
-                                    'Theme/Subject': 'Theme',
-                                    'Variety': 'Variety',
-                                    'Environment': 'Environment',
-                                    'Editing': 'Editing'
-                                };
-                                if (keywordMap[category]) {
-                                    flaggedKeywords.add(keywordMap[category]);
-                                }
+                    // Scan all columns for flag-like values
+                    Object.entries(assessment).forEach(([colName, value]) => {
+                        // Look for columns with "flagged", "Flags", or technical flag indicators
+                        if ((colName.includes('flag') || colName.includes('Flag')) && value && value !== 'No Flag' && value !== 'No Technical Flags') {
+                            // Add the actual value from the column
+                            if (typeof value === 'string') {
+                                // For comma-separated values, add each
+                                const parts = value.split(',').map(v => v.trim());
+                                parts.forEach(part => {
+                                    // Clean up parenthetical notes like "Notes (Insufficient or Missing)"
+                                    const cleanFlag = part.split('(')[0].trim();
+                                    if (cleanFlag && cleanFlag !== 'Score of 1: Urgent' && cleanFlag !== 'Score of 2: Non-Urgent') {
+                                        flaggedValues.add(cleanFlag);
+                                    }
+                                });
                             }
                         }
                     });
-
-                    // Check Technical Flags column
-                    const technicalFlags = assessment['Technical Flags:'];
-                    if (technicalFlags && technicalFlags !== 'No Technical Flags' && technicalFlags !== 'null') {
-                        // Parse comma-separated technical flags
-                        const flags = technicalFlags.split(',').map(f => f.trim());
-                        flags.forEach(flag => {
-                            // Extract the flag name (before the parenthesis if any)
-                            const flagName = flag.split('(')[0].trim();
-                            // Map to keywords in flag_resources
-                            const technicalKeywordMap = {
-                                'Notes': 'Notes',
-                                'Metadata': 'Metadata',
-                                'Image Order': 'Image Order',
-                                'Image Count': 'Count',
-                                'Image Number Sequence': 'Image Number Sequence',
-                                'Image Aspect Ratio': 'Aspect',
-                                'Capitalization': 'Capitalization',
-                                'Spelling': 'Spelling',
-                                'Baby Naming': 'Baby Naming',
-                                'Safety Concerns': 'Safety Concerns',
-                                'Bella Style': 'Bella Style',
-                                'Intro': 'Intro',
-                                'Copyright': 'Copyright',
-                                'Size': 'Size'
-                            };
-                            if (technicalKeywordMap[flagName]) {
-                                flaggedKeywords.add(technicalKeywordMap[flagName]);
-                            }
-                        });
-                    }
                 });
 
                 // If no flags, don't show resources
-                if (flaggedKeywords.size === 0) {
+                if (flaggedValues.size === 0) {
                     container.innerHTML = '';
                     return;
                 }
 
-                // Fetch all active flag resources
+                // Fetch all active flag resources with review_flags
                 const { data: allResources } = await supabase
                     .from('flag_resources')
                     .select('*')
@@ -8451,11 +8398,22 @@
                     return;
                 }
 
-                // Filter to matching resources and flatten them
+                // Filter to matching resources based on review_flags
                 const matchedResources = [];
                 allResources.forEach(row => {
-                    const keyword = row.keyword || '';
-                    if (flaggedKeywords.has(keyword)) {
+                    const reviewFlags = row.review_flags || '';
+                    const flagList = reviewFlags.split(';').map(f => f.trim());
+                    
+                    // Check if any of the user's flagged values match this resource's review_flags
+                    let isMatch = false;
+                    flaggedValues.forEach(flagValue => {
+                        if (flagList.includes(flagValue)) {
+                            isMatch = true;
+                        }
+                    });
+
+                    if (isMatch) {
+                        const keyword = row.keyword || '';
                         // Add first resource if it exists
                         if (row.resource_name_1 && row.resource_url_1) {
                             matchedResources.push({
