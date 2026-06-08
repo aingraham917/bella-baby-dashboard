@@ -1358,7 +1358,7 @@
                     <div class="main-content">
 
                     <!-- TOP CONTROLS BAR -->
-                    <div style="background:white;border:1px solid #e0e0e0;border-radius:8px;padding:8px 12px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                    <div id="dashboardControlsBar" style="background:white;border:1px solid #e0e0e0;border-radius:8px;padding:8px 12px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
 
                         <!-- Search -->
                         <div style="position:relative;flex:1;min-width:160px;">
@@ -4974,6 +4974,12 @@
                 const viewRubricOption = document.getElementById('viewRubricOption');
                 if (viewRubricOption) {
                     viewRubricOption.style.display = currentUserRole !== 'user' ? 'block' : 'none';
+                }
+
+                // Search/filter/sort bar (non-photographer roles only)
+                const controlsBar = document.getElementById('dashboardControlsBar');
+                if (controlsBar) {
+                    controlsBar.style.display = currentUserRole !== 'user' ? 'flex' : 'none';
                 }
 
                 // Assessments (PSS: trainer, area_manager)
