@@ -107,6 +107,162 @@
         .section-modules{display:none;}
         .section-card.open .section-modules{display:block;}
 
+        /* ── RESOURCES CAROUSEL ── */
+        .recommended-for-you {
+            margin: 24px 0 30px 0;
+            padding: 0;
+        }
+
+        .rfy-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .rfy-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin: 0;
+        }
+
+        .rfy-subtitle {
+            font-size: 13px;
+            color: #999;
+            margin: 5px 0 0 0;
+        }
+
+        .rfy-carousel-wrap {
+            position: relative;
+            width: 100%;
+        }
+
+        .rfy-carousel {
+            display: flex;
+            gap: 16px;
+            overflow: hidden;
+            scroll-behavior: smooth;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .rfy-resource-card {
+            flex: 0 0 calc(50% - 8px);
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-decoration: none;
+            color: inherit;
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .rfy-resource-card:hover {
+            box-shadow: 0 4px 12px rgba(75, 168, 168, 0.1);
+            border-color: #4ba8a8;
+        }
+
+        .rfy-card-icon {
+            font-size: 24px;
+        }
+
+        .rfy-card-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .rfy-card-desc {
+            font-size: 13px;
+            color: #666;
+            margin: 0;
+            line-height: 1.5;
+            flex: 1;
+        }
+
+        .rfy-card-meta {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+
+        .rfy-btn {
+            align-self: flex-start;
+            padding: 8px 14px;
+            font-size: 12px;
+            background: #e8f5f5;
+            color: #4ba8a8;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .rfy-btn:hover {
+            background: #d0e8e8;
+        }
+
+        .rfy-controls {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            display: flex;
+            gap: 8px;
+        }
+
+        .rfy-arrow {
+            width: 36px;
+            height: 36px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .rfy-arrow:hover {
+            background: #f9f9f9;
+            border-color: #4ba8a8;
+            color: #4ba8a8;
+        }
+
+        .rfy-arrow:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .rfy-empty {
+            padding: 30px;
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .rfy-resource-card {
+                flex: 0 0 100%;
+            }
+        }
+
         /* ── MODULE ROWS ── */
         .module-row{border-top:1px solid #f0f0f0;}
         .module-row-hdr{padding:12px 20px 12px 36px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:background 0.2s;}
@@ -438,6 +594,8 @@
                 <h3>No training assigned yet</h3>
                 <p>Your training path will appear here once it has been assigned.<br>Reach out to your trainer if you think this is a mistake.</p>
             </div>
+            <!-- RECOMMENDED FOR YOU SECTION -->
+            <div class="recommended-for-you" id="lmsRecommendedResources"></div>
             <div class="sections-list" id="sectionsList" style="display:none;"></div>
         </div>
 
@@ -990,6 +1148,9 @@ async function loadLearnerView() {
         loadEl.style.display = 'none';
         emptyEl.style.display = 'block';
     }
+
+    // Load recommended resources
+    setTimeout(loadLMSRecommendedResources, 300);
 }
 
 function renderSections(sections) {
@@ -3076,6 +3237,207 @@ function closeDD() { document.getElementById('optionsDD').style.display = 'none'
 
 // ══════════════════════════════════════════════
 // GO
+// ══════════════════════════════════════════════
+// RESOURCES CAROUSEL SYSTEM
+// ══════════════════════════════════// ══════════════════════════════════════════════
+// RESOURCES CAROUSEL SYSTEM - Using flag_resources Table
+// ══════════════════════════════════════════════
+
+async function loadLMSRecommendedResources() {
+    const container = document.getElementById('lmsRecommendedResources');
+    if (!container) return;
+
+    try {
+        // Get current user's email
+        const userEmail = sessionStorage.getItem('userEmail');
+        if (!userEmail) {
+            container.innerHTML = '';
+            return;
+        }
+
+        // Get user's recent QC assessments
+        const { data: recentAssessments } = await supabase
+            .from('qc_records')
+            .select('*')
+            .eq('photographer_email', userEmail)
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+        if (!recentAssessments || recentAssessments.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+
+        // Extract all flagged keywords
+        const flaggedKeywords = new Set();
+
+        recentAssessments.forEach(assessment => {
+            // Check Core Skills sub-flags
+            if (assessment.core_skills_flags) {
+                const flags = assessment.core_skills_flags;
+                if (Array.isArray(flags)) {
+                    flags.forEach(flag => {
+                        if (flag && flag !== 'N/A') flaggedKeywords.add(flag);
+                    });
+                } else if (typeof flags === 'object') {
+                    Object.keys(flags).forEach(key => {
+                        const flag = flags[key];
+                        if (flag && flag !== 'N/A') flaggedKeywords.add(flag);
+                    });
+                }
+            }
+
+            // Check Delivery Standard flags
+            if (assessment.delivery_standard_flags) {
+                const flags = assessment.delivery_standard_flags;
+                if (Array.isArray(flags)) {
+                    flags.forEach(flag => {
+                        if (flag) flaggedKeywords.add(flag);
+                    });
+                } else if (typeof flags === 'object') {
+                    Object.keys(flags).forEach(key => {
+                        if (flags[key]) flaggedKeywords.add(key);
+                    });
+                }
+            }
+        });
+
+        // If no flags, don't show resources
+        if (flaggedKeywords.size === 0) {
+            container.innerHTML = '';
+            return;
+        }
+
+        // Fetch all active flag resources
+        const { data: allResources } = await supabase
+            .from('flag_resources')
+            .select('*')
+            .eq('active', true);
+
+        if (!allResources || allResources.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+
+        // Filter to matching resources and flatten them
+        const matchedResources = [];
+        allResources.forEach(row => {
+            const keyword = row.keyword || '';
+            if (flaggedKeywords.has(keyword)) {
+                // Add first resource if it exists
+                if (row.resource_name_1 && row.resource_url_1) {
+                    matchedResources.push({
+                        title: row.resource_name_1,
+                        url: row.resource_url_1,
+                        keyword: keyword,
+                        message: row.message || ''
+                    });
+                }
+                // Add second resource if it exists
+                if (row.resource_name_2 && row.resource_url_2) {
+                    matchedResources.push({
+                        title: row.resource_name_2,
+                        url: row.resource_url_2,
+                        keyword: keyword,
+                        message: row.message || ''
+                    });
+                }
+            }
+        });
+
+        if (matchedResources.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+
+        // Render carousel
+        renderResourcesCarousel(container, matchedResources, 'lms');
+
+    } catch (error) {
+        console.error('Error loading LMS recommended resources:', error);
+    }
+}
+
+function renderResourcesCarousel(container, resources, context = 'lms') {
+    if (!resources || resources.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+
+    const carouselId = context === 'lms' ? 'lmsCarousel' : 'photogCarousel';
+    const controlsId = context === 'lms' ? 'lmsControls' : 'photogControls';
+
+    let html = `
+        <div class="rfy-header">
+            <h3 class="rfy-title">📚 Recommended For You</h3>
+        </div>
+        <p class="rfy-subtitle" style="margin: -15px 0 20px 0; color: #999; font-size: 13px;">Based on your recent assessment flags</p>
+        <div class="rfy-carousel-wrap">
+            <div class="rfy-controls" id="${controlsId}">
+                <button class="rfy-arrow" id="${controlsId}Left" onclick="scrollResourceCarousel('${carouselId}', -1)">←</button>
+                <button class="rfy-arrow" id="${controlsId}Right" onclick="scrollResourceCarousel('${carouselId}', 1)">→</button>
+            </div>
+            <div class="rfy-carousel" id="${carouselId}">
+    `;
+
+    resources.forEach(resource => {
+        const buttonText = '📖 View';
+        
+        html += `
+            <a href="${esc(resource.url)}" target="_blank" class="rfy-resource-card" title="Open in new window">
+                <h4 class="rfy-card-title">${esc(resource.title)}</h4>
+                ${resource.keyword ? `<p class="rfy-card-meta">${esc(resource.keyword)}</p>` : ''}
+                <button class="rfy-btn" onclick="event.preventDefault(); window.open('${esc(resource.url)}', '_blank');">
+                    ${buttonText} →
+                </button>
+            </a>
+        `;
+    });
+
+    html += `
+            </div>
+        </div>
+    `;
+
+    container.innerHTML = html;
+
+    // Update arrow states
+    setTimeout(() => updateCarouselArrowState(carouselId, controlsId), 100);
+}
+
+function scrollResourceCarousel(carouselId, direction) {
+    const carousel = document.getElementById(carouselId);
+    if (!carousel) return;
+
+    const cardWidth = carousel.querySelector('.rfy-resource-card').offsetWidth;
+    const gap = 16;
+    const scrollAmount = cardWidth + gap;
+
+    carousel.scrollBy({
+        left: direction * scrollAmount,
+        behavior: 'smooth'
+    });
+
+    // Update arrow states
+    const controlsId = carouselId.replace('Carousel', 'Controls');
+    setTimeout(() => updateCarouselArrowState(carouselId, controlsId), 400);
+}
+
+function updateCarouselArrowState(carouselId, controlsId) {
+    const carousel = document.getElementById(carouselId);
+    const leftBtn = document.getElementById(controlsId + 'Left');
+    const rightBtn = document.getElementById(controlsId + 'Right');
+
+    if (!carousel || !leftBtn || !rightBtn) return;
+
+    const scrollLeft = carousel.scrollLeft;
+    const scrollWidth = carousel.scrollWidth;
+    const clientWidth = carousel.clientWidth;
+
+    leftBtn.disabled = scrollLeft <= 0;
+    rightBtn.disabled = scrollLeft + clientWidth >= scrollWidth - 10;
+}
+
 // ══════════════════════════════════════════════
 init();
 </script>
