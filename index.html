@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>9.6 Dashboard</title>
+    <title>9.7 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -7737,9 +7737,12 @@
                     } else if (assignment.status === 'skipped_see_notes') {
                         statusColor = '#6366f1';
                         statusLabel = 'Skipped (See Notes)';
+                    } else if (hasDraft) {
+                        statusColor = '#4ba8a8';
+                        statusLabel = isOverdue ? 'Overdue' : 'In Progress';
                     } else if (isOverdue) {
                         statusColor = '#ef4444';
-                        statusLabel = 'Not Started (Overdue)';
+                        statusLabel = 'Overdue';
                     }
 
                     html += `
@@ -7755,6 +7758,7 @@
                                     <span style="background: ${statusColor}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">${statusLabel}</span>
                                     <select id="status-${assignment.id}" onchange="updateAssignmentStatus('${assignment.id}', this.value)" style="padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; background: white; cursor: pointer;">
                                         <option value="not_started" ${assignment.status === 'not_started' || !assignment.status ? 'selected' : ''}>Not Started</option>
+                                        <option value="in_progress" ${assignment.status === 'in_progress' || hasDraft ? 'selected' : ''}>In Progress</option>
                                         <option value="completed" ${assignment.status === 'completed' ? 'selected' : ''}>Complete</option>
                                         <option value="needs_updated" ${assignment.status === 'needs_updated' ? 'selected' : ''}>Needs Updated</option>
                                         <option value="skipped_no_galleries" ${assignment.status === 'skipped_no_galleries' ? 'selected' : ''}>Skipped (No Galleries)</option>
