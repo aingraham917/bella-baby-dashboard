@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>8.3C Dashboard</title>
+    <title>8.4 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -6959,16 +6959,12 @@
 
             if (filter === 'flagged') {
                 filtered = _pendingAssessmentsRaw.filter(r => {
-                    // Check Delivery Standard Flags (must have actual flags, not just "No Delivery Standard Flags")
-                    const deliveryFlags = (r['Delivery Standard Flags:'] || '').trim();
-                    const hasDeliveryFlag = deliveryFlags !== '' && deliveryFlags !== 'No Delivery Standard Flags';
-
-                    // Check Core Skills flags (must have actual flag values)
+                    // Check Core Skills flags only
                     const g1csFlags = (r['Gallery #1 Core Skills Flags'] || '').trim();
                     const g2csFlags = (r['Gallery #2 Core Skills Flags'] || '').trim();
                     const hasCsFlag = g1csFlags !== '' || g2csFlags !== '';
 
-                    // Check score-based flags: score of 1 anywhere = flagged
+                    // Check score-based flags: score of 1 anywhere, or 2 in same category on both galleries
                     const scoreFields = [
                         ['Core Skills (1)', 'Core Skills (2)'],
                         ['Subject and Posing (1)', 'Subject and Posing (2)'],
@@ -6979,13 +6975,11 @@
                     for (const [f1, f2] of scoreFields) {
                         const s1 = parseInt(r[f1]) || 0;
                         const s2 = parseInt(r[f2]) || 0;
-                        // Score of 1 in either gallery = flagged
                         if (s1 === 1 || s2 === 1) { hasScoreFlag = true; break; }
-                        // Score of 2 in BOTH galleries for same category = flagged
                         if (s1 === 2 && s2 === 2) { hasScoreFlag = true; break; }
                     }
 
-                    return hasDeliveryFlag || hasCsFlag || hasScoreFlag;
+                    return hasCsFlag || hasScoreFlag;
                 });
             } else if (filter === 'high_score') {
                 filtered = _pendingAssessmentsRaw.filter(r => {
