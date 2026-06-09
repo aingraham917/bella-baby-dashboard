@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3.0 Dashboard</title>
+    <title>3.1 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -749,6 +749,38 @@
             height: 100%;
             object-fit: cover;
             display: block;
+        }
+
+        .rfy-article-screenshot {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top;
+            display: block;
+        }
+
+        .rfy-article-fallback {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #f0f9f9 0%, #e8f4f4 100%);
+        }
+
+        .rfy-favicon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+        }
+
+        .rfy-domain {
+            font-size: 12px;
+            font-weight: 600;
+            color: #4ba8a8;
+            letter-spacing: 0.3px;
         }
 
         .rfy-play-overlay {
@@ -8623,6 +8655,23 @@
                                 </div>
                             </div>`;
                     }
+                } else {
+                    let domain = '';
+                    try { domain = new URL(resource.url).hostname.replace('www.', ''); } catch(e) {}
+                    const screenshotUrl = `https://image.thum.io/get/width/600/crop/400/${resource.url}`;
+                    const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+                    thumbHtml = `
+                        <div class="rfy-card-thumb">
+                            <img class="rfy-article-screenshot"
+                                 src="${screenshotUrl}"
+                                 alt="${escapeHtml(resource.title)}"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                 onload="this.nextElementSibling.style.display='none';">
+                            <div class="rfy-article-fallback">
+                                <img src="${faviconUrl}" class="rfy-favicon" onerror="this.style.display='none'">
+                                <span class="rfy-domain">${domain}</span>
+                            </div>
+                        </div>`;
                 }
 
                 html += `
