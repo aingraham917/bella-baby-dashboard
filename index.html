@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>5.8 Dashboard</title>
+    <title>5.9 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -1436,32 +1436,34 @@
             <div class="top-bar">
                 <div class="top-bar-left" style="display: flex; align-items: center; gap: 20px;">
                     <span style="font-size: 13px;">Logged in as <strong id="userEmail"></strong></span>
-                    <a href="LMS.html" style="padding: 8px 15px; background: #a8d5a3; color: #1a4d1a; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; text-decoration: none; display: inline-block; line-height: normal;" onmouseover="this.style.background='#8fc98a'" onmouseout="this.style.background='#a8d5a3'">Learning</a>
+                    
+                    <!-- LEARNING DROPDOWN -->
                     <div style="position: relative;">
-                        <button id="optionsBtn" style="padding: 8px 15px; background: #4ba8a8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">Options</button>
-                        <div id="optionsDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; margin-top: 5px;">
-                            <!-- View Rubric (Non-photographer roles only) -->
-                            <a id="viewRubricOption" href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view?usp=sharing" target="_blank" class="options-menu-item" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; text-decoration: none; color: inherit; box-sizing: border-box;">📋 View Rubric</a>
-                            <!-- Assessments (PSS: trainer, area_manager) -->
+                        <button id="learningBtn" style="padding: 8px 15px; background: #a8d5a3; color: #1a4d1a; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">Learning</button>
+                        <div id="learningDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; margin-top: 5px;">
+                            <button id="resourcesLibraryOption" onclick="openResourcesLibrary('videos')" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📚 Resources Library</button>
+                            <a href="LMS.html" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; display: block; text-decoration: none; color: inherit;">📚 Courses</a>
+                            <button id="resourceViewsOption" onclick="openResourceViews()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; transition: background 0.2s;">📊 Resource Views</button>
+                        </div>
+                    </div>
+                    
+                    <!-- TRAINING TEAM DROPDOWN -->
+                    <div style="position: relative;">
+                        <button id="trainingTeamBtn" style="padding: 8px 15px; background: #4ba8a8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">Training Team</button>
+                        <div id="trainingTeamDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; margin-top: 5px;">
                             <button id="assessmentsOption" class="options-menu-item" onclick="openAssessments()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📋 My Assessments</button>
-                            
-                            <!-- Admin Assessments (Super Admin) -->
                             <button id="adminAssessmentsOption" class="options-menu-item" onclick="openAdminAssessments()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📋 Manage Assessments</button>
-                            
-                            <!-- Charts (Non-photographers) -->
+                            <a id="viewRubricOption" href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view?usp=sharing" target="_blank" class="options-menu-item" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; transition: background 0.2s; text-decoration: none; color: inherit; display: block;">📋 View Rubric</a>
+                        </div>
+                    </div>
+                    
+                    <!-- OPTIONS DROPDOWN -->
+                    <div style="position: relative;">
+                        <button id="optionsBtn" style="padding: 8px 15px; background: #666; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">Options</button>
+                        <div id="optionsDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; margin-top: 5px;">
                             <button id="chartsOption" class="options-menu-item" onclick="openCharts()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📊 Charts & Analytics</button>
-                            
-                            <!-- Resource Views (Non-photographers) -->
-                            <button id="resourceViewsOption" class="options-menu-item" onclick="openResourceViews()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📊 Resource Views</button>
-                            
-                            <!-- Admin Reports (Super Admin) -->
                             <button id="adminReportOption" class="options-menu-item" onclick="openAdminReport()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📁 Admin Tools</button>
-                            
-                            <!-- Image Storage (Super Admin only) -->
-                            <button id="imageStorageOption" class="options-menu-item" onclick="openImageStoragePage()" style="display:none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; transition: background 0.2s;">🗄 Image Storage</button>
-            <!-- Resources Library (Everyone) -->
-                            <button id="trainingLibraryOption" class="options-menu-item" onclick="openResourcesLibrary('videos')" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📚 Resources Library</button>
-            <!-- Change Password (Everyone) -->
+                            <button id="imageStorageOption" class="options-menu-item" onclick="openImageStoragePage()" style="display:none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">🗄 Image Storage</button>
                             <button id="changePasswordOption" class="options-menu-item" onclick="openChangePasswordPage()" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; transition: background 0.2s;">👤 Edit Profile</button>
                         </div>
                     </div>
@@ -3761,19 +3763,46 @@
                 dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
             });
 
-            // Close dropdown when clicking outside
+            // Learning Dropdown Toggle
+            on('learningBtn', 'click', (e) => {
+                e.stopPropagation();
+                const dropdown = document.getElementById('learningDropdown');
+                dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // Training Team Dropdown Toggle
+            on('trainingTeamBtn', 'click', (e) => {
+                e.stopPropagation();
+                const dropdown = document.getElementById('trainingTeamDropdown');
+                dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // Close all dropdowns when clicking outside
             document.addEventListener('click', (e) => {
                 const optionsBtn = document.getElementById('optionsBtn');
-                const dropdown = document.getElementById('optionsDropdown');
-                if (!optionsBtn.contains(e.target) && !dropdown.contains(e.target)) {
-                    dropdown.style.display = 'none';
+                const optionsDropdown = document.getElementById('optionsDropdown');
+                const learningBtn = document.getElementById('learningBtn');
+                const learningDropdown = document.getElementById('learningDropdown');
+                const trainingTeamBtn = document.getElementById('trainingTeamBtn');
+                const trainingTeamDropdown = document.getElementById('trainingTeamDropdown');
+                
+                if (!optionsBtn.contains(e.target) && !optionsDropdown.contains(e.target)) {
+                    optionsDropdown.style.display = 'none';
+                }
+                if (!learningBtn.contains(e.target) && !learningDropdown.contains(e.target)) {
+                    learningDropdown.style.display = 'none';
+                }
+                if (!trainingTeamBtn.contains(e.target) && !trainingTeamDropdown.contains(e.target)) {
+                    trainingTeamDropdown.style.display = 'none';
                 }
             });
 
-            // Close dropdown when clicking a menu item
+            // Close dropdowns when clicking a menu item
             document.querySelectorAll('.options-menu-item').forEach(item => {
                 item.addEventListener('click', () => {
                     document.getElementById('optionsDropdown').style.display = 'none';
+                    document.getElementById('trainingTeamDropdown').style.display = 'none';
+                    document.getElementById('learningDropdown').style.display = 'none';
                 });
             });
 
