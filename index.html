@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3.9 Dashboard</title>
+    <title>4.0 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -8982,37 +8982,33 @@
             container.innerHTML = '<p style="color: #999;">Loading...</p>';
 
             try {
-                // Get photographers from the already-loaded allUserRoles object (loaded during init)
-                const photographers = [];
-                Object.entries(allUserRoles).forEach(([email, role]) => {
-                    if (role === 'user') {
-                        photographers.push({ user_email: email });
-                    }
-                });
+                // Get photographers and their names from am_photographer_mapping
+                const { data: photoList, error: photoError } = await supabaseClient
+                    .from('am_photographer_mapping')
+                    .select('Photographer, Photographer Email');
 
-                photographers.sort((a, b) => a.user_email.localeCompare(b.user_email));
+                if (photoError) throw photoError;
 
-                if (photographers.length === 0) {
+                if (!photoList || photoList.length === 0) {
                     container.innerHTML = '<p style="color: #999;">No photographers found.</p>';
                     return;
                 }
 
-                // Get photographer names from qc_records
-                const { data: records, error: recordsError } = await supabaseClient
-                    .from('qc_records')
-                    .select('photographer_name, photographer_email');
+                // Remove duplicates by email and sort
+                const uniquePhotos = {};
+                photoList.forEach(p => {
+                    const email = p['Photographer Email']?.toLowerCase();
+                    if (email && !uniquePhotos[email]) {
+                        uniquePhotos[email] = {
+                            name: p['Photographer'],
+                            email: p['Photographer Email']
+                        };
+                    }
+                });
 
-                if (recordsError) console.warn('Could not load photographer names:', recordsError);
-
-                const nameMap = {};
-                if (records) {
-                    records.forEach(rec => {
-                        const email = rec.photographer_email ? rec.photographer_email.toLowerCase() : '';
-                        if (email && rec.photographer_name && !nameMap[email]) {
-                            nameMap[email] = rec.photographer_name;
-                        }
-                    });
-                }
+                const photographers = Object.values(uniquePhotos).sort((a, b) => 
+                    (a.name || a.email).localeCompare(b.name || b.email)
+                );
 
                 // Get all completed resources
                 const { data: completions, error: compError } = await supabaseClient
@@ -9035,8 +9031,8 @@
                 // Build HTML
                 let html = '';
                 photographers.forEach((photo, idx) => {
-                    const email = photo.user_email.toLowerCase();
-                    const displayName = nameMap[email] || email;
+                    const email = photo.email.toLowerCase();
+                    const displayName = photo.name || email;
                     const completedResources = completionsByEmail[email] || [];
                     const cardId = 'rvCard_' + idx;
                     const contentId = 'rvContent_' + idx;
