@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>7.1 Dashboard</title>
+    <title>7.2 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -7498,69 +7498,77 @@
             }
         }
 
-        function calculateTeamStats(records) {
-            if (!records || records.length === 0) {
-                return {
-                    avgGrowthScore: 0,
-                    avgLegacyScore: 0,
-                    byLevel: {}
-                };
+        function calculateTeamStats(photographers) {
+            // photographers is an array of [name, records[]] pairs
+            if (!photographers || photographers.length === 0) {
+                return { avgGrowthScore: '—', avgLegacyScore: '—', hasLegacy: false, byLevel: {} };
             }
-            
-            const stats = {
-                avgGrowthScore: 0,
-                avgLegacyScore: 0,
-                byLevel: {}
-            };
-            
-            let growthCount = 0;
-            let growthSum = 0;
-            let legacyCount = 0;
-            let legacySum = 0;
-            
-            records.forEach(record => {
-                const level = record['Photographer Level'] || 'Unknown';
-                
+
+            const stats = { avgGrowthScore: '—', avgLegacyScore: '—', hasLegacy: false, byLevel: {} };
+
+            // Per-photographer averages, then average those
+            const growthPhotogAvgs = [];
+            const legacyPhotogAvgs = [];
+
+            photographers.forEach(([name, records]) => {
+                // Split records by type
+                const growthRecords = records.filter(r => r.record_type === 'growth_assessment');
+                const legacyRecords = records.filter(r => r.record_type === 'legacy');
+
+                // Determine photographer's level from their most recent growth assessment (or legacy)
+                const mostRecent = records[0];
+                const level = mostRecent?.['Current Assessment Level'] || mostRecent?.['Quality Check Determination'] || 'Unknown';
+
                 if (!stats.byLevel[level]) {
-                    stats.byLevel[level] = { count: 0, growthSum: 0, legacySum: 0 };
+                    stats.byLevel[level] = { count: 0, growthAvgs: [], legacyAvgs: [] };
                 }
-                
                 stats.byLevel[level].count++;
-                
-                // Growth assessment scores
-                if (record['Gallery #1 Score:']) {
-                    const g1 = parseFloat(record['Gallery #1 Score:']) || 0;
-                    growthSum += g1;
-                    growthCount++;
-                    stats.byLevel[level].growthSum += g1;
+
+                // Growth: average this photographer's Average Gallery Scores across their GA records
+                if (growthRecords.length > 0) {
+                    const validScores = growthRecords
+                        .map(r => parseFloat(r['Average Gallery Score']))
+                        .filter(s => !isNaN(s) && s > 0);
+                    if (validScores.length > 0) {
+                        const photogAvg = validScores.reduce((a, b) => a + b, 0) / validScores.length;
+                        growthPhotogAvgs.push(photogAvg);
+                        stats.byLevel[level].growthAvgs.push(photogAvg);
+                    }
                 }
-                
-                if (record['Gallery #2 Score:']) {
-                    const g2 = parseFloat(record['Gallery #2 Score:']) || 0;
-                    growthSum += g2;
-                    growthCount++;
-                    stats.byLevel[level].growthSum += g2;
-                }
-                
-                // Legacy scores (if available)
-                if (record['overall_score']) {
-                    const legacyScore = parseFloat(record['overall_score']) || 0;
-                    legacySum += legacyScore;
-                    legacyCount++;
-                    stats.byLevel[level].legacySum += legacyScore;
+
+                // Legacy: average this photographer's Average Gallery Scores across their legacy records
+                if (legacyRecords.length > 0) {
+                    const validScores = legacyRecords
+                        .map(r => parseFloat(r['Average Gallery Score']))
+                        .filter(s => !isNaN(s) && s > 0);
+                    if (validScores.length > 0) {
+                        const photogAvg = validScores.reduce((a, b) => a + b, 0) / validScores.length;
+                        legacyPhotogAvgs.push(photogAvg);
+                        stats.byLevel[level].legacyAvgs.push(photogAvg);
+                    }
                 }
             });
-            
-            stats.avgGrowthScore = growthCount > 0 ? (growthSum / growthCount).toFixed(1) : 0;
-            stats.avgLegacyScore = legacyCount > 0 ? (legacySum / legacyCount).toFixed(1) : 0;
-            
-            // Calculate averages per level
+
+            // Overall team averages (average of per-photographer averages)
+            if (growthPhotogAvgs.length > 0) {
+                stats.avgGrowthScore = (growthPhotogAvgs.reduce((a, b) => a + b, 0) / growthPhotogAvgs.length).toFixed(1);
+            }
+            if (legacyPhotogAvgs.length > 0) {
+                stats.avgLegacyScore = (legacyPhotogAvgs.reduce((a, b) => a + b, 0) / legacyPhotogAvgs.length).toFixed(1);
+                stats.hasLegacy = true;
+            }
+
+            // Per-level averages
             Object.keys(stats.byLevel).forEach(level => {
-                const levelData = stats.byLevel[level];
-                levelData.avgGrowth = levelData.growthSum > 0 ? (levelData.growthSum / levelData.count).toFixed(1) : 0;
-                levelData.avgLegacy = levelData.legacySum > 0 ? (levelData.legacySum / levelData.count).toFixed(1) : 0;
+                const d = stats.byLevel[level];
+                d.avgGrowth = d.growthAvgs.length > 0
+                    ? (d.growthAvgs.reduce((a, b) => a + b, 0) / d.growthAvgs.length).toFixed(1)
+                    : '—';
+                d.avgLegacy = d.legacyAvgs.length > 0
+                    ? (d.legacyAvgs.reduce((a, b) => a + b, 0) / d.legacyAvgs.length).toFixed(1)
+                    : '—';
             });
-            
+
             return stats;
         }
 
@@ -7753,8 +7761,8 @@
             let html = '';
             
             // Add team status card if AM is viewing their team
-            if (amViewMode === 'team' && getCurrentUserRole() === 'am' && filtered.length > 0) {
-                const teamStats = calculateTeamStats(filtered);
+            if (amViewMode === 'team' && getCurrentUserRole() === 'am' && photographers.length > 0) {
+                const teamStats = calculateTeamStats(photographers);
                 const levelRows = Object.entries(teamStats.byLevel)
                     .sort((a, b) => {
                         const order = { 'Pre-Foundation': 0, 'Foundation': 1, 'Ambassador': 2, 'Advanced Ambassador': 3 };
@@ -7764,13 +7772,14 @@
                         <tr style="border-bottom: 1px solid #f0f0f0;">
                             <td style="padding: 8px 12px; font-size: 12px; color: #666;">${level}</td>
                             <td style="padding: 8px 12px; text-align: center; font-size: 12px; color: #333;"><strong>${data.count}</strong></td>
-                            <td style="padding: 8px 12px; text-align: center; font-size: 12px; color: #003d7a;"><strong>${data.avgGrowth}</strong> / 16</td>
-                            ${teamStats.avgLegacyScore > 0 ? `<td style="padding: 8px 12px; text-align: center; font-size: 12px; color: #1a472a;"><strong>${data.avgLegacy}</strong></td>` : ''}
+                            <td style="padding: 8px 12px; text-align: center; font-size: 12px; color: #003d7a;"><strong>${data.avgGrowth}</strong></td>
+                            ${teamStats.hasLegacy ? `<td style="padding: 8px 12px; text-align: center; font-size: 12px; color: #1a472a;"><strong>${data.avgLegacy}</strong></td>` : ''}
                         </tr>
                     `).join('');
                 
-                const legacyHeader = teamStats.avgLegacyScore > 0 ? '<th style="padding: 8px 12px; font-size: 12px; font-weight: 600; text-align: center;">Legacy Avg</th>' : '';
-                
+                const legacyHeader = teamStats.hasLegacy ? '<th style="padding: 8px 12px; font-size: 12px; font-weight: 600; text-align: center;">Legacy Avg</th>' : '';
+                const totalPhotogs = photographers.length;
+
                 html = `
                     <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 18px; margin-bottom: 20px;">
                         <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 700; color: #333;">📊 Team Status</h3>
@@ -7779,17 +7788,19 @@
                             <div style="background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 6px; padding: 12px; text-align: center;">
                                 <div style="font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 6px;">Avg Growth Score</div>
                                 <div style="font-size: 26px; font-weight: 700; color: #003d7a;">${teamStats.avgGrowthScore}</div>
-                                <div style="font-size: 10px; color: #999; margin-top: 4px;">/ 16</div>
+                                <div style="font-size: 10px; color: #999; margin-top: 4px;">avg of photographer averages</div>
                             </div>
-                            ${teamStats.avgLegacyScore > 0 ? `
+                            ${teamStats.hasLegacy ? `
                             <div style="background: #f0f8f0; border: 1px solid #b3dfb8; border-radius: 6px; padding: 12px; text-align: center;">
                                 <div style="font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 6px;">Avg Legacy Score</div>
                                 <div style="font-size: 26px; font-weight: 700; color: #1a472a;">${teamStats.avgLegacyScore}</div>
+                                <div style="font-size: 10px; color: #999; margin-top: 4px;">avg of photographer averages</div>
                             </div>
                             ` : ''}
                             <div style="background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px; text-align: center;">
-                                <div style="font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 6px;">Total Photographers</div>
-                                <div style="font-size: 26px; font-weight: 700; color: #333;">${Object.keys(teamStats.byLevel).reduce((sum, level) => sum + teamStats.byLevel[level].count, 0)}</div>
+                                <div style="font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 6px;">My Team</div>
+                                <div style="font-size: 26px; font-weight: 700; color: #333;">${totalPhotogs}</div>
+                                <div style="font-size: 10px; color: #999; margin-top: 4px;">photographers</div>
                             </div>
                         </div>
                         
