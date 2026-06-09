@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4.4 Dashboard</title>
+    <title>4.5 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -1485,14 +1485,27 @@
                     <!-- TOP CONTROLS BAR -->
                     <div id="dashboardControlsBar" style="background:white;border:1px solid #e0e0e0;border-radius:8px;padding:8px 12px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
 
-                        <!-- Search -->
-                        <div style="position:relative;flex:1;min-width:160px;">
+                        <!-- Search (hidden by default, shown only in View Everyone mode) -->
+                        <div id="searchContainer" style="position:relative;flex:1;min-width:160px;display:none;">
                             <input type="text" id="searchInput" class="search-input" placeholder="Search photographer name..." style="padding-right:30px;width:100%;box-sizing:border-box;padding-top:6px;padding-bottom:6px;">
                             <button id="searchClearBtn" onclick="clearSearch()" title="Clear search"
                                 style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#aaa;font-size:16px;line-height:1;padding:0;">✕</button>
                         </div>
 
-                        <!-- Filter -->
+                        <!-- Record Type Dropdown (for trainers and photographers) -->
+                        <select id="recordTypeSelect" class="sort-select" style="min-width:150px;padding-top:6px;padding-bottom:6px;display:none;">
+                            <option value="all">All Records</option>
+                            <option value="growth_assessment">Growth Assessment</option>
+                            <option value="legacy">Legacy</option>
+                        </select>
+
+                        <!-- View Dropdown (for trainers only) -->
+                        <select id="viewModeSelect" class="sort-select" style="min-width:150px;padding-top:6px;padding-bottom:6px;display:none;" onchange="handleViewModeChange(this.value)">
+                            <option value="mine">My Reviews</option>
+                            <option value="all">View Everyone</option>
+                        </select>
+
+                        <!-- Legacy button filters (for admins/AMs) -->
                         <div id="typeFilterBtns" style="display:flex;gap:6px;flex-wrap:wrap;">
                             <button type="button" class="filter-btn type-filter active" data-filter="all">All Records</button>
                             <button type="button" class="filter-btn type-filter" data-filter="growth_assessment">Growth Assessments</button>
@@ -1502,12 +1515,6 @@
                         <!-- AM Team filter -->
                         <div id="amTeamFilterBtns" style="display:none;gap:6px;">
                             <button type="button" id="teamViewBtn" class="filter-btn active" onclick="switchAMView('team')">My Team</button>
-                        </div>
-
-                        <!-- Trainer filter -->
-                        <div id="trainerFilterBtns" style="display:none;gap:6px;">
-                            <button type="button" id="trainerMineBtn" class="filter-btn active" onclick="switchTrainerView('mine')">My Reviews</button>
-                            <button type="button" id="trainerAllBtn" class="filter-btn" onclick="switchTrainerView('all')">View Everyone</button>
                         </div>
 
                         <!-- Sort -->
@@ -5012,6 +5019,12 @@
                 displayRecords();
             });
 
+            on('recordTypeSelect', 'change', (e) => {
+                currentFilter = e.target.value === 'all' ? 'all' : e.target.value;
+                currentPage = 1;
+                displayRecords();
+            });
+
             // Charts page button - no longer needed, uses new page system
 
 
@@ -5065,8 +5078,29 @@
                     const modal = document.getElementById('profileNameModal');
                     if (modal) modal.style.display = 'flex';
                 }, 600);
-            }
             
+            // Show/hide filters based on role
+            const recordTypeSelect = document.getElementById('recordTypeSelect');
+            const viewModeSelect = document.getElementById('viewModeSelect');
+            const typeFilterBtns = document.getElementById('typeFilterBtns');
+            
+            if (currentUserRole === 'trainer') {
+                // Trainers see both dropdowns, hide legacy buttons
+                if (recordTypeSelect) recordTypeSelect.style.display = 'block';
+                if (viewModeSelect) viewModeSelect.style.display = 'block';
+                if (typeFilterBtns) typeFilterBtns.style.display = 'none';
+            } else if (['user'].includes(currentUserRole)) {
+                // Photographers hide all dropdowns and filters
+                if (recordTypeSelect) recordTypeSelect.style.display = 'none';
+                if (viewModeSelect) viewModeSelect.style.display = 'none';
+                if (typeFilterBtns) typeFilterBtns.style.display = 'flex';
+            } else {
+                // Admins/AMs see legacy button filters
+                if (recordTypeSelect) recordTypeSelect.style.display = 'none';
+                if (viewModeSelect) viewModeSelect.style.display = 'none';
+                if (typeFilterBtns) typeFilterBtns.style.display = 'flex';
+            }
+
             // Set AM team if user is an AM
             if (isAM()) {
                 currentAMTeam = getAMTeamPhotographers();
@@ -5074,12 +5108,6 @@
                 showAMViewToggle();
             } else {
                 hideAMViewToggle();
-            }
-            
-            // Show Trainer filter for admins/super admins/trainers
-            const trainerFilterDiv = document.getElementById('trainerFilterBtns');
-            if (trainerFilterDiv) {
-                trainerFilterDiv.style.display = ['super_admin', 'admin', 'trainer'].includes(currentUserRole) ? 'flex' : 'none';
             }
 
             // Show admin button for super admins only (null-guarded — element may not exist)
@@ -5134,13 +5162,20 @@
             displayRecords();
         }
 
+        function handleViewModeChange(value) {
+            switchTrainerView(value);
+            const searchContainer = document.getElementById('searchContainer');
+            if (searchContainer) {
+                searchContainer.style.display = value === 'all' ? 'block' : 'none';
+            }
+        }
+
         function switchTrainerView(mode) {
             trainerViewMode = mode;
             currentPage = 1;
-            const mineBtn = document.getElementById('trainerMineBtn');
-            const allBtn  = document.getElementById('trainerAllBtn');
-            if (mineBtn) mineBtn.classList.toggle('active', mode === 'mine');
-            if (allBtn)  allBtn.classList.toggle('active', mode === 'all');
+            // Update dropdown to match
+            const dropdown = document.getElementById('viewModeSelect');
+            if (dropdown) dropdown.value = mode;
             displayRecords();
         }
 
@@ -7578,8 +7613,10 @@
                     </div>` : '';
 
                 const isTrainer = getCurrentUserRole() === 'trainer';
+                const viewLabel = isTrainer && trainerViewMode === 'mine' ? `<div style="font-size:12px;color:#666;margin-bottom:8px;font-weight:500;">View: My Reviews</div>` : '';
 
                 recordsContainer.innerHTML = `
+                    ${viewLabel}
                     <!-- Summary bar — single compact line -->
                     <div style="background:#e5f5e0;border:1px solid #c8e6c0;border-radius:8px;padding:14px 20px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
                         <div style="font-size:13px;color:#666;">Total Reviews: <strong style="color:#333;">${totalCount}</strong></div>
