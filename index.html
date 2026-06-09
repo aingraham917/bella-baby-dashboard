@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>10.4 Dashboard</title>
+    <title>10.5 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -1448,8 +1448,8 @@
                     </div>
                     
                     <!-- TRAINING TEAM DROPDOWN -->
-                    <div style="position: relative;">
-                        <button id="trainingTeamBtn" style="padding: 8px 15px; background: #4ba8a8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">Training Team</button>
+                    <div id="trainingTeamWrapper" style="position: relative; display: none;">
+                        <button id="trainingTeamBtn" style="padding: 8px 15px; background: #4ba8a8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">Training</button>
                         <div id="trainingTeamDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; margin-top: 5px;">
                             <button id="assessmentsOption" class="options-menu-item" onclick="openAssessments()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📋 My Assessments</button>
                             <button id="adminAssessmentsOption" class="options-menu-item" onclick="openAdminAssessments()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📋 Manage Assessments</button>
@@ -1494,35 +1494,48 @@
                                 style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#aaa;font-size:16px;line-height:1;padding:0;">✕</button>
                         </div>
 
-                        <!-- Record Type Dropdown (for trainers and photographers) -->
+                        <!-- Record Type Dropdown (trainers) -->
                         <select id="recordTypeSelect" class="sort-select" style="min-width:150px;padding-top:6px;padding-bottom:6px;display:none;">
                             <option value="all">All Records</option>
                             <option value="growth_assessment">Growth Assessment</option>
                             <option value="legacy">Legacy</option>
                         </select>
 
-                        <!-- View Dropdown (for trainers only) -->
+                        <!-- View Dropdown (trainers only) -->
                         <select id="viewModeSelect" class="sort-select" style="min-width:150px;padding-top:6px;padding-bottom:6px;display:none;" onchange="handleViewModeChange(this.value)">
                             <option value="mine">My Reviews</option>
                             <option value="all">View Everyone</option>
                         </select>
 
-                        <!-- Legacy button filters (for admins/AMs) -->
-                        <div id="typeFilterBtns" style="display:flex;gap:6px;flex-wrap:wrap;">
+                        <!-- Records Dropdown (admin/AM/super admin) -->
+                        <select id="adminRecordsSelect" class="sort-select" style="min-width:160px;padding-top:6px;padding-bottom:6px;display:none;" onchange="handleAdminRecordsChange(this.value)">
+                            <option value="all">Records: All</option>
+                            <option value="growth_assessment">Growth Assessments</option>
+                            <option value="legacy">Legacy</option>
+                        </select>
+
+                        <!-- View Dropdown (AMs only) -->
+                        <select id="amViewSelect" class="sort-select" style="min-width:160px;padding-top:6px;padding-bottom:6px;display:none;" onchange="handleAMViewChange(this.value)">
+                            <option value="team">View: My Team</option>
+                            <option value="all">View All</option>
+                        </select>
+
+                        <!-- Legacy button filters (hidden — kept for fallback) -->
+                        <div id="typeFilterBtns" style="display:none;gap:6px;flex-wrap:wrap;">
                             <button type="button" class="filter-btn type-filter active" data-filter="all">All Records</button>
                             <button type="button" class="filter-btn type-filter" data-filter="growth_assessment">Growth Assessments</button>
                             <button type="button" class="filter-btn type-filter" data-filter="legacy">Legacy</button>
                         </div>
 
-                        <!-- AM Team filter -->
+                        <!-- AM Team toggle (hidden — replaced by amViewSelect) -->
                         <div id="amTeamFilterBtns" style="display:none;gap:6px;">
                             <button type="button" id="teamViewBtn" class="filter-btn active" onclick="switchAMView('team')">My Team</button>
                         </div>
 
                         <!-- Sort -->
                         <select id="sortSelect" class="sort-select" style="min-width:150px;padding-top:6px;padding-bottom:6px;">
-                            <option value="a-z">A - Z</option>
-                            <option value="z-a">Z - A</option>
+                            <option value="a-z" selected>Sort: A – Z</option>
+                            <option value="z-a">Z – A</option>
                             <option value="score-high">Score High to Low</option>
                             <option value="score-low">Score Low to High</option>
                         </select>
@@ -5128,35 +5141,48 @@
                 }, 600);
             }
             
-            // Show/hide filters based on role
-            const recordTypeSelect = document.getElementById('recordTypeSelect');
+            // Training Team button (non-photographers only)
+            const trainingTeamWrapper = document.getElementById('trainingTeamWrapper');
+            if (trainingTeamWrapper) {
+                trainingTeamWrapper.style.display = currentUserRole !== 'user' ? 'block' : 'none';
+            }
+
+            // Search/filter/sort bar (non-photographer roles only)
+            const controlsBar = document.getElementById('dashboardControlsBar');
+            if (controlsBar) {
+                controlsBar.style.display = currentUserRole !== 'user' ? 'flex' : 'none';
+            }
             const viewModeSelect = document.getElementById('viewModeSelect');
             const typeFilterBtns = document.getElementById('typeFilterBtns');
-            
+            const adminRecordsSelect = document.getElementById('adminRecordsSelect');
+            const amViewSelect = document.getElementById('amViewSelect');
+            const searchContainer = document.getElementById('searchContainer');
+
+            // Hide all first
+            if (recordTypeSelect) recordTypeSelect.style.display = 'none';
+            if (viewModeSelect) viewModeSelect.style.display = 'none';
+            if (typeFilterBtns) typeFilterBtns.style.display = 'none';
+            if (adminRecordsSelect) adminRecordsSelect.style.display = 'none';
+            if (amViewSelect) amViewSelect.style.display = 'none';
+
             if (currentUserRole === 'trainer') {
-                // Trainers see both dropdowns, hide legacy buttons
                 if (recordTypeSelect) recordTypeSelect.style.display = 'block';
                 if (viewModeSelect) viewModeSelect.style.display = 'block';
-                if (typeFilterBtns) typeFilterBtns.style.display = 'none';
-            } else if (['user'].includes(currentUserRole)) {
-                // Photographers hide all dropdowns and filters
-                if (recordTypeSelect) recordTypeSelect.style.display = 'none';
-                if (viewModeSelect) viewModeSelect.style.display = 'none';
-                if (typeFilterBtns) typeFilterBtns.style.display = 'flex';
-            } else {
-                // Admins/AMs see legacy button filters
-                if (recordTypeSelect) recordTypeSelect.style.display = 'none';
-                if (viewModeSelect) viewModeSelect.style.display = 'none';
-                if (typeFilterBtns) typeFilterBtns.style.display = 'flex';
+            } else if (currentUserRole === 'am') {
+                if (adminRecordsSelect) adminRecordsSelect.style.display = 'block';
+                if (amViewSelect) amViewSelect.style.display = 'block';
+                if (searchContainer) searchContainer.style.display = 'none';
+            } else if (['admin', 'super_admin'].includes(currentUserRole)) {
+                if (adminRecordsSelect) adminRecordsSelect.style.display = 'block';
+                if (searchContainer) searchContainer.style.display = 'block';
             }
 
             // Set AM team if user is an AM
             if (isAM()) {
                 currentAMTeam = getAMTeamPhotographers();
                 amViewMode = 'team'; // Always start in 'team' view
-                showAMViewToggle();
-            } else {
-                hideAMViewToggle();
+                const amViewSel = document.getElementById('amViewSelect');
+                if (amViewSel) amViewSel.value = 'team';
             }
 
             // Show admin button for super admins only (null-guarded — element may not exist)
@@ -5179,13 +5205,12 @@
         }
 
         function showAMViewToggle() {
-            const div = document.getElementById('amTeamFilterBtns');
-            if (div) div.style.display = 'block';
+            // no-op: amViewSelect shown via role-based visibility
         }
 
         function hideAMViewToggle() {
-            const div = document.getElementById('amTeamFilterBtns');
-            if (div) div.style.display = 'none';
+            const sel = document.getElementById('amViewSelect');
+            if (sel) sel.style.display = 'none';
         }
 
         function clearSearch() {
