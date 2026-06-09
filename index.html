@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4.9 Dashboard</title>
+    <title>5.0 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -7613,11 +7613,11 @@
                 recordsContainer.innerHTML = `
                     ${viewLabel}
                     <!-- Summary bar — compact single line -->
-                    <div style="background:#e5f5e0;border:1px solid #c8e6c0;border-radius:8px;padding:10px 20px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;font-size:13px;color:#666;">
-                        <div>Total Reviews: <strong style="color:#333;">${totalCount}</strong></div>
-                        <div style="display:flex;gap:16px;align-items:center;">
-                            ${legacyBadge}
+                    <div style="background:#e5f5e0;border:1px solid #c8e6c0;border-radius:8px;padding:10px 20px;margin-bottom:14px;display:flex;justify-content:flex-start;align-items:center;gap:20px;flex-wrap:nowrap;font-size:13px;color:#666;overflow-x:auto;">
+                        <div style="flex-shrink:0;">Total Reviews: <strong style="color:#333;">${totalCount}</strong></div>
+                        <div style="display:flex;gap:16px;align-items:center;flex-shrink:0;">
                             ${gaBadge}
+                            ${legacyBadge}
                         </div>
                     </div>
 
