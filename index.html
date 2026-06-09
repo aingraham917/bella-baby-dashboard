@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4.3 Dashboard</title>
+    <title>4.4 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -1506,8 +1506,8 @@
 
                         <!-- Trainer filter -->
                         <div id="trainerFilterBtns" style="display:none;gap:6px;">
-                            <button type="button" id="trainerAllBtn" class="filter-btn active" onclick="switchTrainerView('all')">All</button>
-                            <button type="button" id="trainerOnlyBtn" class="filter-btn" onclick="switchTrainerView('trainers')">Trainers Only</button>
+                            <button type="button" id="trainerMineBtn" class="filter-btn active" onclick="switchTrainerView('mine')">My Reviews</button>
+                            <button type="button" id="trainerAllBtn" class="filter-btn" onclick="switchTrainerView('all')">View Everyone</button>
                         </div>
 
                         <!-- Sort -->
@@ -2627,7 +2627,7 @@
         let currentUserRole = null;
         let currentAMTeam = []; // Photographer emails assigned to current AM
         let amViewMode = 'team'; // 'team' or 'all' for AMs
-        let trainerViewMode = 'all'; // 'all' or 'trainers' for admins
+        let trainerViewMode = 'mine'; // 'mine' or 'all' for trainers
         let currentFilter = 'all';
         let currentSort = 'a-z';
         let searchQuery = '';
@@ -2803,7 +2803,12 @@
             const role = getCurrentUserRole();
             const email = photographerEmail.toLowerCase();
 
-            // Super admin, admin, trainer — apply trainer view filter if set
+            // Trainer viewing their own records
+            if (role === 'trainer' && trainerViewMode === 'mine') {
+                return email === currentUser.email.toLowerCase();
+            }
+
+            // Super admin, admin, or trainer in 'all' view — apply trainer view filter if set
             if (['super_admin', 'admin', 'trainer'].includes(role)) {
                 if (trainerViewMode === 'trainers') {
                     // Only show photographers who have the 'trainer' role
@@ -5071,10 +5076,10 @@
                 hideAMViewToggle();
             }
             
-            // Show Trainer filter for admins/super admins
+            // Show Trainer filter for admins/super admins/trainers
             const trainerFilterDiv = document.getElementById('trainerFilterBtns');
             if (trainerFilterDiv) {
-                trainerFilterDiv.style.display = ['super_admin', 'admin'].includes(currentUserRole) ? 'block' : 'none';
+                trainerFilterDiv.style.display = ['super_admin', 'admin', 'trainer'].includes(currentUserRole) ? 'flex' : 'none';
             }
 
             // Show admin button for super admins only (null-guarded — element may not exist)
@@ -5132,10 +5137,10 @@
         function switchTrainerView(mode) {
             trainerViewMode = mode;
             currentPage = 1;
-            const allBtn      = document.getElementById('trainerAllBtn');
-            const trainersBtn = document.getElementById('trainerOnlyBtn');
-            if (allBtn)      allBtn.classList.toggle('active', mode === 'all');
-            if (trainersBtn) trainersBtn.classList.toggle('active', mode === 'trainers');
+            const mineBtn = document.getElementById('trainerMineBtn');
+            const allBtn  = document.getElementById('trainerAllBtn');
+            if (mineBtn) mineBtn.classList.toggle('active', mode === 'mine');
+            if (allBtn)  allBtn.classList.toggle('active', mode === 'all');
             displayRecords();
         }
 
@@ -5191,7 +5196,7 @@
             currentUser = null;
             allRecords = [];
             currentPage = 1;
-            trainerViewMode = 'all';
+            trainerViewMode = 'mine';
             loginForm.reset();
 
             // Reset login button in case it was stuck mid-login
@@ -7547,8 +7552,8 @@
                     <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} style="padding:6px 14px;background:${currentPage === totalPages ? '#f0f0f0' : '#4ba8a8'};color:${currentPage === totalPages ? '#999' : 'white'};border:none;border-radius:4px;cursor:${currentPage === totalPages ? 'default' : 'pointer'};font-size:13px;">Next →</button>
                 </div>` : '';
 
-            // Photographer (user) view: flat list with summary header
-            if (getCurrentUserRole() === 'user' && pagePhotographers.length > 0) {
+            // Photographer (user) or Trainer view: flat list with summary header showing their own records
+            if (['user', 'trainer'].includes(getCurrentUserRole()) && pagePhotographers.length > 0) {
                 const [photogName, allMyRecords] = pagePhotographers[0];
                 const totalCount = allMyRecords.length;
 
@@ -7571,6 +7576,8 @@
                         <div style="font-size:22px;font-weight:700;color:${getScoreColor(gaAvg,'growth_assessment')};">${gaAvg}</div>
                         <div style="font-size:10px;color:#999;">${gaRecs.length} review${gaRecs.length !== 1 ? 's' : ''}</div>
                     </div>` : '';
+
+                const isTrainer = getCurrentUserRole() === 'trainer';
 
                 recordsContainer.innerHTML = `
                     <!-- Summary bar — single compact line -->
