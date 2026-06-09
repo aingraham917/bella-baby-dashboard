@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>8.4 Dashboard</title>
+    <title>8.5 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -1546,9 +1546,12 @@
                         <div class="loading">Loading records...</div>
                     </div>
 
-                    <!-- RECOMMENDED FOR YOU CAROUSEL -->
-                    <div id="inspirationalQuoteBanner"></div>
-                    <div class="recommended-for-you" id="photographerRecommendedResources"></div>
+                    <!-- DIVIDER + QUOTE + CAROUSEL -->
+                    <div id="quoteAndCarouselSection" style="display:none;">
+                        <hr style="border:none;border-top:1px solid #e8e8e8;margin:32px 0 28px 0;">
+                        <div id="inspirationalQuoteBanner"></div>
+                        <div class="recommended-for-you" id="photographerRecommendedResources"></div>
+                    </div>
 
                     </div><!-- end main-content -->
                 </div>
@@ -1556,7 +1559,10 @@
             <!-- MANAGE ASSESSMENTS PAGE -->
             <div id="manageAssessmentsPage" class="page-container" style="display: none; flex-direction: column;">
                 <div class="main-content">
-                    <h2 style="margin: 0 0 20px 0;">Manage Assessments</h2>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                        <h2 style="margin:0;">Manage Assessments</h2>
+                        <button onclick="bulkArchiveCycle()" style="padding:8px 16px;background:#f0f0f0;color:#555;border:1px solid #ddd;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;" title="Archive all completed reviews from this cycle">📦 Archive This Cycle</button>
+                    </div>
                     
                     <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #e0e0e0; padding-bottom: 15px;">
                         <button id="assignmentStatusTabBtn" onclick="switchAssessmentTab('status')" style="padding: 10px 20px; background: none; border: none; border-bottom: 3px solid #4ba8a8; color: #4ba8a8; font-weight: 600; cursor: pointer;">📌 Assignment Status</button>
@@ -1570,13 +1576,16 @@
 
                     <!-- Pending Approvals Tab -->
                     <div id="assessmentPendingContent" style="display: none;">
-                        <div style="display: flex; align-items: center; gap: 12px; margin: 12px 0 8px 0;">
-                            <select id="pendingFilterSelect" onchange="applyPendingFilter()" style="padding: 7px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; cursor: pointer;">
-                                <option value="all">Filter: View All</option>
-                                <option value="flagged">Flagged Only</option>
-                                <option value="high_score">High Score (13–16)</option>
-                            </select>
-                            <span id="pendingFilterCount" style="font-size: 12px; color: #999;"></span>
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin: 12px 0 8px 0; flex-wrap: wrap; gap: 8px;">
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <select id="pendingFilterSelect" onchange="applyPendingFilter()" style="padding: 7px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; cursor: pointer;">
+                                    <option value="all">Filter: View All</option>
+                                    <option value="flagged">Flagged Only</option>
+                                    <option value="high_score">High Score (13–16)</option>
+                                </select>
+                                <span id="pendingFilterCount" style="font-size: 12px; color: #999;"></span>
+                            </div>
+                            <button onclick="openBulkApproveModal()" style="padding:7px 14px;background:#a8d5a3;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">✓ Bulk Approve</button>
                         </div>
                         <div id="pendingApprovalsList">Loading pending approvals...</div>
                     </div>
@@ -2612,6 +2621,28 @@
                 <button type="submit" class="login-btn">Send Reset Link</button>
             </form>
             <p style="text-align: center; color: #999; font-size: 12px; margin-top: 15px;">We'll send you a link to reset your password</p>
+        </div>
+    </div>
+
+    <!-- BULK APPROVE MODAL -->
+    <div class="password-modal" id="bulkApproveModal">
+        <div class="password-modal-content" style="max-width:560px;">
+            <button class="password-modal-close" onclick="document.getElementById('bulkApproveModal').classList.remove('active')" type="button">&times;</button>
+            <h2>✓ Bulk Approve Reviews</h2>
+            <p style="color:#666;font-size:13px;margin-bottom:20px;">Select which reviews to approve. Only non-flagged reviews are shown here — flagged reviews must be approved individually.</p>
+            <div id="bulkApproveMessage"></div>
+            <div style="margin-bottom:16px;">
+                <label style="font-size:13px;font-weight:600;display:block;margin-bottom:8px;">Filter by Reviewer:</label>
+                <select id="bulkApproveReviewerFilter" onchange="renderBulkApproveList()" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
+                    <option value="all">All Reviewers</option>
+                </select>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <span id="bulkApproveCount" style="font-size:12px;color:#999;"></span>
+                <button onclick="toggleAllBulkApprove()" style="font-size:12px;padding:4px 10px;background:#f0f0f0;border:1px solid #ddd;border-radius:4px;cursor:pointer;">Select All</button>
+            </div>
+            <div id="bulkApproveList" style="max-height:320px;overflow-y:auto;border:1px solid #eee;border-radius:6px;margin-bottom:16px;"></div>
+            <button onclick="executeBulkApprove()" style="width:100%;padding:10px;background:#a8d5a3;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600;">✓ Approve Selected</button>
         </div>
     </div>
 
@@ -6750,6 +6781,135 @@
             }
         }
 
+        async function openBulkApproveModal() {
+            document.getElementById('bulkApproveModal').classList.add('active');
+            document.getElementById('bulkApproveMessage').innerHTML = '';
+            document.getElementById('bulkApproveList').innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Loading...</p>';
+
+            // Use already-loaded raw data, filter out flagged
+            const nonFlagged = _pendingAssessmentsRaw.filter(r => {
+                const scoreFields = [
+                    ['Core Skills (1)', 'Core Skills (2)'],
+                    ['Subject and Posing (1)', 'Subject and Posing (2)'],
+                    ['Gallery Experience (1)', 'Gallery Experience (2)'],
+                    ['Editing / Bella Baby Standards (1)', 'Editing / Bella Baby Standards (2)']
+                ];
+                for (const [f1, f2] of scoreFields) {
+                    const s1 = parseInt(r[f1]) || 0;
+                    const s2 = parseInt(r[f2]) || 0;
+                    if (s1 === 1 || s2 === 1) return false;
+                    if (s1 === 2 && s2 === 2) return false;
+                }
+                const g1cs = (r['Gallery #1 Core Skills Flags'] || '').trim();
+                const g2cs = (r['Gallery #2 Core Skills Flags'] || '').trim();
+                if (g1cs || g2cs) return false;
+                return true;
+            });
+
+            window._bulkApproveEligible = nonFlagged;
+
+            // Populate reviewer dropdown
+            const reviewers = [...new Set(nonFlagged.map(r => r['PSS Reviewer Name']).filter(Boolean))].sort();
+            const sel = document.getElementById('bulkApproveReviewerFilter');
+            sel.innerHTML = '<option value="all">All Reviewers</option>' +
+                reviewers.map(n => `<option value="${n}">${n}</option>`).join('');
+
+            renderBulkApproveList();
+        }
+
+        function renderBulkApproveList() {
+            const filter = document.getElementById('bulkApproveReviewerFilter')?.value || 'all';
+            const eligible = (window._bulkApproveEligible || []).filter(r =>
+                filter === 'all' || r['PSS Reviewer Name'] === filter
+            );
+
+            const countEl = document.getElementById('bulkApproveCount');
+            if (countEl) countEl.textContent = `${eligible.length} review${eligible.length !== 1 ? 's' : ''} eligible`;
+
+            const list = document.getElementById('bulkApproveList');
+            if (!eligible.length) {
+                list.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">No eligible reviews found.</p>';
+                return;
+            }
+
+            list.innerHTML = eligible.map(r => `
+                <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #f0f0f0;cursor:pointer;font-size:13px;">
+                    <input type="checkbox" class="bulk-approve-cb" data-id="${r.id}" checked style="width:16px;height:16px;cursor:pointer;">
+                    <div style="flex:1;">
+                        <div style="font-weight:600;color:#333;">${r['Photographer Name']}</div>
+                        <div style="font-size:11px;color:#999;">Reviewed by ${r['PSS Reviewer Name']} · Avg: ${parseFloat(r['Average Gallery Score']).toFixed(1)} / 16</div>
+                    </div>
+                </label>
+            `).join('');
+        }
+
+        function toggleAllBulkApprove() {
+            const cbs = document.querySelectorAll('.bulk-approve-cb');
+            const allChecked = [...cbs].every(cb => cb.checked);
+            cbs.forEach(cb => cb.checked = !allChecked);
+        }
+
+        async function executeBulkApprove() {
+            const selected = [...document.querySelectorAll('.bulk-approve-cb:checked')].map(cb => cb.dataset.id);
+            if (selected.length === 0) {
+                document.getElementById('bulkApproveMessage').innerHTML = '<p style="color:#c92a2a;font-size:13px;">No reviews selected.</p>';
+                return;
+            }
+
+            const confirmed = confirm(`Approve ${selected.length} review${selected.length !== 1 ? 's' : ''}? This cannot be undone.`);
+            if (!confirmed) return;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('growth_assessments')
+                    .update({ status: 'approved' })
+                    .in('id', selected);
+
+                if (error) throw error;
+
+                document.getElementById('bulkApproveMessage').innerHTML =
+                    `<p style="color:#2d7a2d;font-size:13px;font-weight:600;">✓ ${selected.length} review${selected.length !== 1 ? 's' : ''} approved successfully.</p>`;
+
+                setTimeout(async () => {
+                    document.getElementById('bulkApproveModal').classList.remove('active');
+                    await loadPendingAssessments();
+                }, 1200);
+            } catch (err) {
+                document.getElementById('bulkApproveMessage').innerHTML = `<p style="color:#c92a2a;font-size:13px;">Error: ${err.message}</p>`;
+            }
+        }
+
+        async function bulkArchiveCycle() {
+            // Find all completed assignments
+            const { data: completed, error } = await supabaseClient
+                .from('pss_assignments')
+                .select('id, photographer_name, pss_name, status')
+                .eq('cycle_status', 'active')
+                .in('status', ['Complete', 'completed', 'Skipped (No galleries)', 'Skipped (See notes)']);
+
+            if (error) { alert('Error: ' + error.message); return; }
+            if (!completed || completed.length === 0) {
+                alert('No completed assignments found to archive.');
+                return;
+            }
+
+            const confirmed = confirm(
+                `Archive ${completed.length} completed assignment${completed.length !== 1 ? 's' : ''}?\n\nThis will mark them as archived and hide them from the active view. This cannot be undone easily.`
+            );
+            if (!confirmed) return;
+
+            const ids = completed.map(a => a.id);
+            const { error: archiveError } = await supabaseClient
+                .from('pss_assignments')
+                .update({ cycle_status: 'archive', updated_at: new Date().toISOString() })
+                .in('id', ids);
+
+            if (archiveError) { alert('Error archiving: ' + archiveError.message); return; }
+
+            alert(`✓ Archived ${completed.length} completed assignment${completed.length !== 1 ? 's' : ''} successfully.`);
+            await loadAdminAssignmentStatus();
+        }
+
         async function loadAdminAssignmentStatus() {
             try {
                 console.log('Loading admin assignment status...');
@@ -8005,35 +8165,46 @@
             setTimeout(loadPhotographerRecommendedResources, 200);
         }
 
-        function showInspirationalQuote() {
+        async function showInspirationalQuote() {
             const container = document.getElementById('inspirationalQuoteBanner');
+            const section = document.getElementById('quoteAndCarouselSection');
             if (!container) return;
             const role = getCurrentUserRole();
-            if (role !== 'user' && role !== 'trainer') { container.innerHTML = ''; return; }
+            if (role !== 'user' && role !== 'trainer') {
+                if (section) section.style.display = 'none';
+                return;
+            }
 
-            const quotes = [
-                { quote: "Every expert was once a beginner. Keep going.", author: "Helen Hayes" },
-                { quote: "Photography is the story I fail to put into words.", author: "Destin Sparks" },
-                { quote: "The best camera is the one that's with you — and the best photographer is the one who never stops learning.", author: "Bella Baby Training" },
-                { quote: "You don't take a photograph, you make it.", author: "Ansel Adams" },
-                { quote: "Light makes photography. Embrace light. Admire it. Love it. But above all, know light.", author: "George Eastman" },
-                { quote: "Growth is not a destination. It's a direction.", author: "Bella Baby Training" },
-                { quote: "A great photograph is one that fully expresses what one feels, in the deepest sense.", author: "Ansel Adams" },
+            if (section) section.style.display = 'block';
+
+            // Fallback quotes in case DB isn't set up yet
+            const fallbackQuotes = [
                 { quote: "The secret to getting ahead is getting started.", author: "Mark Twain" },
-                { quote: "Your instincts will improve with every session. Trust the process.", author: "Bella Baby Training" },
-                { quote: "In photography, there are no accidents — only discoveries.", author: "Cartier-Bresson" },
-                { quote: "Excellence is not a destination but a continuous journey that never ends.", author: "Brian Tracy" },
-                { quote: "Every session is a chance to see something you've never seen before.", author: "Bella Baby Training" },
+                { quote: "You don't take a photograph, you make it.", author: "Ansel Adams" },
+                { quote: "Growth is not a destination. It's a direction.", author: "Bella Baby Training" },
+                { quote: "Every expert was once a beginner. Keep going.", author: "Helen Hayes" },
+                { quote: "Light makes photography. Embrace light. Admire it. Love it. But above all, know light.", author: "George Eastman" },
             ];
 
-            const q = quotes[Math.floor(Math.random() * quotes.length)];
+            let q = fallbackQuotes[Math.floor(Math.random() * fallbackQuotes.length)];
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('hub_quotes')
+                    .select('quote, author')
+                    .eq('active', true);
+
+                if (!error && data && data.length > 0) {
+                    q = data[Math.floor(Math.random() * data.length)];
+                }
+            } catch(e) {
+                // Table doesn't exist yet — use fallback silently
+            }
+
             container.innerHTML = `
-                <div style="margin-bottom: 20px; padding: 16px 20px; background: linear-gradient(135deg, #f0fafa 0%, #e8f5e9 100%); border-left: 4px solid #4ba8a8; border-radius: 6px; display: flex; align-items: flex-start; gap: 14px;">
-                    <span style="font-size: 24px; line-height: 1; flex-shrink: 0;">✨</span>
-                    <div>
-                        <p style="margin: 0 0 4px 0; font-size: 14px; color: #2c5f5f; font-style: italic; line-height: 1.5;">"${q.quote}"</p>
-                        <p style="margin: 0; font-size: 11px; color: #888; font-weight: 600;">— ${q.author}</p>
-                    </div>
+                <div style="padding: 8px 0 24px 0; text-align: center;">
+                    <p style="margin: 0 0 6px 0; font-size: 15px; color: #555; font-style: italic; line-height: 1.6;">"${q.quote}"</p>
+                    <p style="margin: 0; font-size: 12px; color: #aaa; font-weight: 600; letter-spacing: 0.5px;">— ${q.author}</p>
                 </div>
             `;
         }
