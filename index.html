@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>6.6 Dashboard</title>
+    <title>6.7 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -2568,6 +2568,57 @@
         </div>
     </div>
 
+            <!-- REPORT AN ISSUE PAGE -->
+            <div id="reportIssuePage" class="page-container" style="display: none; flex-direction: column;">
+                <div class="main-content">
+                    <h2 style="margin: 0 0 5px 0;">🐛 Report an Issue</h2>
+                    <p style="color: #999; font-size: 13px; margin-bottom: 30px;">Help us improve by reporting any issues you encounter. Include as much detail as possible!</p>
+
+                    <div style="max-width: 900px;">
+                        <div id="reportIssueMessage"></div>
+                        <form id="reportIssueForm">
+                            <div class="form-group">
+                                <label for="issueType">Issue Type <span style="color: #c92a2a;">*</span></label>
+                                <select id="issueType" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                                    <option value="">-- Select an issue type --</option>
+                                    <option value="button_link">Button or Link Issue</option>
+                                    <option value="lms">LMS / Course Issue</option>
+                                    <option value="resource_library">Resource Library Issue</option>
+                                    <option value="broken_link">Broken Link</option>
+                                    <option value="performance">Performance/Loading Issue</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="issueTitle">Title <span style="color: #c92a2a;">*</span></label>
+                                <input type="text" id="issueTitle" placeholder="Brief title of the issue" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                            </div>
+                            <div class="form-group">
+                                <label for="issueDescription">Description <span style="color: #c92a2a;">*</span></label>
+                                <textarea id="issueDescription" placeholder="Please describe the issue in detail. What were you trying to do? What happened?" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box; min-height: 150px; font-family: inherit; resize: vertical;"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="issueLocation">Where did this happen? (optional)</label>
+                                <input type="text" id="issueLocation" placeholder="e.g., Resources Library, Growth Assessments page, etc." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                            </div>
+                            <div class="form-group">
+                                <label for="issueBrowserInfo">Browser/Device (optional)</label>
+                                <input type="text" id="issueBrowserInfo" placeholder="e.g., Chrome on Windows, Safari on iPhone, etc." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                            </div>
+                            <div class="form-group">
+                                <label for="issueScreenshot">Upload Screenshot (optional)</label>
+                                <input type="file" id="issueScreenshot" accept="image/*" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                                <div id="screenshotPreview" style="margin-top: 10px; font-size: 12px; color: #666;"></div>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" style="padding: 10px 20px; background: #4ba8a8; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Submit Report</button>
+                                <button type="button" onclick="goToDashboard()" style="padding: 10px 20px; background: #999; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
     <!-- MODAL FOR RECORD DETAILS -->
     <div class="modal" id="recordModal">
         <div class="modal-content">
@@ -2590,57 +2641,6 @@
                 <button type="submit" class="login-btn">Send Reset Link</button>
             </form>
             <p style="text-align: center; color: #999; font-size: 12px; margin-top: 15px;">We'll send you a link to reset your password</p>
-        </div>
-    </div>
-
-    <!-- REPORT AN ISSUE PAGE -->
-    <div id="reportIssuePage" class="page-container" style="display: none; flex-direction: column;">
-        <div class="main-content">
-            <h2 style="margin: 0 0 5px 0;">🐛 Report an Issue</h2>
-            <p style="color: #999; font-size: 13px; margin-bottom: 30px;">Help us improve by reporting any issues you encounter. Include as much detail as possible!</p>
-
-            <div style="max-width: 900px;">
-                <div id="reportIssueMessage"></div>
-                <form id="reportIssueForm">
-                    <div class="form-group">
-                        <label for="issueType">Issue Type <span style="color: #c92a2a;">*</span></label>
-                        <select id="issueType" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
-                            <option value="">-- Select an issue type --</option>
-                            <option value="button_link">Button or Link Issue</option>
-                            <option value="lms">LMS / Course Issue</option>
-                            <option value="resource_library">Resource Library Issue</option>
-                            <option value="broken_link">Broken Link</option>
-                            <option value="performance">Performance/Loading Issue</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="issueTitle">Title <span style="color: #c92a2a;">*</span></label>
-                        <input type="text" id="issueTitle" placeholder="Brief title of the issue" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
-                    </div>
-                    <div class="form-group">
-                        <label for="issueDescription">Description <span style="color: #c92a2a;">*</span></label>
-                        <textarea id="issueDescription" placeholder="Please describe the issue in detail. What were you trying to do? What happened?" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box; min-height: 150px; font-family: inherit; resize: vertical;"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="issueLocation">Where did this happen? (optional)</label>
-                        <input type="text" id="issueLocation" placeholder="e.g., Resources Library, Growth Assessments page, etc." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
-                    </div>
-                    <div class="form-group">
-                        <label for="issueBrowserInfo">Browser/Device (optional)</label>
-                        <input type="text" id="issueBrowserInfo" placeholder="e.g., Chrome on Windows, Safari on iPhone, etc." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
-                    </div>
-                    <div class="form-group">
-                        <label for="issueScreenshot">Upload Screenshot (optional)</label>
-                        <input type="file" id="issueScreenshot" accept="image/*" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
-                        <div id="screenshotPreview" style="margin-top: 10px; font-size: 12px; color: #666;"></div>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button type="submit" style="padding: 10px 20px; background: #4ba8a8; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Submit Report</button>
-                        <button type="button" onclick="goToDashboard()" style="padding: 10px 20px; background: #999; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Cancel</button>
-                    </div>
-                </form>
-            </div>
         </div>
     </div>
 
