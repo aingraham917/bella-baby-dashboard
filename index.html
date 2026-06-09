@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4.8 Dashboard</title>
+    <title>4.9 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -7603,29 +7603,19 @@
                 const legacyAvg  = calculate6MonthAverage(legacyRecs);
                 const gaAvg      = calculate6MonthAverage(gaRecs);
 
-                const legacyBadge = legacyRecs.length > 0 ? `
-                    <div style="text-align:center;background:${getScoreBgColor(legacyAvg,'legacy')};border:2px solid ${getScoreColor(legacyAvg,'legacy')};border-radius:6px;padding:8px 16px;">
-                        <div style="font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Legacy 6-Mo Avg</div>
-                        <div style="font-size:22px;font-weight:700;color:${getScoreColor(legacyAvg,'legacy')};">${legacyAvg}</div>
-                        <div style="font-size:10px;color:#999;">${legacyRecs.length} review${legacyRecs.length !== 1 ? 's' : ''}</div>
-                    </div>` : '';
+                const legacyBadge = legacyRecs.length > 0 ? `Legacy: <strong style="color:${getScoreColor(legacyAvg,'legacy')}">${legacyAvg}</strong> (${legacyRecs.length})` : '';
 
-                const gaBadge = gaRecs.length > 0 ? `
-                    <div style="text-align:center;background:${getScoreBgColor(gaAvg,'growth_assessment')};border:2px solid ${getScoreColor(gaAvg,'growth_assessment')};border-radius:6px;padding:8px 16px;">
-                        <div style="font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Growth 6-Mo Avg</div>
-                        <div style="font-size:22px;font-weight:700;color:${getScoreColor(gaAvg,'growth_assessment')};">${gaAvg}</div>
-                        <div style="font-size:10px;color:#999;">${gaRecs.length} review${gaRecs.length !== 1 ? 's' : ''}</div>
-                    </div>` : '';
+                const gaBadge = gaRecs.length > 0 ? `Growth: <strong style="color:${getScoreColor(gaAvg,'growth_assessment')}">${gaAvg}</strong> (${gaRecs.length})` : '';
 
                 const isTrainer = getCurrentUserRole() === 'trainer';
                 const viewLabel = isTrainer && trainerViewMode === 'mine' ? `<div style="font-size:16px;color:#666;margin-bottom:12px;font-weight:500;">View: My Reviews</div>` : '';
 
                 recordsContainer.innerHTML = `
                     ${viewLabel}
-                    <!-- Summary bar — single compact line -->
-                    <div style="background:#e5f5e0;border:1px solid #c8e6c0;border-radius:8px;padding:14px 20px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-                        <div style="font-size:13px;color:#666;">Total Reviews: <strong style="color:#333;">${totalCount}</strong></div>
-                        <div style="display:flex;gap:10px;align-items:center;">
+                    <!-- Summary bar — compact single line -->
+                    <div style="background:#e5f5e0;border:1px solid #c8e6c0;border-radius:8px;padding:10px 20px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;font-size:13px;color:#666;">
+                        <div>Total Reviews: <strong style="color:#333;">${totalCount}</strong></div>
+                        <div style="display:flex;gap:16px;align-items:center;">
                             ${legacyBadge}
                             ${gaBadge}
                         </div>
