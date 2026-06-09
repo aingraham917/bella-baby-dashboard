@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>9.2 Dashboard</title>
+    <title>9.3 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -2083,6 +2083,125 @@
                 <div style="margin-bottom: 25px;">
                     <label class="fl">Gallery #2 Feedback *</label>
                     <textarea id="fG2Feedback" class="fi" oninput="markFormDirty()" style="min-height: 90px; resize: vertical;" required placeholder="Provide specific, actionable feedback..."></textarea>
+                </div>
+
+                <!-- ── SECTION 4: Overview & Flags ── -->
+                <h4 style="margin: 0 0 15px 0; color: #4ba8a8; font-size: 15px; border-bottom: 2px solid #e8f5f5; padding-bottom: 8px;">📊 Gallery Overview</h4>
+                <div style="background: #f0fdf4; border: 1px solid #a8d5a3; border-radius: 8px; padding: 15px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
+                    <div>
+                        <div style="font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 4px;">Gallery #1</div>
+                        <div id="fSumG1" style="font-size: 22px; font-weight: 700; color: #4ba8a8;">—</div>
+                        <div style="font-size: 10px; color: #999;">/ 16</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 4px;">Gallery #2</div>
+                        <div id="fSumG2" style="font-size: 22px; font-weight: 700; color: #4ba8a8;">—</div>
+                        <div style="font-size: 10px; color: #999;">/ 16</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 4px;">Average</div>
+                        <div id="fSumAvg" style="font-size: 22px; font-weight: 700; color: #333;">—</div>
+                        <div id="fSumLevel" style="font-size: 11px; font-weight: 600; margin-top: 2px; color: #666;"></div>
+                    </div>
+                </div>
+                <p style="font-size: 13px; color: #333; font-weight: 600; margin-bottom: 5px;">Category Flags</p>
+                <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Flag a category if either gallery scored a 1, OR both galleries scored a 2 in the same category.</p>
+                <div style="border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; margin-bottom: 8px;">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; background: #f5f5f5; padding: 8px 12px; font-size: 11px; font-weight: 600; color: #555; text-transform: uppercase;">
+                        <div>Category</div>
+                        <div style="text-align:center;">No Flag</div>
+                        <div style="text-align:center;">Score of 1<br><span style="color:#ef4444;">Urgent</span></div>
+                        <div style="text-align:center;">Score of 2<br><span style="color:#f59e0b;">Non-Urgent</span></div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; padding: 10px 12px; border-top: 1px solid #e0e0e0; align-items: center;">
+                        <div style="font-size: 13px; color: #333;">Core Skills</div>
+                        <div style="text-align:center;"><input type="radio" name="flag_0" value="none" checked style="accent-color:#4ba8a8;"></div>
+                        <div style="text-align:center;"><input type="radio" name="flag_0" value="urgent" style="accent-color:#ef4444;"></div>
+                        <div style="text-align:center;"><input type="radio" name="flag_0" value="nonurgent" style="accent-color:#f59e0b;"></div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; padding: 10px 12px; border-top: 1px solid #e0e0e0; align-items: center; background:#fafafa;">
+                        <div style="font-size: 13px; color: #333;">Subject and Posing</div>
+                        <div style="text-align:center;"><input type="radio" name="flag_1" value="none" checked style="accent-color:#4ba8a8;"></div>
+                        <div style="text-align:center;"><input type="radio" name="flag_1" value="urgent" style="accent-color:#ef4444;"></div>
+                        <div style="text-align:center;"><input type="radio" name="flag_1" value="nonurgent" style="accent-color:#f59e0b;"></div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; padding: 10px 12px; border-top: 1px solid #e0e0e0; align-items: center;">
+                        <div style="font-size: 13px; color: #333;">Gallery Experience</div>
+                        <div style="text-align:center;"><input type="radio" name="flag_2" value="none" checked style="accent-color:#4ba8a8;"></div>
+                        <div style="text-align:center;"><input type="radio" name="flag_2" value="urgent" style="accent-color:#ef4444;"></div>
+                        <div style="text-align:center;"><input type="radio" name="flag_2" value="nonurgent" style="accent-color:#f59e0b;"></div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; padding: 10px 12px; border-top: 1px solid #e0e0e0; align-items: center; background:#fafafa;">
+                        <div style="font-size: 13px; color: #333;">Editing or Bella Baby Standards</div>
+                        <div style="text-align:center;"><input type="radio" name="flag_3" value="none" checked style="accent-color:#4ba8a8;"></div>
+                        <div style="text-align:center;"><input type="radio" name="flag_3" value="urgent" style="accent-color:#ef4444;"></div>
+                        <div style="text-align:center;"><input type="radio" name="flag_3" value="nonurgent" style="accent-color:#f59e0b;"></div>
+                    </div>
+                </div>
+                <p style="font-size:11px;color:#999;margin-bottom:25px;">💡 Flags auto-suggest based on scores when you enter them — you can override anytime.</p>
+
+                <!-- ── SECTION 5: Technical ── -->
+                <h4 style="margin: 0 0 15px 0; color: #4ba8a8; font-size: 15px; border-bottom: 2px solid #e8f5f5; padding-bottom: 8px;">🔧 Delivery Standards Review</h4>
+                <details style="background:#f9f9f9; border:1px solid #e0e0e0; border-radius:6px; padding:12px; margin-bottom:20px; cursor:pointer;">
+                    <summary style="font-weight:600; font-size:13px; color:#333; list-style:none; display:flex; justify-content:space-between;">
+                        📋 Bella Baby Delivery Standards <span style="color:#4ba8a8; font-weight:400; font-size:12px;">tap to expand ▼</span>
+                    </summary>
+                    <ul style="margin:12px 0 0 0; padding-left:18px; font-size:12px; color:#555; line-height:1.8;">
+                        <li>18–20 Images (28–30 for Twins)</li>
+                        <li>Newest Intro/Outro Slides</li>
+                        <li>Copyright Slide (if gallery isn't purchased)</li>
+                        <li>Image Aspect Ratio (8×12 or 4×6)</li>
+                        <li>Image File Size (3MB–8MB)</li>
+                        <li>3 Notes</li>
+                        <li>Metadata Copyright</li>
+                        <li>Proper Capitalization/Spelling for Emailing Purposes</li>
+                        <li>Baby Name: "Baby" or proper name for Child's First Name. Last name should also be present, OR a note about why it was not.</li>
+                        <li><strong>Safety Concerns:</strong> If baby is too close to an edge, seems unattended from far away, or looks like he/she may fall, flag it.</li>
+                        <li><strong>Bella Style:</strong> Images should not be overedited — only flag if editing goes completely beyond scope.</li>
+                        <li><strong>Image Number Sequence:</strong> Images should start at #2, not #1.</li>
+                        <li><strong>Image Order:</strong> Images should be in order and tell a story.</li>
+                    </ul>
+                </details>
+                <p style="font-size: 13px; font-weight: 600; color: #333; margin-bottom: 10px;">Delivery Standard Flags</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px;">
+                    <label class="fcb"><input type="checkbox" name="techflag" value="No Delivery Standard Flags"> No Delivery Standard Flags</label>
+                    <label class="fcb"><input type="checkbox" name="techflag" value="Metadata"> Metadata (Missing)</label>
+                    <label class="fcb"><input type="checkbox" name="techflag" value="Notes"> Notes (Insufficient or Missing)</label>
+                    <label class="fcb"><input type="checkbox" name="techflag" value="Image Count"> Image Count</label>
+                    <label class="fcb"><input type="checkbox" name="techflag" value="Image Number Sequence"> Image Number Sequence</label>
+                    <label class="fcb"><input type="checkbox" name="techflag" value="Image Order"> Image Order</label>
+                    <label class="fcb"><input type="checkbox" name="techflag" value="Image File Size"> Image File Size</label>
+                    <label class="fcb"><input type="checkbox" name="techflag" value="Image Aspect Ratio"> Image Aspect Ratio</label>
+                    <label class="fcb"><input type="checkbox" name="techflag" value="Intro/Outro Old or Missing"> Intro/Outro Old or Missing</label>
+                    <label class="fcb"><input type="checkbox" name="techflag" value="Copyright Slide Missing"> Copyright Slide Missing on Unpurchased Gallery</label>
+                    <label class="fcb"><input type="checkbox" name="techflag" value="Capitalization/Spelling"> Capitalization/Spelling</label>
+                    <label class="fcb"><input type="checkbox" name="techflag" value="Baby Naming"> Baby Naming</label>
+                    <label class="fcb"><input type="checkbox" name="techflag" value="Safety Concerns"> Safety Concerns</label>
+                    <label class="fcb"><input type="checkbox" name="techflag" value="Bella Style"> Bella Style</label>
+                    <label class="fcb"><input type="checkbox" name="techflag" value="Other"> Other:</label>
+                </div>
+                <div style="margin-bottom: 25px;">
+                    <label class="fl">Delivery Notes</label>
+                    <textarea id="fTechNotes" class="fi" oninput="markFormDirty()" style="min-height: 70px; resize: vertical;" placeholder="Any additional delivery standard observations..."></textarea>
+                </div>
+
+                <!-- ── SECTION 6: Reference Images ── -->
+                <h4 style="margin: 0 0 10px 0; color: #4ba8a8; font-size: 15px; border-bottom: 2px solid #e8f5f5; padding-bottom: 8px;">📎 Reference Images <span style="font-weight:400; font-size:12px; color:#999;">(optional)</span></h4>
+                <p style="font-size: 12px; color: #666; margin-bottom: 15px; line-height: 1.6;">Upload up to 2 reference images to support your feedback. Any size or format is fine — images are automatically compressed before uploading.</p>
+                <div id="fImageUploadArea" style="border: 2px dashed #ccc; border-radius: 8px; padding: 30px; text-align: center; background: #fafafa; cursor: pointer;" onclick="document.getElementById('fImageInput').click()">
+                    <div style="font-size: 32px; margin-bottom: 8px;">📁</div>
+                    <p style="color: #666; font-size: 13px; margin: 0 0 4px 0;">Click to select images</p>
+                    <p style="color: #999; font-size: 11px; margin: 0;">Up to 2 images · auto-compressed to ~200KB each</p>
+                </div>
+                <input type="file" id="fImageInput" multiple accept="image/*" style="display:none;" onchange="handleImageSelect(this.files)">
+                <div id="fImagePreviewList" style="margin-top: 12px; display: grid; gap: 8px;"></div>
+                <div id="fImageUploadStatus" style="margin-top: 8px; font-size: 12px; color: #999;"></div>
+                <p id="fImageReplaceHint" style="display:none; font-size: 11px; color: #999; margin-top: 6px;">To replace an image, click ✕ Remove then select a new one.</p>
+
+                <!-- ── Internal Notes ── -->
+                <div style="background:#fffde7; border:1px solid #ffe082; border-radius:8px; padding:16px; margin-bottom:25px;">
+                    <label class="fl" style="color:#b45309;">🔒 Internal Notes <span style="font-weight:400; font-size:11px; color:#888;">(visible to PSS and admin only — not shown on the photographer's record)</span></label>
+                    <textarea id="fInternalNotes" class="fi" style="min-height:60px; resize:vertical; background:white; border-color:#ffe082;" oninput="markFormDirty()" placeholder="Leave notes for the admin or for yourself — these won't appear on the photographer's review card."></textarea>
                 </div>
 
                 <!-- SUBMIT SECTION -->
