@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>8.8 Dashboard</title>
+    <title>8.9 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -5803,8 +5803,9 @@
 
         // Set the PSS name field — show tooltip if only email is available
         function setPSSNameField(nameOrEmail) {
-            const field = document.getElementById('fPSSName');
-            const tooltip = document.getElementById('fPSSNameTooltip');
+            const formPage = document.getElementById('assessmentFormPage');
+            const field = formPage ? formPage.querySelector('#fPSSName') : document.getElementById('fPSSName');
+            const tooltip = formPage ? formPage.querySelector('#fPSSNameTooltip') : document.getElementById('fPSSNameTooltip');
             if (!field) return;
             if (isEmail(nameOrEmail) || !nameOrEmail) {
                 // No real name found — leave editable, show tooltip
@@ -5830,8 +5831,9 @@
 
         // Set the read-only level display select + hidden input
         function setLevelField(level) {
-            const sel = document.getElementById('fPhotogLevel');
-            const hidden = document.getElementById('fPhotogLevelHidden');
+            const formPage = document.getElementById('assessmentFormPage');
+            const sel = formPage ? formPage.querySelector('#fPhotogLevel') : document.getElementById('fPhotogLevel');
+            const hidden = formPage ? formPage.querySelector('#fPhotogLevelHidden') : document.getElementById('fPhotogLevelHidden');
             if (sel) {
                 // Rebuild options then set value for display
                 sel.innerHTML = `<option value="${level || ''}">${level || 'Not specified'}</option>`;
@@ -5847,10 +5849,16 @@
             window._currentDraftId = null; // reset draft tracking
             resetFormDirty();
 
+            const formPage = document.getElementById('assessmentFormPage');
+            const getField = (id) => formPage ? formPage.querySelector('#' + id) : document.getElementById(id);
+
             // Pre-fill locked fields
-            document.getElementById('fPhotogName').value  = photogName  || '';
-            document.getElementById('fPhotogEmail').value = photogEmail || '';
-            document.getElementById('fDate').valueAsDate  = new Date();
+            const fPhotogName = getField('fPhotogName');
+            const fPhotogEmail = getField('fPhotogEmail');
+            const fDate = getField('fDate');
+            if (fPhotogName) fPhotogName.value = photogName || '';
+            if (fPhotogEmail) fPhotogEmail.value = photogEmail || '';
+            if (fDate) fDate.valueAsDate = new Date();
             setLevelField(photogLevel);
 
             // PSS name: prefer display name from metadata, fall back to pssName, check if it's an email
@@ -5859,24 +5867,27 @@
             setPSSNameField(_displayName);
 
             // Update header
-            document.getElementById('formPhotogName').textContent = photogName || 'Assessment';
-            document.getElementById('formPhotogMeta').textContent = photogEmail + (photogLevel ? ' · ' + photogLevel : '');
+            const formPhotogName = document.getElementById('formPhotogName');
+            const formPhotogMeta = document.getElementById('formPhotogMeta');
+            if (formPhotogName) formPhotogName.textContent = photogName || 'Assessment';
+            if (formPhotogMeta) formPhotogMeta.textContent = photogEmail + (photogLevel ? ' · ' + photogLevel : '');
 
             // Reset all form inputs
             ['fG1Code','fG1Core','fG1Subj','fG1GalleryExp','fG1Edit','fG1Feedback',
              'fG2Code','fG2Core','fG2Subj','fG2GalleryExp','fG2Edit','fG2Feedback',
              'fTechNotes','fInternalNotes'].forEach(id => {
-                const el = document.getElementById(id);
+                const el = getField(id);
                 if (el) el.value = '';
             });
             document.querySelectorAll('#assessmentFormPage input[type=checkbox]').forEach(cb => cb.checked = false);
             document.querySelectorAll('#assessmentFormPage input[type=radio]').forEach(rb => {
                 if (rb.value === 'none') rb.checked = true; else rb.checked = false;
             });
-            document.getElementById('fImagePreviewList').innerHTML = '';
-            const statusDiv2 = document.getElementById('fImageUploadStatus');
+            const fImagePreviewList = getField('fImagePreviewList');
+            if (fImagePreviewList) fImagePreviewList.innerHTML = '';
+            const statusDiv2 = getField('fImageUploadStatus');
             if (statusDiv2) statusDiv2.textContent = '';
-            const hintDiv = document.getElementById('fImageReplaceHint');
+            const hintDiv = getField('fImageReplaceHint');
             if (hintDiv) hintDiv.style.display = 'none';
             resetGalleryGating(1);
             resetGalleryGating(2);
