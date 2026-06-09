@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4.6 Dashboard</title>
+    <title>Bella Baby QC Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -5166,8 +5166,12 @@
         function handleViewModeChange(value) {
             switchTrainerView(value);
             const searchContainer = document.getElementById('searchContainer');
+            const sortSelect = document.getElementById('sortSelect');
             if (searchContainer) {
                 searchContainer.style.display = value === 'all' ? 'block' : 'none';
+            }
+            if (sortSelect) {
+                sortSelect.style.display = value === 'all' ? 'block' : 'none';
             }
         }
 
@@ -7588,8 +7592,8 @@
                     <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} style="padding:6px 14px;background:${currentPage === totalPages ? '#f0f0f0' : '#4ba8a8'};color:${currentPage === totalPages ? '#999' : 'white'};border:none;border-radius:4px;cursor:${currentPage === totalPages ? 'default' : 'pointer'};font-size:13px;">Next →</button>
                 </div>` : '';
 
-            // Photographer (user) or Trainer view: flat list with summary header showing their own records
-            if (['user', 'trainer'].includes(getCurrentUserRole()) && pagePhotographers.length > 0) {
+            // Photographer (user) or Trainer in 'mine' mode: flat list with summary header showing their own records
+            if ((getCurrentUserRole() === 'user' || (getCurrentUserRole() === 'trainer' && trainerViewMode === 'mine')) && pagePhotographers.length > 0) {
                 const [photogName, allMyRecords] = pagePhotographers[0];
                 const totalCount = allMyRecords.length;
 
@@ -7614,7 +7618,7 @@
                     </div>` : '';
 
                 const isTrainer = getCurrentUserRole() === 'trainer';
-                const viewLabel = isTrainer && trainerViewMode === 'mine' ? `<div style="font-size:12px;color:#666;margin-bottom:8px;font-weight:500;">View: My Reviews</div>` : '';
+                const viewLabel = isTrainer && trainerViewMode === 'mine' ? `<div style="font-size:16px;color:#666;margin-bottom:12px;font-weight:500;">View: My Reviews</div>` : '';
 
                 recordsContainer.innerHTML = `
                     ${viewLabel}
