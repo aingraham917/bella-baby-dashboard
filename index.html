@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>10.7 Dashboard</title>
+    <title>Bella Baby QC Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -9466,6 +9466,9 @@
                     .from('resource_completions')
                     .select('user_email, resource_name, completed_at');
 
+                console.log('resource_completions fetch:', { count: completions?.length, error: compError });
+                if (completions) console.log('completion emails:', completions.map(c => c.user_email));
+
                 if (compError) throw compError;
 
                 // Group completions by email — normalize to lowercase
@@ -9479,6 +9482,7 @@
                         completionsByEmail[emailKey].push(comp);
                     });
                 }
+                console.log('completionsByEmail keys:', Object.keys(completionsByEmail));
 
                 // Build HTML
                 let html = '';
@@ -9486,6 +9490,7 @@
                     const email = (photo.email || '').toLowerCase().trim();
                     const displayName = photo.name || email;
                     const completedResources = completionsByEmail[email] || [];
+                    if (completedResources.length > 0) console.log(`Found ${completedResources.length} completions for ${email}`);
                     const cardId = 'rvCard_' + idx;
                     const contentId = 'rvContent_' + idx;
 
