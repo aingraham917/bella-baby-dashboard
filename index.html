@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>7.0 Dashboard</title>
+    <title>7.1 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -1494,27 +1494,40 @@
                                 style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#aaa;font-size:16px;line-height:1;padding:0;">✕</button>
                         </div>
 
-                        <!-- Record Type Dropdown (for trainers and photographers) -->
+                        <!-- Record Type Dropdown (trainers: dropdown; admins/AMs: new dropdown below) -->
                         <select id="recordTypeSelect" class="sort-select" style="min-width:150px;padding-top:6px;padding-bottom:6px;display:none;">
                             <option value="all">All Records</option>
                             <option value="growth_assessment">Growth Assessment</option>
                             <option value="legacy">Legacy</option>
                         </select>
 
-                        <!-- View Dropdown (for trainers only) -->
+                        <!-- View Dropdown (trainers only) -->
                         <select id="viewModeSelect" class="sort-select" style="min-width:150px;padding-top:6px;padding-bottom:6px;display:none;" onchange="handleViewModeChange(this.value)">
                             <option value="mine">My Reviews</option>
                             <option value="all">View Everyone</option>
                         </select>
 
-                        <!-- Legacy button filters (for admins/AMs) -->
-                        <div id="typeFilterBtns" style="display:flex;gap:6px;flex-wrap:wrap;">
+                        <!-- Records Dropdown (admin/AM/super admin) -->
+                        <select id="adminRecordsSelect" class="sort-select" style="min-width:160px;padding-top:6px;padding-bottom:6px;display:none;" onchange="handleAdminRecordsChange(this.value)">
+                            <option value="all">Records: All</option>
+                            <option value="growth_assessment">Growth Assessments</option>
+                            <option value="legacy">Legacy</option>
+                        </select>
+
+                        <!-- View Dropdown (AMs only) -->
+                        <select id="amViewSelect" class="sort-select" style="min-width:160px;padding-top:6px;padding-bottom:6px;display:none;" onchange="handleAMViewChange(this.value)">
+                            <option value="team">View: My Team</option>
+                            <option value="all">View All</option>
+                        </select>
+
+                        <!-- Legacy button filters (kept for fallback but hidden) -->
+                        <div id="typeFilterBtns" style="display:none;gap:6px;flex-wrap:wrap;">
                             <button type="button" class="filter-btn type-filter active" data-filter="all">All Records</button>
                             <button type="button" class="filter-btn type-filter" data-filter="growth_assessment">Growth Assessments</button>
                             <button type="button" class="filter-btn type-filter" data-filter="legacy">Legacy</button>
                         </div>
 
-                        <!-- AM Team filter -->
+                        <!-- AM Team toggle (hidden - replaced by amViewSelect) -->
                         <div id="amTeamFilterBtns" style="display:none;gap:6px;">
                             <button type="button" id="teamViewBtn" class="filter-btn active" onclick="switchAMView('team')">My Team</button>
                         </div>
@@ -2844,29 +2857,6 @@
         }
 
         // ADMIN REPORT FUNCTIONS
-        async function openAdminReport() {
-            document.getElementById('adminReportModal').classList.add('active');
-            
-            // Show role management and AM report tabs only for super admins
-            const rolesTabBtn = document.getElementById('rolesTabBtn');
-            const amreportTabBtn = document.getElementById('amreportTabBtn');
-            const archiveTabBtn = document.getElementById('archiveTabBtn');
-            
-            if (canManageRoles()) {
-                rolesTabBtn.style.display = 'block';
-                amreportTabBtn.style.display = 'block';
-            }
-            
-            // Show archive tab for AMs and Super Admins
-            const role = getCurrentUserRole();
-            if (role === 'super_admin' || role === 'area_manager') {
-                archiveTabBtn.style.display = 'block';
-                loadArchivedPhotographers();
-            }
-            
-            await loadUserSyncReport();
-        }
-
         function switchAdminTab(tab, btn) {
             console.log('switchAdminTab called with tab:', tab);
             
@@ -5054,6 +5044,10 @@
                 displayRecords();
             });
 
+            on('adminRecordsSelect', 'change', (e) => {
+                handleAdminRecordsChange(e.target.value);
+            });
+
             // Charts page button - no longer needed, uses new page system
 
 
@@ -5113,28 +5107,38 @@
             const recordTypeSelect = document.getElementById('recordTypeSelect');
             const viewModeSelect = document.getElementById('viewModeSelect');
             const typeFilterBtns = document.getElementById('typeFilterBtns');
-            
+            const adminRecordsSelect = document.getElementById('adminRecordsSelect');
+            const amViewSelect = document.getElementById('amViewSelect');
+
+            // Hide all first
+            if (recordTypeSelect) recordTypeSelect.style.display = 'none';
+            if (viewModeSelect) viewModeSelect.style.display = 'none';
+            if (typeFilterBtns) typeFilterBtns.style.display = 'none';
+            if (adminRecordsSelect) adminRecordsSelect.style.display = 'none';
+            if (amViewSelect) amViewSelect.style.display = 'none';
+
             if (currentUserRole === 'trainer') {
-                // Trainers see both dropdowns, hide legacy buttons
+                // Trainers: Records dropdown + View dropdown
                 if (recordTypeSelect) recordTypeSelect.style.display = 'block';
                 if (viewModeSelect) viewModeSelect.style.display = 'block';
-                if (typeFilterBtns) typeFilterBtns.style.display = 'none';
-            } else if (['user'].includes(currentUserRole)) {
-                // Photographers hide all dropdowns and filters
-                if (recordTypeSelect) recordTypeSelect.style.display = 'none';
-                if (viewModeSelect) viewModeSelect.style.display = 'none';
-                if (typeFilterBtns) typeFilterBtns.style.display = 'flex';
-            } else {
-                // Admins/AMs see legacy button filters
-                if (recordTypeSelect) recordTypeSelect.style.display = 'none';
-                if (viewModeSelect) viewModeSelect.style.display = 'none';
-                if (typeFilterBtns) typeFilterBtns.style.display = 'flex';
+            } else if (currentUserRole === 'am') {
+                // AMs: Records dropdown + View dropdown (My Team / View All)
+                if (adminRecordsSelect) adminRecordsSelect.style.display = 'block';
+                if (amViewSelect) amViewSelect.style.display = 'block';
+                if (searchContainer) searchContainer.style.display = 'none'; // hidden by default (team view)
+            } else if (['admin', 'super_admin'].includes(currentUserRole)) {
+                // Admins/Super Admins: Records dropdown + search always visible
+                if (adminRecordsSelect) adminRecordsSelect.style.display = 'block';
+                if (searchContainer) searchContainer.style.display = 'block';
             }
+            // users: nothing shown (handled by controls bar hide above)
 
             // Set AM team if user is an AM
             if (isAM()) {
                 currentAMTeam = getAMTeamPhotographers();
                 amViewMode = 'team'; // Always start in 'team' view
+                const amViewSelect = document.getElementById('amViewSelect');
+                if (amViewSelect) amViewSelect.value = 'team';
                 showAMViewToggle();
             } else {
                 hideAMViewToggle();
@@ -5160,13 +5164,12 @@
         }
 
         function showAMViewToggle() {
-            const div = document.getElementById('amTeamFilterBtns');
-            if (div) div.style.display = 'block';
+            // No-op: amViewSelect is shown via role-based visibility above
         }
 
         function hideAMViewToggle() {
-            const div = document.getElementById('amTeamFilterBtns');
-            if (div) div.style.display = 'none';
+            const sel = document.getElementById('amViewSelect');
+            if (sel) sel.style.display = 'none';
         }
 
         function clearSearch() {
@@ -5179,16 +5182,33 @@
             displayRecords();
         }
 
+        function handleAdminRecordsChange(value) {
+            currentFilter = value;
+            currentPage = 1;
+            displayRecords();
+        }
+
+        function handleAMViewChange(value) {
+            amViewMode = value;
+            currentPage = 1;
+            const searchContainer = document.getElementById('searchContainer');
+            if (searchContainer) {
+                searchContainer.style.display = value === 'all' ? 'block' : 'none';
+            }
+            currentFilter = 'all';
+            const adminRecordsSelect = document.getElementById('adminRecordsSelect');
+            if (adminRecordsSelect) adminRecordsSelect.value = 'all';
+            displayRecords();
+        }
+
         function switchAMView(mode) {
             amViewMode = mode;
             currentPage = 1;
-            const teamBtn = document.getElementById('teamViewBtn');
-            if (teamBtn) teamBtn.classList.add('active');
-            // Reset type filter to All Records so no combined filtering
+            const amViewSelect = document.getElementById('amViewSelect');
+            if (amViewSelect) amViewSelect.value = mode;
             currentFilter = 'all';
-            document.querySelectorAll('.type-filter').forEach(b => b.classList.remove('active'));
-            const allRecordsBtn = document.querySelector('.type-filter[data-filter="all"]');
-            if (allRecordsBtn) allRecordsBtn.classList.add('active');
+            const adminRecordsSelect = document.getElementById('adminRecordsSelect');
+            if (adminRecordsSelect) adminRecordsSelect.value = 'all';
             displayRecords();
         }
 
@@ -9284,6 +9304,8 @@
                         }
                     });
                 }
+                // Also include trainers (they're photographers too)
+                const { data: trainers, error: trainError } = await supabaseClient
                     .from('user_roles')
                     .select('user_email')
                     .eq('role', 'trainer');
@@ -9293,7 +9315,7 @@
                         const email = trainer.user_email?.toLowerCase();
                         if (email && !uniquePhotos[email]) {
                             uniquePhotos[email] = {
-                                name: trainer.user_email, // Use email as fallback name
+                                name: trainer.user_email,
                                 email: trainer.user_email
                             };
                         }
