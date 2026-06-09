@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4.7 Dashboard</title>
+    <title>4.8 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -8712,57 +8712,49 @@
                     (r['Photographer Email'] || '').toLowerCase().trim() === email
                 ).slice(0, 10);
 
-                if (!myRecords.length) {
-                    container.innerHTML = '';
-                    return;
-                }
-
                 // Extract all flag keywords from this photographer's records
                 const flaggedValues = new Set();
 
-                myRecords.forEach(record => {
-                    // Technical / Delivery Standard flags (stored as short keys e.g. "Metadata", "Image Order")
-                    const techFlags = record['Delivery Standard Flags:'] || '';
-                    if (techFlags && techFlags !== 'No Delivery Standard Flags') {
-                        techFlags.split(',').map(f => f.trim()).filter(Boolean).forEach(f => flaggedValues.add(f));
-                    }
-
-                    // Core Skills sub-flags (e.g. "Focus, Exposure")
-                    ['Gallery #1 Core Skills Flags', 'Gallery #2 Core Skills Flags'].forEach(col => {
-                        const flags = record[col] || '';
-                        if (flags) {
-                            flags.split(',').map(f => f.trim()).filter(Boolean).forEach(f => flaggedValues.add(f));
+                if (myRecords.length > 0) {
+                    myRecords.forEach(record => {
+                        // Technical / Delivery Standard flags (stored as short keys e.g. "Metadata", "Image Order")
+                        const techFlags = record['Delivery Standard Flags:'] || '';
+                        if (techFlags && techFlags !== 'No Delivery Standard Flags') {
+                            techFlags.split(',').map(f => f.trim()).filter(Boolean).forEach(f => flaggedValues.add(f));
                         }
-                    });
 
-                    // Legacy QC records: compute flags from category scores
-                    // Score of 1 in either gallery = flagged; score of 2 in both = flagged
-                    if (record.record_type === 'legacy') {
-                        const legacyCategories = [
-                            { label: 'Theme/Subject',        g1: record['Gallery #1 Theme/Subject'],        g2: record['Gallery #2 Theme/Subject'] },
-                            { label: 'Exposure',             g1: record['Gallery #1 Exposure'],             g2: record['Gallery #2 Exposure'] },
-                            { label: 'Focus',                g1: record['Gallery #1 Focus'],                g2: record['Gallery #2 Focus'] },
-                            { label: 'White Balance',        g1: record['Gallery #1 White Balance'],        g2: record['Gallery #2 White Balance'] },
-                            { label: 'Posing',               g1: record['Gallery #1 Posing'],               g2: record['Gallery #2 Posing'] },
-                            { label: 'Variety',              g1: record['Gallery #1 Variety'],              g2: record['Gallery #2 Variety'] },
-                            { label: 'Environment',          g1: record['Gallery #1 Environment'],          g2: record['Gallery #2 Environment'] },
-                            { label: 'Editing',              g1: record['Gallery #1 Editing'],              g2: record['Gallery #2 Editing'] },
-                            { label: 'Calming and Soothing', g1: record['Gallery #1 Calming and soothing'], g2: record['Gallery #2 Calming and soothing'] },
-                            { label: 'Composition/Cropping', g1: record['Gallery #1 Composition/Cropping'], g2: record['Gallery #2 Composition/Cropping'] }
-                        ];
-                        legacyCategories.forEach(({ label, g1, g2 }) => {
-                            const s1 = parseInt(g1) || 0;
-                            const s2 = parseInt(g2) || 0;
-                            if (s1 === 1 || s2 === 1 || (s1 === 2 && s2 === 2)) {
-                                flaggedValues.add(label);
+                        // Core Skills sub-flags (e.g. "Focus, Exposure")
+                        ['Gallery #1 Core Skills Flags', 'Gallery #2 Core Skills Flags'].forEach(col => {
+                            const flags = record[col] || '';
+                            if (flags) {
+                                flags.split(',').map(f => f.trim()).filter(Boolean).forEach(f => flaggedValues.add(f));
                             }
                         });
-                    }
-                });
 
-                if (!flaggedValues.size) {
-                    container.innerHTML = '';
-                    return;
+                        // Legacy QC records: compute flags from category scores
+                        // Score of 1 in either gallery = flagged; score of 2 in both = flagged
+                        if (record.record_type === 'legacy') {
+                            const legacyCategories = [
+                                { label: 'Theme/Subject',        g1: record['Gallery #1 Theme/Subject'],        g2: record['Gallery #2 Theme/Subject'] },
+                                { label: 'Exposure',             g1: record['Gallery #1 Exposure'],             g2: record['Gallery #2 Exposure'] },
+                                { label: 'Focus',                g1: record['Gallery #1 Focus'],                g2: record['Gallery #2 Focus'] },
+                                { label: 'White Balance',        g1: record['Gallery #1 White Balance'],        g2: record['Gallery #2 White Balance'] },
+                                { label: 'Posing',               g1: record['Gallery #1 Posing'],               g2: record['Gallery #2 Posing'] },
+                                { label: 'Variety',              g1: record['Gallery #1 Variety'],              g2: record['Gallery #2 Variety'] },
+                                { label: 'Environment',          g1: record['Gallery #1 Environment'],          g2: record['Gallery #2 Environment'] },
+                                { label: 'Editing',              g1: record['Gallery #1 Editing'],              g2: record['Gallery #2 Editing'] },
+                                { label: 'Calming and Soothing', g1: record['Gallery #1 Calming and soothing'], g2: record['Gallery #2 Calming and soothing'] },
+                                { label: 'Composition/Cropping', g1: record['Gallery #1 Composition/Cropping'], g2: record['Gallery #2 Composition/Cropping'] }
+                            ];
+                            legacyCategories.forEach(({ label, g1, g2 }) => {
+                                const s1 = parseInt(g1) || 0;
+                                const s2 = parseInt(g2) || 0;
+                                if (s1 === 1 || s2 === 1 || (s1 === 2 && s2 === 2)) {
+                                    flaggedValues.add(label);
+                                }
+                            });
+                        }
+                    });
                 }
 
                 // Fetch active resources from flag_resources table
@@ -8776,39 +8768,60 @@
                     return;
                 }
 
-                // Match: check if any extracted flag appears in the resource's review_flags
-                // Uses containment so "Metadata" matches "Metadata (Missing)" etc.
-                const matchedResources = [];
+                // Separate flagged and recommended resources
+                const flaggedResources = [];
+                const recommendedResources = [];
                 const seenTitles = new Set();
 
                 allResources.forEach(row => {
-                    const reviewFlags = (row.review_flags || '').split(';').map(f => f.trim()).filter(Boolean);
-                    const isMatch = [...flaggedValues].some(flagVal =>
-                        reviewFlags.some(rf =>
-                            rf.toLowerCase().includes(flagVal.toLowerCase()) ||
-                            flagVal.toLowerCase().includes(rf.toLowerCase())
-                        )
-                    );
+                    // Check if this is a featured/recommended resource
+                    const isRecommended = row.feature === 'feature';
+                    
+                    // Extract resources from this row
+                    const resources = [
+                        { name: row.resource_name_1, url: row.resource_url_1, thumb: row.thumbnail_url_1 || '' },
+                        { name: row.resource_name_2, url: row.resource_url_2, thumb: row.thumbnail_url_2 || '' }
+                    ];
 
-                    if (isMatch) {
-                        [
-                            { name: row.resource_name_1, url: row.resource_url_1, thumb: row.thumbnail_url_1 || '' },
-                            { name: row.resource_name_2, url: row.resource_url_2, thumb: row.thumbnail_url_2 || '' }
-                        ].forEach(({ name, url, thumb }) => {
-                            if (name && url && !seenTitles.has(name)) {
-                                seenTitles.add(name);
-                                matchedResources.push({
-                                    title: name,
-                                    url: url,
-                                    keyword: row.keyword || '',
-                                    thumbnail_url: thumb
-                                });
+                    resources.forEach(({ name, url, thumb }) => {
+                        if (!name || !url || seenTitles.has(name)) return;
+                        seenTitles.add(name);
+
+                        const resourceObj = {
+                            title: name,
+                            url: url,
+                            keyword: row.keyword || '',
+                            thumbnail_url: thumb
+                        };
+
+                        // Check if matches any flag
+                        if (flaggedValues.size > 0) {
+                            const reviewFlags = (row.review_flags || '').split(';').map(f => f.trim()).filter(Boolean);
+                            const isMatch = [...flaggedValues].some(flagVal =>
+                                reviewFlags.some(rf =>
+                                    rf.toLowerCase().includes(flagVal.toLowerCase()) ||
+                                    flagVal.toLowerCase().includes(rf.toLowerCase())
+                                )
+                            );
+                            
+                            if (isMatch) {
+                                flaggedResources.push(resourceObj);
                             }
-                        });
-                    }
+                        }
+
+                        // Add to recommended if marked as feature
+                        if (isRecommended) {
+                            recommendedResources.push(resourceObj);
+                        }
+                    });
                 });
 
-                if (!matchedResources.length) {
+                // Combine: flagged first, then recommended (removing duplicates)
+                const seenUrls = new Set(flaggedResources.map(r => r.url));
+                const recommendedOnly = recommendedResources.filter(r => !seenUrls.has(r.url));
+                const allToDisplay = [...flaggedResources, ...recommendedOnly];
+
+                if (allToDisplay.length === 0) {
                     container.innerHTML = '';
                     return;
                 }
@@ -8822,7 +8835,7 @@
                 const completions = {};
                 (completionRows || []).forEach(r => { completions[r.resource_url] = r.completed_at; });
 
-                renderResourcesCarousel(container, matchedResources, 'photographer', completions);
+                renderResourcesCarousel(container, allToDisplay, 'photographer', completions, flaggedResources.length, recommendedOnly.length);
 
             } catch (err) {
                 console.error('Carousel error:', err);
@@ -8857,7 +8870,7 @@
             return m ? m[1] : null;
         }
 
-        function renderResourcesCarousel(container, resources, context = 'photographer', completions = {}) {
+        function renderResourcesCarousel(container, resources, context = 'photographer', completions = {}, flaggedCount = 0, recommendedCount = 0) {
             if (!resources || resources.length === 0) {
                 container.innerHTML = '';
                 return;
@@ -8867,11 +8880,19 @@
             const carouselId = context === 'lms' ? 'lmsCarousel' : 'photogCarousel';
             const controlsId = context === 'lms' ? 'lmsControls' : 'photogControls';
 
+            // Generate subtitle based on what's being shown
+            let subtitle = 'Based on your recent assessment flags';
+            if (flaggedCount === 0 && recommendedCount > 0) {
+                subtitle = 'Featured resources to help your growth';
+            } else if (flaggedCount > 0 && recommendedCount > 0) {
+                subtitle = 'Resources for your flags, plus featured recommendations';
+            }
+
             let html = `
                 <div class="rfy-header">
                     <h3 class="rfy-title">📚 Recommended For You</h3>
                 </div>
-                <p class="rfy-subtitle">Based on your recent assessment flags</p>
+                <p class="rfy-subtitle">${subtitle}</p>
                 <div class="rfy-carousel-wrap">
                     <div class="rfy-controls" id="${controlsId}">
                         <button class="rfy-arrow" id="${controlsId}Left" onclick="scrollResourceCarousel('${carouselId}', -1)">←</button>
