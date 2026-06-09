@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>9.1 QC Dashboard</title>
+    <title>9.2 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -1675,7 +1675,7 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; overflow: visible;">
                         <div>
                             <label class="fl">Core Skills *</label>
-                            <input type="number" id="fG1Core" class="fi" min="1" max="4" required oninput="markFormDirty(); onFormCoreChange(1); updateOverviewSummary(); autoSuggestFlags();">
+                            <input type="number" id="fG1Core" class="fi" min="1" max="4" required oninput="clampScore(this); markFormDirty(); onFormCoreChange(1); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                         <div id="fG1SubjWrap">
                             <div class="tooltip-wrapper">
@@ -1685,7 +1685,7 @@
                                     <div class="tooltip-rubric-link"><a href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view" target="_blank">View Rubric</a></div>
                                 </div>
                             </div>
-                            <input type="number" id="fG1Subj" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                            <input type="number" id="fG1Subj" class="fi" min="1" max="4" required oninput="clampScore(this); markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                         <div id="fG1CompWrap">
                             <div class="tooltip-wrapper">
@@ -1695,7 +1695,7 @@
                                     <div class="tooltip-rubric-link"><a href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view" target="_blank">View Rubric</a></div>
                                 </div>
                             </div>
-                            <input type="number" id="fG1GalleryExp" class="fi" min="1" max="4" required oninput="markFormDirty(); onFormGalleryExpChange(1); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                            <input type="number" id="fG1GalleryExp" class="fi" min="1" max="4" required oninput="clampScore(this); markFormDirty(); onFormGalleryExpChange(1); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                         <div id="fG1EditWrap">
                             <div class="tooltip-wrapper">
@@ -1705,7 +1705,7 @@
                                     <div class="tooltip-rubric-link"><a href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view" target="_blank">View Rubric</a></div>
                                 </div>
                             </div>
-                            <input type="number" id="fG1Edit" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                            <input type="number" id="fG1Edit" class="fi" min="1" max="4" required oninput="clampScore(this); markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                     </div>
                     <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
@@ -1745,7 +1745,7 @@
                                     <div class="tooltip-rubric-link"><a href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view" target="_blank">View Rubric</a></div>
                                 </div>
                             </div>
-                            <input type="number" id="fG2Core" class="fi" min="1" max="4" required oninput="markFormDirty(); onFormCoreChange(2); updateOverviewSummary(); autoSuggestFlags();">
+                            <input type="number" id="fG2Core" class="fi" min="1" max="4" required oninput="clampScore(this); markFormDirty(); onFormCoreChange(2); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                         <div id="fG2SubjWrap">
                             <div class="tooltip-wrapper">
@@ -1755,7 +1755,7 @@
                                     <div class="tooltip-rubric-link"><a href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view" target="_blank">View Rubric</a></div>
                                 </div>
                             </div>
-                            <input type="number" id="fG2Subj" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                            <input type="number" id="fG2Subj" class="fi" min="1" max="4" required oninput="clampScore(this); markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                         <div id="fG2CompWrap">
                             <div class="tooltip-wrapper">
@@ -1765,7 +1765,7 @@
                                     <div class="tooltip-rubric-link"><a href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view" target="_blank">View Rubric</a></div>
                                 </div>
                             </div>
-                            <input type="number" id="fG2GalleryExp" class="fi" min="1" max="4" required oninput="markFormDirty(); onFormGalleryExpChange(2); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                            <input type="number" id="fG2GalleryExp" class="fi" min="1" max="4" required oninput="clampScore(this); markFormDirty(); onFormGalleryExpChange(2); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                         <div id="fG2EditWrap">
                             <div class="tooltip-wrapper">
@@ -1775,7 +1775,7 @@
                                     <div class="tooltip-rubric-link"><a href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view" target="_blank">View Rubric</a></div>
                                 </div>
                             </div>
-                            <input type="number" id="fG2Edit" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                            <input type="number" id="fG2Edit" class="fi" min="1" max="4" required oninput="clampScore(this); markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                     </div>
                     <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
@@ -2000,19 +2000,19 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; overflow: visible;">
                         <div>
                             <label class="fl">Core Skills *</label>
-                            <input type="number" id="fG1Core" class="fi" min="1" max="4" required oninput="markFormDirty(); onFormCoreChange(1); updateOverviewSummary(); autoSuggestFlags();">
+                            <input type="number" id="fG1Core" class="fi" min="1" max="4" required oninput="clampScore(this); markFormDirty(); onFormCoreChange(1); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                         <div>
                             <label class="fl">Subject / Posing *</label>
-                            <input type="number" id="fG1Subj" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                            <input type="number" id="fG1Subj" class="fi" min="1" max="4" required oninput="clampScore(this); markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                         <div>
                             <label class="fl">Gallery Experience *</label>
-                            <input type="number" id="fG1GalleryExp" class="fi" min="1" max="4" required oninput="markFormDirty(); onFormGalleryExpChange(1); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                            <input type="number" id="fG1GalleryExp" class="fi" min="1" max="4" required oninput="clampScore(this); markFormDirty(); onFormGalleryExpChange(1); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                         <div>
                             <label class="fl">Editing / Standards *</label>
-                            <input type="number" id="fG1Edit" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                            <input type="number" id="fG1Edit" class="fi" min="1" max="4" required oninput="clampScore(this); markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                     </div>
                     <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
@@ -2048,19 +2048,19 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; overflow: visible;">
                         <div>
                             <label class="fl">Core Skills *</label>
-                            <input type="number" id="fG2Core" class="fi" min="1" max="4" required oninput="markFormDirty(); onFormCoreChange(2); updateOverviewSummary(); autoSuggestFlags();">
+                            <input type="number" id="fG2Core" class="fi" min="1" max="4" required oninput="clampScore(this); markFormDirty(); onFormCoreChange(2); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                         <div>
                             <label class="fl">Subject / Posing *</label>
-                            <input type="number" id="fG2Subj" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                            <input type="number" id="fG2Subj" class="fi" min="1" max="4" required oninput="clampScore(this); markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                         <div>
                             <label class="fl">Gallery Experience *</label>
-                            <input type="number" id="fG2GalleryExp" class="fi" min="1" max="4" required oninput="markFormDirty(); onFormGalleryExpChange(2); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                            <input type="number" id="fG2GalleryExp" class="fi" min="1" max="4" required oninput="clampScore(this); markFormDirty(); onFormGalleryExpChange(2); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                         <div>
                             <label class="fl">Editing / Standards *</label>
-                            <input type="number" id="fG2Edit" class="fi" min="1" max="4" required oninput="markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
+                            <input type="number" id="fG2Edit" class="fi" min="1" max="4" required oninput="clampScore(this); markFormDirty(); recalcFormScores(); updateOverviewSummary(); autoSuggestFlags();">
                         </div>
                     </div>
                     <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
@@ -6371,6 +6371,16 @@
             const myPage = document.getElementById('myAssessmentsPage');
             if (myPage && myPage.style.display !== 'none') return myPage;
             return document;
+        }
+
+        function clampScore(el) {
+            let val = el.value.replace(/[^0-9]/g, ''); // strip non-digits
+            if (val.length > 1) val = val.slice(-1);   // keep only last digit typed
+            const n = parseInt(val);
+            if (!val || isNaN(n)) { el.value = ''; return; }
+            if (n < 1) el.value = 1;
+            else if (n > 4) el.value = 4;
+            else el.value = n;
         }
 
         function onFormGalleryExpChange(gallery, container) {
