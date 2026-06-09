@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>7.7 Dashboard</title>
+    <title>7.8 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -2069,6 +2069,7 @@
                         <button id="printThisRecordBtn" onclick="printCurrentRecord()" style="padding: 6px 14px; background: #4ba8a8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">📄 Print This</button>
                         <button id="printAllRecordsBtn" onclick="printPhotographerRecords(currentRecord['Photographer Name'])" style="padding: 6px 14px; background: #4ba8a8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">📄 Print All</button>
                         <button id="editRecordBtn" style="padding: 6px 14px; background: #f0f0f0; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">✏️ Edit</button>
+                        <button id="reopenReviewBtn" onclick="reopenReview()" style="display:none; padding: 6px 14px; background: #f59e0b; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">↩ Reopen Review</button>
                     </div>
                     <div id="recordDetailContent">Loading record...</div>
                 </div>
@@ -8463,6 +8464,16 @@
                     editBtn.style.display = 'none';
                 }
             }
+
+            // Setup Reopen Review button — super_admin only, growth assessments only
+            const reopenBtn = document.getElementById('reopenReviewBtn');
+            if (reopenBtn) {
+                if (getCurrentUserRole() === 'super_admin' && record.record_type === 'growth_assessment') {
+                    reopenBtn.style.display = '';
+                } else {
+                    reopenBtn.style.display = 'none';
+                }
+            }
             
             showPage('recordDetailPage');
             
@@ -8470,6 +8481,98 @@
             setTimeout(initRecordDetailTooltips, 100);
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function addBusinessDays(date, days) {
+            let d = new Date(date);
+            let added = 0;
+            while (added < days) {
+                d.setDate(d.getDate() + 1);
+                const dow = d.getDay();
+                if (dow !== 0 && dow !== 6) added++; // Skip Sunday (0) and Saturday (6)
+            }
+            // If landing on Saturday, push to Monday
+            if (d.getDay() === 6) d.setDate(d.getDate() + 2);
+            // If landing on Sunday, push to Monday
+            if (d.getDay() === 0) d.setDate(d.getDate() + 1);
+            return d;
+        }
+
+        async function reopenReview() {
+            if (!currentRecord) return;
+            if (getCurrentUserRole() !== 'super_admin') return;
+
+            const confirmed = confirm(
+                `Reopen this review for ${currentRecord['Photographer Name']}?\n\nThis will:\n• Set the review status back to "Pending"\n• Mark the assignment as "Needs Updated"\n• Set a new due date of 5 business days from today`
+            );
+            if (!confirmed) return;
+
+            const reopenBtn = document.getElementById('reopenReviewBtn');
+            if (reopenBtn) { reopenBtn.disabled = true; reopenBtn.textContent = 'Reopening...'; }
+
+            try {
+                // Calculate 5 business days from today (no Saturday/Sunday landing)
+                const dueDate = addBusinessDays(new Date(), 5);
+                const dueDateStr = dueDate.toISOString().split('T')[0]; // YYYY-MM-DD
+
+                // 1. Update growth_assessments: set status to 'pending' so it disappears from photographer view
+                const { error: gaError } = await supabaseClient
+                    .from('growth_assessments')
+                    .update({ status: 'pending' })
+                    .eq('id', currentRecord.id);
+
+                if (gaError) throw gaError;
+
+                // 2. Find matching pss_assignment by photographer_email and update status + due_date
+                const photogEmail = (currentRecord['Photographer Email'] || '').toLowerCase().trim();
+                if (photogEmail) {
+                    const { data: assignments, error: findError } = await supabaseClient
+                        .from('pss_assignments')
+                        .select('id')
+                        .ilike('photographer_email', photogEmail)
+                        .neq('cycle_status', 'archive')
+                        .order('created_at', { ascending: false })
+                        .limit(1);
+
+                    if (!findError && assignments && assignments.length > 0) {
+                        const { error: assignError } = await supabaseClient
+                            .from('pss_assignments')
+                            .update({
+                                cycle_status: 'active',
+                                status: 'Needs Updated',
+                                due_date: dueDateStr,
+                                updated_at: new Date().toISOString()
+                            })
+                            .eq('id', assignments[0].id);
+
+                        if (assignError) throw assignError;
+                    }
+                }
+
+                if (reopenBtn) {
+                    reopenBtn.textContent = '✓ Reopened!';
+                    reopenBtn.style.background = '#a8d5a3';
+                }
+
+                // Update currentRecord in memory so the button reflects state
+                currentRecord.status = 'pending';
+
+                setTimeout(() => {
+                    if (reopenBtn) {
+                        reopenBtn.disabled = false;
+                        reopenBtn.textContent = '↩ Reopen Review';
+                        reopenBtn.style.background = '#f59e0b';
+                    }
+                }, 2500);
+
+            } catch (err) {
+                console.error('Error reopening review:', err);
+                alert('Error reopening review: ' + err.message);
+                if (reopenBtn) {
+                    reopenBtn.disabled = false;
+                    reopenBtn.textContent = '↩ Reopen Review';
+                }
+            }
         }
 
         function printCurrentRecord() {
