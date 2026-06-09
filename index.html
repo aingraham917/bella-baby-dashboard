@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>5.2 Dashboard</title>
+    <title>5.3 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -7654,7 +7654,19 @@
                                 <div>
                                     <div style="font-size:13px;color:#999;margin-bottom:3px;">${formatDate(record.Date)}</div>
                                     <div style="font-size:14px;font-weight:600;color:#333;">${record['Quality Check Determination'] || record['Current Assessment Level'] || ''}</div>
-                                    ${record.record_type === 'legacy' ? (record['Technical Flags:'] ? `<div style="font-size:11px;color:#c92a2a;margin-top:3px;">⚑ ${record['Technical Flags:']}</div>` : '') : (record['Delivery Standard Flags:'] ? `<div style="font-size:11px;color:#c92a2a;margin-top:3px;">⚑ ${record['Delivery Standard Flags:']}</div>` : '')}
+                                    ${(() => {
+                                        let flagText = '';
+                                        if (record.record_type === 'legacy') {
+                                            const calculatedFlags = calculateLegacyFlags(record);
+                                            const technicalFlags = record['Technical Flags:'];
+                                            if (calculatedFlags || technicalFlags) {
+                                                flagText = [calculatedFlags, technicalFlags].filter(Boolean).join(' • ');
+                                            }
+                                        } else {
+                                            flagText = record['Delivery Standard Flags:'];
+                                        }
+                                        return flagText ? `<div style="font-size:11px;color:#c92a2a;margin-top:3px;">⚑ ${flagText}</div>` : '';
+                                    })()}
                                 </div>
                                 <div style="display:flex;align-items:center;gap:10px;">
                                     <div style="background:${getScoreBgColor(record['Average Gallery Score'], record.record_type)};color:${getScoreColor(record['Average Gallery Score'], record.record_type)};font-weight:700;padding:6px 14px;border-radius:20px;font-size:14px;${record.record_type === 'growth_assessment' && parseFloat(record['Average Gallery Score']) >= 1 && parseFloat(record['Average Gallery Score']) <= 4 ? 'background:#8b5cf6;color:white;' : ''}">
@@ -7765,7 +7777,19 @@
                                     <div class="nested-record-left">
                                         <div class="nested-record-date">${formatDate(record.Date)}</div>
                                         <div class="nested-record-determination">${record['Quality Check Determination'] || record['Current Assessment Level'] || ''}</div>
-                                        ${record.record_type === 'legacy' ? (record['Technical Flags:'] ? `<div class="nested-record-flags" style="color: #c92a2a; font-size: 12px; margin-top: 4px;"><strong>Flags:</strong> ${record['Technical Flags:']}</div>` : '') : (record['Delivery Standard Flags:'] ? `<div class="nested-record-flags" style="color: #c92a2a; font-size: 12px; margin-top: 4px;"><strong>Flags:</strong> ${record['Delivery Standard Flags:']}</div>` : '')}
+                                        ${(() => {
+                                            let flagText = '';
+                                            if (record.record_type === 'legacy') {
+                                                const calculatedFlags = calculateLegacyFlags(record);
+                                                const technicalFlags = record['Technical Flags:'];
+                                                if (calculatedFlags || technicalFlags) {
+                                                    flagText = [calculatedFlags, technicalFlags].filter(Boolean).join(' • ');
+                                                }
+                                            } else {
+                                                flagText = record['Delivery Standard Flags:'];
+                                            }
+                                            return flagText ? `<div class="nested-record-flags" style="color: #c92a2a; font-size: 12px; margin-top: 4px;"><strong>Flags:</strong> ${flagText}</div>` : '';
+                                        })()}
                                         ${record['Delivery Notes:'] ? `<div class="nested-record-notes" style="color: #666; font-size: 12px; margin-top: 4px;"><strong>Notes:</strong> ${record['Delivery Notes:']}</div>` : ''}
                                     </div>
                                     <div class="nested-record-score" style="color: ${getScoreColor(record['Average Gallery Score'], record.record_type)}; font-weight: bold; background: ${getScoreBgColor(record['Average Gallery Score'], record.record_type)}; padding: 8px 12px; border-radius: 20px; ${record.record_type === 'growth_assessment' && parseFloat(record['Average Gallery Score']) >= 1 && parseFloat(record['Average Gallery Score']) <= 4 ? 'background: #8b5cf6; color: white;' : ''}">${getNestedRecordDisplayValue(record['Average Gallery Score'], record.record_type)}</div>
@@ -7783,7 +7807,34 @@
             setTimeout(loadPhotographerRecommendedResources, 200);
         }
 
-        function changePage(page) {
+        function calculateLegacyFlags(record) {
+            const categories = [
+                'Theme/Subject',
+                'Exposure',
+                'Focus',
+                'White Balance',
+                'Posing',
+                'Variety',
+                'Environment',
+                'Editing',
+                'Calming and soothing',
+                'Composition/Cropping'
+            ];
+
+            const flaggedCategories = [];
+
+            categories.forEach(cat => {
+                const g1Score = parseInt(record[`Gallery #1 ${cat}`]) || 0;
+                const g2Score = parseInt(record[`Gallery #2 ${cat}`]) || 0;
+
+                // Flag if either gallery has a 1, or both galleries have a 2
+                if (g1Score === 1 || g2Score === 1 || (g1Score === 2 && g2Score === 2)) {
+                    flaggedCategories.push(cat);
+                }
+            });
+
+            return flaggedCategories.length > 0 ? flaggedCategories.join(', ') : null;
+        }
             currentPage = page;
             displayRecords();
             window.scrollTo({ top: 0, behavior: 'smooth' });
