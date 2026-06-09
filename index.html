@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3.7 Dashboard</title>
+    <title>3.8 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -1451,6 +1451,9 @@
                             <!-- Charts (Non-photographers) -->
                             <button id="chartsOption" class="options-menu-item" onclick="openCharts()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📊 Charts & Analytics</button>
                             
+                            <!-- Resource Views (Non-photographers) -->
+                            <button id="resourceViewsOption" class="options-menu-item" onclick="openResourceViews()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📊 Resource Views</button>
+                            
                             <!-- Admin Reports (Super Admin) -->
                             <button id="adminReportOption" class="options-menu-item" onclick="openAdminReport()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📁 Admin Tools</button>
                             
@@ -2381,6 +2384,25 @@
                             <button onclick="handleChangePasswordPage()" style="padding: 10px 20px; background: #4ba8a8; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Update Password</button>
                         </div>
 
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESOURCE VIEWS PAGE -->
+            <div id="resourceViewsPage" class="page-container" style="display: none; flex-direction: column;">
+                <div class="main-content">
+                    <h2 style="margin: 0 0 5px 0;">📊 Resource Views</h2>
+                    <p style="color: #999; font-size: 13px; margin-bottom: 25px;">View completed resources by photographer.</p>
+                    
+                    <!-- Search bar -->
+                    <div style="margin-bottom: 20px;">
+                        <input type="text" id="rvSearchPhotographer" placeholder="Search photographer by name or email..." 
+                            style="width: 100%; max-width: 400px; padding: 10px 15px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                    </div>
+
+                    <!-- Photographers list -->
+                    <div id="rvPhotographersList" style="display: flex; flex-direction: column; gap: 12px;">
+                        <!-- Populated by JavaScript -->
                     </div>
                 </div>
             </div>
@@ -4446,7 +4468,7 @@
 
         function showPage(pageId) {
             // Hide all pages
-            const allPages = ['dashboardPage','manageAssessmentsPage','myAssessmentsPage','assessmentFormPage','recordDetailPage','chartsPage','adminReportsPage','imageStoagePage','changePasswordPage','trainingLibraryPage'];
+            const allPages = ['dashboardPage','manageAssessmentsPage','myAssessmentsPage','assessmentFormPage','recordDetailPage','chartsPage','adminReportsPage','imageStoagePage','changePasswordPage','trainingLibraryPage','resourceViewsPage'];
             allPages.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
 
             // Show selected page
@@ -4490,6 +4512,11 @@
             document.getElementById('arArchiveTabBtn').style.display = (role === 'super_admin' || role === 'am') ? 'inline-block' : 'none';
             loadARUserSync();
             if (role === 'super_admin' || role === 'am') loadARArchivedPhotographers();
+        }
+
+        function openResourceViews() {
+            showPage('resourceViewsPage');
+            loadResourceViews();
         }
 
         // Admin Reports Page Tab Switching
@@ -5203,6 +5230,12 @@
                 const chartsOption = document.getElementById('chartsOption');
                 if (chartsOption) {
                     chartsOption.style.display = currentUserRole !== 'user' ? 'block' : 'none';
+                }
+
+                // Resource Views (Non-photographers)
+                const resourceViewsOption = document.getElementById('resourceViewsOption');
+                if (resourceViewsOption) {
+                    resourceViewsOption.style.display = currentUserRole !== 'user' ? 'block' : 'none';
                 }
 
                 // Admin Reports (Super Admin)
@@ -8940,6 +8973,121 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        // RESOURCE VIEWS PAGE
+        async function loadResourceViews() {
+            const container = document.getElementById('rvPhotographersList');
+            if (!container) return;
+            container.innerHTML = '<p style="color: #999;">Loading...</p>';
+
+            try {
+                // Get all users with role 'user' (photographers)
+                const { data: photographers, error: photoError } = await supabaseClient
+                    .from('users_roles')
+                    .select('email, first_name, last_name')
+                    .eq('role', 'user')
+                    .order('email');
+
+                if (photoError) throw photoError;
+
+                if (!photographers || photographers.length === 0) {
+                    container.innerHTML = '<p style="color: #999;">No photographers found.</p>';
+                    return;
+                }
+
+                // Get all completed resources
+                const { data: completions, error: compError } = await supabaseClient
+                    .from('resource_completions')
+                    .select('user_email, resource_name, completed_at');
+
+                if (compError) throw compError;
+
+                // Group completions by email
+                const completionsByEmail = {};
+                if (completions) {
+                    completions.forEach(comp => {
+                        if (!completionsByEmail[comp.user_email]) {
+                            completionsByEmail[comp.user_email] = [];
+                        }
+                        completionsByEmail[comp.user_email].push(comp);
+                    });
+                }
+
+                // Build HTML
+                let html = '';
+                photographers.forEach((photo, idx) => {
+                    const email = photo.email.toLowerCase();
+                    const completedResources = completionsByEmail[email] || [];
+                    const displayName = `${photo.first_name || ''} ${photo.last_name || ''}`.trim() || email;
+                    const cardId = 'rvCard_' + idx;
+                    const contentId = 'rvContent_' + idx;
+
+                    html += `
+                        <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+                            <div id="${cardId}" style="padding: 16px 18px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s;" 
+                                onmouseover="this.style.background='#f9f9f9'" 
+                                onmouseout="this.style.background='white'"
+                                onclick="toggleResourceCard('${cardId}','${contentId}')">
+                                <div>
+                                    <div style="font-weight: 600; font-size: 14px; color: #333;">${escapeHtml(displayName)}</div>
+                                    <div style="font-size: 12px; color: #999; margin-top: 3px;">${escapeHtml(email)}</div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px; flex-shrink: 0;">
+                                    <span style="background: #e8f5f5; color: #4ba8a8; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600;">${completedResources.length}</span>
+                                    <span style="color: #999; font-size: 18px;" id="${cardId}_arrow">▼</span>
+                                </div>
+                            </div>
+                            <div id="${contentId}" style="display: none; padding: 16px 18px; background: #f9f9f9; border-top: 1px solid #e0e0e0;">
+                                ${completedResources.length === 0 
+                                    ? '<p style="color: #999; font-size: 13px; margin: 0;">No completed resources.</p>'
+                                    : `<div style="display: flex; flex-direction: column; gap: 10px;">
+                                        ${completedResources.map(res => {
+                                            const dateStr = new Date(res.completed_at).toLocaleDateString('en-US', { 
+                                                month: 'short', 
+                                                day: 'numeric', 
+                                                year: 'numeric' 
+                                            });
+                                            return `<div style="padding: 10px; background: white; border-radius: 4px; border-left: 3px solid #4ba8a8;">
+                                                <div style="font-weight: 500; color: #333; font-size: 13px;">${escapeHtml(res.resource_name)}</div>
+                                                <div style="color: #999; font-size: 12px; margin-top: 4px;">✓ Completed ${dateStr}</div>
+                                            </div>`;
+                                        }).join('')}
+                                    </div>`
+                                }
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+
+                // Add search functionality
+                const searchInput = document.getElementById('rvSearchPhotographer');
+                if (searchInput) {
+                    searchInput.oninput = function() {
+                        const query = this.value.toLowerCase();
+                        document.querySelectorAll('#rvPhotographersList > div').forEach(card => {
+                            const text = card.textContent.toLowerCase();
+                            card.style.display = text.includes(query) ? 'block' : 'none';
+                        });
+                    };
+                }
+
+            } catch (err) {
+                console.error('Resource Views error:', err);
+                container.innerHTML = '<p style="color: #c92a2a;">Error loading data: ' + (err.message || 'Unknown error') + '</p>';
+            }
+        }
+
+        function toggleResourceCard(cardId, contentId) {
+            const content = document.getElementById(contentId);
+            const arrow = document.getElementById(cardId + '_arrow');
+            if (!content || !arrow) return;
+
+            const isOpen = content.style.display !== 'none';
+            content.style.display = isOpen ? 'none' : 'block';
+            arrow.textContent = isOpen ? '▼' : '▲';
         }
 
         init();
