@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3.5 Dashboard</title>
+    <title>3.6 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -812,9 +812,9 @@
         }
 
         .rfy-complete-btn.completed:hover {
-            background: #ffe8e8;
-            border-color: #f5c6c6;
-            color: #c92a2a;
+            background: #fff3e0;
+            border-color: #ffe0b2;
+            color: #e65100;
         }
 
         .rfy-complete-btn.completing {
@@ -4185,7 +4185,10 @@
             const libBtnId = 'lib_' + (v.id || '').replace(/[^a-zA-Z0-9]/g, '');
 
             const completeBtn = done
-                ? `<button id="${libBtnId}" class="rfy-complete-btn completed" style="width:auto;margin:0;padding:5px 12px;font-size:11px;" onclick="event.stopPropagation();toggleLibraryComplete('${libBtnId}','${escapeHtml(key)}','${escapeHtml(v.title||'')}')">✓ Completed ${doneDate}</button>`
+                ? `<button id="${libBtnId}" class="rfy-complete-btn completed" style="width:auto;margin:0;padding:5px 12px;font-size:11px;" 
+                    onmouseover="this.textContent='Mark Incomplete?'" 
+                    onmouseout="this.textContent='✓ Completed ${doneDate}'" 
+                    onclick="event.stopPropagation();toggleLibraryComplete('${libBtnId}','${escapeHtml(key)}','${escapeHtml(v.title||'')}')">✓ Completed ${doneDate}</button>`
                 : `<button id="${libBtnId}" class="rfy-complete-btn" style="width:auto;margin:0;padding:5px 12px;font-size:11px;" onclick="event.stopPropagation();toggleLibraryComplete('${libBtnId}','${escapeHtml(key)}','${escapeHtml(v.title||'')}')">○ Mark Complete</button>`;
 
             return `
@@ -8781,7 +8784,10 @@
                 const doneDate    = isDone ? new Date(completion).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
                 const btnId       = 'cmp_' + resource.url.replace(/[^a-zA-Z0-9]/g, '').slice(-12);
                 const completeBtn = isDone
-                    ? `<button id="${btnId}" class="rfy-complete-btn completed" onclick="toggleResourceComplete(event, '${safeUrl}', '${escapeHtml(resource.title)}', '${btnId}')">✓ Completed ${doneDate}</button>`
+                    ? `<button id="${btnId}" class="rfy-complete-btn completed" 
+                        onmouseover="this.textContent='Mark Incomplete?'" 
+                        onmouseout="this.textContent='✓ Completed ${doneDate}'" 
+                        onclick="toggleResourceComplete(event, '${safeUrl}', '${escapeHtml(resource.title)}', '${btnId}')">✓ Completed ${doneDate}</button>`
                     : `<button id="${btnId}" class="rfy-complete-btn" onclick="toggleResourceComplete(event, '${safeUrl}', '${escapeHtml(resource.title)}', '${btnId}')">○ Mark Complete</button>`;
 
                 html += `
@@ -8835,6 +8841,9 @@
                     const dateStr = new Date(now).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                     btn.classList.add('completed');
                     btn.textContent = `✓ Completed ${dateStr}`;
+                    // Add hover handlers for the hover text change
+                    btn.onmouseover = function() { this.textContent = 'Mark Incomplete?'; };
+                    btn.onmouseout = function() { this.textContent = `✓ Completed ${dateStr}`; };
                 }
             } catch (err) {
                 console.error('Library completion error:', err);
@@ -8876,6 +8885,9 @@
                     const dateStr = new Date(now).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                     btn.classList.add('completed');
                     btn.textContent = `✓ Completed ${dateStr}`;
+                    // Add hover handlers for the hover text change
+                    btn.onmouseover = function() { this.textContent = 'Mark Incomplete?'; };
+                    btn.onmouseout = function() { this.textContent = `✓ Completed ${dateStr}`; };
                 }
             } catch (err) {
                 console.error('Completion toggle error:', err);
