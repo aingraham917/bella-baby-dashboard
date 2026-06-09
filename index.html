@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>9.3 Dashboard</title>
+    <title>9.4 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -2205,10 +2205,13 @@
                 </div>
 
                 <!-- SUBMIT SECTION -->
-                <div style="background: #f9f9f9; border-radius: 8px; padding: 20px; margin-top: 30px; border-top: 2px solid #e0e0e0;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
-                        <button onclick="submitFullAssessment()" id="formSubmitBtn" style="padding: 12px; background: #4ba8a8; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">✓ Submit Assessment</button>
-                        <button onclick="closeAssessmentForm()" style="padding: 12px; background: #f0f0f0; color: #333; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">Cancel</button>
+                <div style="padding: 25px 0 10px 0; border-top: 1px solid #e0e0e0; margin-top: 25px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <button onclick="confirmCancelAssessment()" style="padding: 12px 20px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;">✕ Cancel &amp; Exit</button>
+                        <div style="display: flex; gap: 10px;">
+                            <button id="formSaveBtn" onclick="saveDraftAssessment()" style="padding: 12px 24px; background: #f0f0f0; color: #333; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">💾 Save</button>
+                            <button id="formSubmitBtn" onclick="submitFullAssessment()" style="padding: 12px 30px; background: #4ba8a8; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 15px; font-weight: 600;">Submit for Review ✓</button>
+                        </div>
                     </div>
                     <div style="text-align: center;">
                         <button onclick="confirmClearForm()" style="padding: 7px 18px; background: none; color: #999; border: 1px dashed #ccc; border-radius: 6px; cursor: pointer; font-size: 12px;">🗑 Clear all entered fields and start over</button>
