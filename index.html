@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bella Baby QC Dashboard</title>
+    <title>3.9 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -8997,6 +8997,23 @@
                     return;
                 }
 
+                // Get photographer names from qc_records
+                const { data: records, error: recordsError } = await supabaseClient
+                    .from('qc_records')
+                    .select('photographer_name, photographer_email');
+
+                if (recordsError) console.warn('Could not load photographer names:', recordsError);
+
+                const nameMap = {};
+                if (records) {
+                    records.forEach(rec => {
+                        const email = rec.photographer_email ? rec.photographer_email.toLowerCase() : '';
+                        if (email && rec.photographer_name && !nameMap[email]) {
+                            nameMap[email] = rec.photographer_name;
+                        }
+                    });
+                }
+
                 // Get all completed resources
                 const { data: completions, error: compError } = await supabaseClient
                     .from('resource_completions')
@@ -9019,6 +9036,7 @@
                 let html = '';
                 photographers.forEach((photo, idx) => {
                     const email = photo.user_email.toLowerCase();
+                    const displayName = nameMap[email] || email;
                     const completedResources = completionsByEmail[email] || [];
                     const cardId = 'rvCard_' + idx;
                     const contentId = 'rvContent_' + idx;
@@ -9029,8 +9047,9 @@
                                 onmouseover="this.style.background='#f9f9f9'" 
                                 onmouseout="this.style.background='white'"
                                 onclick="toggleResourceCard('${cardId}','${contentId}')">
-                                <div>
-                                    <div style="font-weight: 600; font-size: 14px; color: #333;">${escapeHtml(email)}</div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; font-size: 14px; color: #333;">${escapeHtml(displayName)}</div>
+                                    <div style="font-size: 12px; color: #999; margin-top: 3px; font-style: italic;">${escapeHtml(email)}</div>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 12px; flex-shrink: 0;">
                                     <span style="background: #e8f5f5; color: #4ba8a8; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600;">${completedResources.length}</span>
