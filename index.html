@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4.1C Dashboard</title>
+    <title>4.2 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -4100,6 +4100,10 @@
             }
             const grid = document.getElementById('tlVideoGrid');
             const status = document.getElementById('tlStatus');
+            if (!grid || !status) {
+                console.error('Missing tlVideoGrid or tlStatus elements');
+                return;
+            }
             grid.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">Loading...</p>';
             try {
                 const { data, error } = await supabaseClient
@@ -4113,13 +4117,16 @@
                 // Populate category filter
                 const cats = [...new Set(tlAllVideos.map(v => v.category).filter(Boolean))].sort();
                 const catSel = document.getElementById('tlCategoryFilter');
-                catSel.innerHTML = '<option value="">All Categories</option>' +
-                    cats.map(c => `<option value="${c}">${c}</option>`).join('');
+                if (catSel) {
+                    catSel.innerHTML = '<option value="">All Categories</option>' +
+                        cats.map(c => `<option value="${c}">${c}</option>`).join('');
+                }
 
                 filterTrainingVideos();
             } catch(err) {
-                status.innerHTML = `<div class="sync-status error">Error: ${err.message}</div>`;
-                grid.innerHTML = '';
+                console.error('Training videos error:', err);
+                status.innerHTML = `<div class="sync-status error">Error loading videos: ${err.message}</div>`;
+                grid.innerHTML = '<p style="color:#c92a2a;padding:20px;text-align:center;">Failed to load videos. Check browser console for details.</p>';
             }
         }
 
