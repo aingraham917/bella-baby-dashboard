@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>5.0 Dashboard</title>
+    <title>5.1 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -7597,7 +7597,31 @@
                 const [photogName, allMyRecords] = pagePhotographers[0];
                 const totalCount = allMyRecords.length;
 
-                // Split records by type for separate averages
+                // Sort records by date (newest first)
+                const sortedRecords = [...allMyRecords].sort((a, b) => {
+                    const dateA = new Date(a.Date || 0);
+                    const dateB = new Date(b.Date || 0);
+                    return dateB - dateA;
+                });
+
+                // Pagination for trainer/photographer reviews
+                const REVIEW_PAGE_SIZE = 10;
+                const totalPages = Math.ceil(sortedRecords.length / REVIEW_PAGE_SIZE);
+                let reviewCurrentPage = parseInt(sessionStorage.getItem('reviewCurrentPage') || '1');
+                if (reviewCurrentPage > totalPages) reviewCurrentPage = 1;
+                
+                const startIdx = (reviewCurrentPage - 1) * REVIEW_PAGE_SIZE;
+                const pageRecords = sortedRecords.slice(startIdx, startIdx + REVIEW_PAGE_SIZE);
+
+                // Build pagination HTML
+                const paginationHTML = totalPages > 1 ? `
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;margin-top:16px;border-top:1px solid #e0e0e0;">
+                        <button onclick="changeReviewPage(${reviewCurrentPage - 1})" ${reviewCurrentPage === 1 ? 'disabled' : ''} style="padding:6px 14px;background:${reviewCurrentPage === 1 ? '#f0f0f0' : '#4ba8a8'};color:${reviewCurrentPage === 1 ? '#999' : 'white'};border:none;border-radius:4px;cursor:${reviewCurrentPage === 1 ? 'default' : 'pointer'};font-size:13px;">← Prev</button>
+                        <span style="font-size:13px;color:#666;">Page ${reviewCurrentPage} of ${totalPages} &nbsp;·&nbsp; ${sortedRecords.length} reviews</span>
+                        <button onclick="changeReviewPage(${reviewCurrentPage + 1})" ${reviewCurrentPage === totalPages ? 'disabled' : ''} style="padding:6px 14px;background:${reviewCurrentPage === totalPages ? '#f0f0f0' : '#4ba8a8'};color:${reviewCurrentPage === totalPages ? '#999' : 'white'};border:none;border-radius:4px;cursor:${reviewCurrentPage === totalPages ? 'default' : 'pointer'};font-size:13px;">Next →</button>
+                    </div>` : '';
+
+                // Split records by type for separate averages (using original allMyRecords for accurate counts)
                 const legacyRecs = allMyRecords.filter(r => r.record_type === 'legacy');
                 const gaRecs     = allMyRecords.filter(r => r.record_type === 'growth_assessment');
                 const legacyAvg  = calculate6MonthAverage(legacyRecs);
@@ -7623,8 +7647,8 @@
 
                     <!-- Flat record list -->
                     <div style="display:grid;gap:8px;">
-                        ${allMyRecords.map((record, idx) => `
-                            <div onclick="showRecordDetailsForPhoto(${idx}, '${photogName.replace(/'/g, "\'")}')"
+                        ${pageRecords.map((record, idx) => `
+                            <div onclick="showRecordDetailsForPhoto(${startIdx + idx}, '${photogName.replace(/'/g, "\'")}')"
                                  style="background:white;border:1px solid #e8e8e8;border-radius:6px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:border-color 0.15s;"
                                  onmouseover="this.style.borderColor='#4ba8a8'" onmouseout="this.style.borderColor='#e8e8e8'">
                                 <div>
@@ -7641,6 +7665,8 @@
                             </div>
                         `).join('')}
                     </div>
+
+                    ${paginationHTML}
                 `;
 
                 // Load recommended resources for this photographer
@@ -7759,6 +7785,12 @@
 
         function changePage(page) {
             currentPage = page;
+            displayRecords();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function changeReviewPage(page) {
+            sessionStorage.setItem('reviewCurrentPage', page);
             displayRecords();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
