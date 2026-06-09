@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>7.3 Dashboard</title>
+    <title>7.4 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -3747,53 +3747,44 @@
             on('changePasswordForm', 'submit', handleChangePassword);
 
             // Options Dropdown Toggle
+            function closeAllDropdowns() {
+                document.getElementById('optionsDropdown').style.display = 'none';
+                document.getElementById('learningDropdown').style.display = 'none';
+                document.getElementById('trainingTeamDropdown').style.display = 'none';
+            }
+
             on('optionsBtn', 'click', (e) => {
                 e.stopPropagation();
                 const dropdown = document.getElementById('optionsDropdown');
-                dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+                const isOpen = dropdown.style.display === 'block';
+                closeAllDropdowns();
+                if (!isOpen) dropdown.style.display = 'block';
             });
 
             // Learning Dropdown Toggle
             on('learningBtn', 'click', (e) => {
                 e.stopPropagation();
                 const dropdown = document.getElementById('learningDropdown');
-                dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+                const isOpen = dropdown.style.display === 'block';
+                closeAllDropdowns();
+                if (!isOpen) dropdown.style.display = 'block';
             });
 
             // Training Team Dropdown Toggle
             on('trainingTeamBtn', 'click', (e) => {
                 e.stopPropagation();
                 const dropdown = document.getElementById('trainingTeamDropdown');
-                dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+                const isOpen = dropdown.style.display === 'block';
+                closeAllDropdowns();
+                if (!isOpen) dropdown.style.display = 'block';
             });
 
             // Close all dropdowns when clicking outside
-            document.addEventListener('click', (e) => {
-                const optionsBtn = document.getElementById('optionsBtn');
-                const optionsDropdown = document.getElementById('optionsDropdown');
-                const learningBtn = document.getElementById('learningBtn');
-                const learningDropdown = document.getElementById('learningDropdown');
-                const trainingTeamBtn = document.getElementById('trainingTeamBtn');
-                const trainingTeamDropdown = document.getElementById('trainingTeamDropdown');
-                
-                if (!optionsBtn.contains(e.target) && !optionsDropdown.contains(e.target)) {
-                    optionsDropdown.style.display = 'none';
-                }
-                if (!learningBtn.contains(e.target) && !learningDropdown.contains(e.target)) {
-                    learningDropdown.style.display = 'none';
-                }
-                if (!trainingTeamBtn.contains(e.target) && !trainingTeamDropdown.contains(e.target)) {
-                    trainingTeamDropdown.style.display = 'none';
-                }
-            });
+            document.addEventListener('click', () => closeAllDropdowns());
 
             // Close dropdowns when clicking a menu item
             document.querySelectorAll('.options-menu-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    document.getElementById('optionsDropdown').style.display = 'none';
-                    document.getElementById('trainingTeamDropdown').style.display = 'none';
-                    document.getElementById('learningDropdown').style.display = 'none';
-                });
+                item.addEventListener('click', () => closeAllDropdowns());
             });
 
             // Modal close listeners
@@ -6960,6 +6951,11 @@
                     
                     const recordId = record.id;
                     const editId = `edit-${recordId}`;
+                    const baseUrl = 'https://www.bellababyphotography.com/v2/galleries/';
+                    const g1Code = record['Gallery #1 Access Code:'];
+                    const g2Code = record['Gallery #2 Access Code:'];
+                    const g1LinkHtml = g1Code ? `&nbsp;·&nbsp;<a href="${baseUrl}${g1Code}" target="_blank" style="color:#4ba8a8;font-size:11px;font-weight:400;">🔗 View Gallery</a>` : '';
+                    const g2LinkHtml = g2Code ? `&nbsp;·&nbsp;<a href="${baseUrl}${g2Code}" target="_blank" style="color:#4ba8a8;font-size:11px;font-weight:400;">🔗 View Gallery</a>` : '';
                     
                     html += `
                         <div style="background: #f9f9f9; border: 1px solid #ddd; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 4px;">
@@ -6974,8 +6970,8 @@
                             
                             <div style="background: white; border: 1px solid #e0e0e0; border-radius: 3px; padding: 10px; margin-bottom: 10px; font-size: 12px;">
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                                    <div><strong>Gallery #1 Score:</strong> ${g1Score} / 16</div>
-                                    <div><strong>Gallery #2 Score:</strong> ${g2Score} / 16</div>
+                                    <div><strong>Gallery #1 Score:</strong> ${g1Score} / 16${g1LinkHtml}</div>
+                                    <div><strong>Gallery #2 Score:</strong> ${g2Score} / 16${g2LinkHtml}</div>
                                     <div style="color:#555;">G1 Core Skills: ${record['Core Skills (1)'] || '-'}</div>
                                     <div style="color:#555;">G2 Core Skills: ${record['Core Skills (2)'] || '-'}</div>
                                     <div style="color:#555;">G1 Subject/Posing: ${record['Subject and Posing (1)'] || '-'}</div>
