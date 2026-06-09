@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>5.4 Dashboard</title>
+    <title>5.5 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -7787,7 +7787,8 @@
                                 const flagHtml = flagText ? `<div class="nested-record-flags" style="color: #c92a2a; font-size: 12px; margin-top: 4px;"><strong>Flags:</strong> ${flagText}</div>` : '';
                                 
                                 return `
-                                <div class="nested-record" onclick="showRecordDetailsForPhoto(${records.findIndex(r => r.id === record.id)}, '${photographerName.replace(/'/g, "\\'")}'")>
+                                <div class="nested-record" onclick="showRecordDetailsForPhoto(${records.findIndex(r => r.id === record.id)}, '${photographerName.replace(/'/g, "\\'")}')"
+                                    >
                                     <div class="nested-record-left">
                                         <div class="nested-record-date">${formatDate(record.Date)}</div>
                                         <div class="nested-record-determination">${record['Quality Check Determination'] || record['Current Assessment Level'] || ''}</div>
