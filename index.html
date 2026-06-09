@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>7.2 Dashboard</title>
+    <title>7.3 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -7319,11 +7319,17 @@
 
                 let html = '<div style="display: grid; gap: 15px;">';
                 data.forEach(record => {
-                    const g1Score = (parseInt(record['Core Skills (1)'] || 0) + 
-                                   parseInt(record['Subject and Posing (1)'] || 0) + 
-                                   parseInt(record['Gallery Experience (1)'] || 0) + 
-                                   parseInt(record['Editing / Bella Baby Standards (1)'] || 0));
-                    
+                    const g1Code = record['Gallery #1 Access Code:'];
+                    const g2Code = record['Gallery #2 Access Code:'];
+                    const baseUrl = 'https://www.bellababyphotography.com/v2/galleries/';
+
+                    const g1Link = g1Code
+                        ? `<a href="${baseUrl}${g1Code}" target="_blank" style="color: #4ba8a8; font-size: 12px; margin-left: 8px;">🔗 View Gallery</a>`
+                        : '';
+                    const g2Link = g2Code
+                        ? `<a href="${baseUrl}${g2Code}" target="_blank" style="color: #4ba8a8; font-size: 12px; margin-left: 8px;">🔗 View Gallery</a>`
+                        : '';
+
                     html += `
                         <div style="background: #f9f9f9; border: 1px solid #ddd; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 4px;">
                             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
@@ -7334,8 +7340,16 @@
                                 <span style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">PENDING</span>
                             </div>
                             
-                            <p style="margin: 10px 0; font-size: 13px;"><strong>Gallery #1:</strong> ${record['Gallery #1 Score:']} / 16</p>
-                            <p style="margin: 5px 0; font-size: 13px;"><strong>Gallery #2:</strong> ${record['Gallery #2 Score:']} / 16</p>
+                            <p style="margin: 10px 0; font-size: 13px;">
+                                <strong>Gallery #1:</strong> ${record['Gallery #1 Score:']} / 16
+                                ${g1Code ? `<span style="color: #999; font-size: 12px;">· Code: <code>${g1Code}</code></span>` : ''}
+                                ${g1Link}
+                            </p>
+                            <p style="margin: 5px 0; font-size: 13px;">
+                                <strong>Gallery #2:</strong> ${record['Gallery #2 Score:']} / 16
+                                ${g2Code ? `<span style="color: #999; font-size: 12px;">· Code: <code>${g2Code}</code></span>` : ''}
+                                ${g2Link}
+                            </p>
                             ${record['Delivery Notes:'] ? `<p style="margin: 5px 0; font-size: 12px; color: #c92a2a;"><strong>⚠️ Delivery Notes:</strong> ${record['Delivery Notes:']}</p>` : ''}
                             
                             <div style="display: flex; gap: 10px; margin-top: 15px;">
