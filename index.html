@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3.8 Dashboard</title>
+    <title>Bella Baby QC Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -8984,7 +8984,7 @@
             try {
                 // Get all users with role 'user' (photographers)
                 const { data: photographers, error: photoError } = await supabaseClient
-                    .from('users_roles')
+                    .from('user_roles')
                     .select('email, first_name, last_name')
                     .eq('role', 'user')
                     .order('email');
