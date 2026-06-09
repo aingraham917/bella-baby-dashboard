@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3.2 Dashboard</title>
+    <title>Bella Baby QC Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -8594,6 +8594,17 @@
             }
         }
 
+        // Convert Google Drive share links to direct-embeddable thumbnail URLs
+        function normalizeImageUrl(url) {
+            if (!url) return url;
+            // Match: /file/d/FILE_ID/view or /file/d/FILE_ID?
+            const driveMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (driveMatch) {
+                return `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w600`;
+            }
+            return url;
+        }
+
         function getResourceType(url) {
             if (!url) return 'article';
             if (url.includes('youtube.com') || url.includes('youtu.be')) return 'video';
@@ -8664,7 +8675,7 @@
                     let imgSrc, isCustom;
                     if (resource.thumbnail_url) {
                         // Priority 1: custom image from flag_resources table
-                        imgSrc = resource.thumbnail_url;
+                        imgSrc = normalizeImageUrl(resource.thumbnail_url);
                         isCustom = true;
                     } else {
                         // Priority 2: thum.io screenshot
