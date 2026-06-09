@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>10.1 Dashboard</title>
+    <title>10.2 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -7180,16 +7180,36 @@
                     : 'linear-gradient(90deg, #4ba8a8, #a8d5a3)';
 
                 window._assignmentMap = {}; // store full data for button clicks
+
+                // Check for existing drafts for this PSS
+                const { data: drafts } = await supabaseClient
+                    .from('growth_assessments')
+                    .select('id, "Photographer Email", status')
+                    .eq('status', 'draft')
+                    .ilike('"PSS Email Address"', currentUser.email);
+
+                const draftEmailSet = new Set((drafts || []).map(d => (d['Photographer Email'] || '').toLowerCase().trim()));
+
+                // Sort: drafts first, then by due_date
+                const sorted = [...data].sort((a, b) => {
+                    const aHasDraft = draftEmailSet.has((a.photographer_email || '').toLowerCase().trim());
+                    const bHasDraft = draftEmailSet.has((b.photographer_email || '').toLowerCase().trim());
+                    if (aHasDraft && !bHasDraft) return -1;
+                    if (!aHasDraft && bHasDraft) return 1;
+                    return new Date(a.due_date) - new Date(b.due_date);
+                });
+
                 let html = '<div style="display: grid; gap: 15px;">';
-                data.forEach(assignment => {
-                    window._assignmentMap[assignment.id] = assignment; // store for button click
+                sorted.forEach(assignment => {
+                    window._assignmentMap[assignment.id] = assignment;
+                    const hasDraft = draftEmailSet.has((assignment.photographer_email || '').toLowerCase().trim());
                     const dueDate = new Date(assignment.due_date);
                     const today = new Date();
                     const isOverdue = dueDate < today && assignment.status !== 'completed';
-                    
+
                     let statusColor = '#f59e0b';
                     let statusLabel = assignment.status || 'Not Started';
-                    
+
                     if (assignment.status === 'completed') {
                         statusColor = '#a8d5a3';
                         statusLabel = 'Complete';
@@ -7202,16 +7222,19 @@
                     } else if (assignment.status === 'skipped_see_notes') {
                         statusColor = '#6366f1';
                         statusLabel = 'Skipped (See Notes)';
+                    } else if (hasDraft) {
+                        statusColor = isOverdue ? '#ef4444' : '#4ba8a8';
+                        statusLabel = isOverdue ? 'Overdue' : 'In Progress';
                     } else if (isOverdue) {
                         statusColor = '#ef4444';
-                        statusLabel = 'Not Started (Overdue)';
+                        statusLabel = 'Overdue';
                     }
 
                     html += `
                         <div style="background: #f9f9f9; border: 1px solid #ddd; border-left: 4px solid ${statusColor}; padding: 15px; border-radius: 4px;">
                             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
                                 <div>
-                                    <h4 style="margin: 0 0 5px 0;">${assignment.photographer_name}</h4>
+                                    <h4 style="margin: 0 0 5px 0;">${assignment.photographer_name}${hasDraft ? ' <span style="background:#fff3cd;color:#b45309;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;vertical-align:middle;border:1px solid #ffe082;">DRAFT SAVED</span>' : ''}</h4>
                                     <p style="margin: 0; font-size: 12px; color: #666;">${assignment.photographer_email}</p>
                                     ${assignment.photographer_level ? `<p style="margin: 5px 0 0 0; font-size: 12px; color: #666;"><strong>Level:</strong> ${assignment.photographer_level}</p>` : ''}
                                     ${assignment.area_manager_name ? `<p style="margin: 5px 0 0 0; font-size: 12px; color: #4ba8a8;"><strong>Area Manager:</strong> ${assignment.area_manager_name}${assignment.area_manager_email ? ' — ' + assignment.area_manager_email : ''}</p>` : ''}
@@ -7220,6 +7243,7 @@
                                     <span style="background: ${statusColor}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">${statusLabel}</span>
                                     <select id="status-${assignment.id}" onchange="updateAssignmentStatus('${assignment.id}', this.value)" style="padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; background: white; cursor: pointer;">
                                         <option value="not_started" ${assignment.status === 'not_started' || !assignment.status ? 'selected' : ''}>Not Started</option>
+                                        <option value="in_progress" ${assignment.status === 'in_progress' || hasDraft ? 'selected' : ''}>In Progress</option>
                                         <option value="completed" ${assignment.status === 'completed' ? 'selected' : ''}>Complete</option>
                                         <option value="needs_updated" ${assignment.status === 'needs_updated' ? 'selected' : ''}>Needs Updated</option>
                                         <option value="skipped_no_galleries" ${assignment.status === 'skipped_no_galleries' ? 'selected' : ''}>Skipped (No Galleries)</option>
@@ -7246,7 +7270,7 @@
                                     class="start-assessment-btn"
                                     data-id="${assignment.id}"
                                     style="width:100%;padding:6px 9px;background:#4ba8a8;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;">
-                                    ${assignment.status === 'needs_updated' ? '🔄 Resubmit' : '📝 Start Assessment'}
+                                    ${assignment.status === 'needs_updated' ? '🔄 Resubmit' : hasDraft ? '✏️ Continue Assessment' : '📝 Start Assessment'}
                                 </button>` : ''}
                             </div>
                         </div>
