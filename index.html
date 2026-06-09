@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3.2 Dashboard</title>
+    <title>3.3 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -781,6 +781,47 @@
             font-weight: 600;
             color: #4ba8a8;
             letter-spacing: 0.3px;
+        }
+
+        .rfy-complete-btn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 8px 12px;
+            font-size: 12px;
+            background: white;
+            color: #888;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .rfy-complete-btn:hover {
+            border-color: #4ba8a8;
+            color: #4ba8a8;
+        }
+
+        .rfy-complete-btn.completed {
+            background: #f0faf0;
+            border-color: #a8d5a3;
+            color: #2d7a2d;
+            font-weight: 600;
+        }
+
+        .rfy-complete-btn.completed:hover {
+            background: #ffe8e8;
+            border-color: #f5c6c6;
+            color: #c92a2a;
+        }
+
+        .rfy-complete-btn.completing {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .rfy-play-overlay {
@@ -4008,6 +4049,15 @@
 
 
         async function loadTrainingVideos() {
+            // Preload this user's completions into cache for renderVideoCard
+            window._libraryCompletions = {};
+            if (currentUser) {
+                const { data: rows } = await supabaseClient
+                    .from('resource_completions')
+                    .select('resource_url, completed_at')
+                    .eq('user_email', currentUser.email.toLowerCase().trim());
+                (rows || []).forEach(r => { window._libraryCompletions[r.resource_url] = r.completed_at; });
+            }
             const grid = document.getElementById('tlVideoGrid');
             const status = document.getElementById('tlStatus');
             grid.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">Loading...</p>';
@@ -4121,7 +4171,16 @@
 
         function renderVideoCard(v) {
             const embedUrl = driveToEmbedUrl(v.drive_link);
-            const isAdmin = canManageRoles();
+            const isAdmin  = canManageRoles();
+            const key      = v.drive_link || '';
+            const done     = !!(window._libraryCompletions && window._libraryCompletions[key]);
+            const doneDate = done ? new Date(window._libraryCompletions[key]).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+            const libBtnId = 'lib_' + (v.id || '').replace(/[^a-zA-Z0-9]/g, '');
+
+            const completeBtn = done
+                ? `<button id="${libBtnId}" class="rfy-complete-btn completed" style="width:auto;margin:0;padding:5px 12px;font-size:11px;" onclick="event.stopPropagation();toggleLibraryComplete('${libBtnId}','${escapeHtml(key)}','${escapeHtml(v.title||'')}')">✓ Completed ${doneDate}</button>`
+                : `<button id="${libBtnId}" class="rfy-complete-btn" style="width:auto;margin:0;padding:5px 12px;font-size:11px;" onclick="event.stopPropagation();toggleLibraryComplete('${libBtnId}','${escapeHtml(key)}','${escapeHtml(v.title||'')}')">○ Mark Complete</button>`;
+
             return `
                 <div style="background:white;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;">
                     <!-- Collapsed header -->
@@ -4131,7 +4190,8 @@
                             ${v.description ? `<div style="font-size:12px;color:#999;margin-top:3px;">${v.description}</div>` : ''}
                             ${isAdmin ? buildLevelBadges(v.visible_to) : ''}
                         </div>
-                        <div style="display:flex;align-items:center;gap:10px;">
+                        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+                            ${completeBtn}
                             ${isAdmin ? `
                                 <button onclick="event.stopPropagation();editVideo('${v.id}')" style="font-size:11px;padding:3px 8px;background:#e3f2fd;color:#1976d2;border:1px solid #90caf9;border-radius:3px;cursor:pointer;">Edit</button>
                                 <button onclick="event.stopPropagation();deleteVideo('${v.id}', '${(v.title||'').replace(/'/g,"\'")}')" style="font-size:11px;padding:3px 8px;background:#fee2e2;color:#ef4444;border:1px solid #fca5a5;border-radius:3px;cursor:pointer;">Delete</button>
@@ -8586,7 +8646,17 @@
                     return;
                 }
 
-                renderResourcesCarousel(container, matchedResources, 'photographer');
+                // Load this user's completions for these resources
+                const email = currentUser.email.toLowerCase().trim();
+                const { data: completionRows } = await supabaseClient
+                    .from('resource_completions')
+                    .select('resource_url, completed_at')
+                    .eq('user_email', email);
+
+                const completions = {};
+                (completionRows || []).forEach(r => { completions[r.resource_url] = r.completed_at; });
+
+                renderResourcesCarousel(container, matchedResources, 'photographer', completions);
 
             } catch (err) {
                 console.error('Carousel error:', err);
@@ -8621,7 +8691,7 @@
             return m ? m[1] : null;
         }
 
-        function renderResourcesCarousel(container, resources, context = 'photographer') {
+        function renderResourcesCarousel(container, resources, context = 'photographer', completions = {}) {
             if (!resources || resources.length === 0) {
                 container.innerHTML = '';
                 return;
@@ -8699,6 +8769,15 @@
                         </div>`;
                 }
 
+                // Completion state
+                const completion  = completions[resource.url];
+                const isDone      = !!completion;
+                const doneDate    = isDone ? new Date(completion).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+                const btnId       = 'cmp_' + resource.url.replace(/[^a-zA-Z0-9]/g, '').slice(-12);
+                const completeBtn = isDone
+                    ? `<button id="${btnId}" class="rfy-complete-btn completed" onclick="toggleResourceComplete(event, '${safeUrl}', '${escapeHtml(resource.title)}', '${btnId}')">✓ Completed ${doneDate}</button>`
+                    : `<button id="${btnId}" class="rfy-complete-btn" onclick="toggleResourceComplete(event, '${safeUrl}', '${escapeHtml(resource.title)}', '${btnId}')">○ Mark Complete</button>`;
+
                 html += `
                     <a href="${safeUrl}" target="_blank" class="rfy-resource-card">
                         ${thumbHtml}
@@ -8708,6 +8787,7 @@
                             <button class="rfy-btn" onclick="event.preventDefault(); window.open('${safeUrl}', '_blank');">
                                 ${btnLabel}
                             </button>
+                            ${completeBtn}
                         </div>
                     </a>
                 `;
@@ -8720,6 +8800,80 @@
 
             container.innerHTML = html;
             setTimeout(() => updateCarouselArrowState(carouselId, controlsId), 100);
+        }
+
+        async function toggleLibraryComplete(btnId, url, title) {
+            if (!currentUser || !url) return;
+            const btn = document.getElementById(btnId);
+            if (!btn || btn.classList.contains('completing')) return;
+            btn.classList.add('completing');
+
+            const email    = currentUser.email.toLowerCase().trim();
+            const isDone   = btn.classList.contains('completed');
+
+            try {
+                if (isDone) {
+                    await supabaseClient.from('resource_completions').delete()
+                        .eq('user_email', email).eq('resource_url', url);
+                    if (window._libraryCompletions) delete window._libraryCompletions[url];
+                    btn.classList.remove('completed');
+                    btn.textContent = '○ Mark Complete';
+                } else {
+                    const now = new Date().toISOString();
+                    await supabaseClient.from('resource_completions')
+                        .upsert({ user_email: email, resource_url: url, resource_name: title, completed_at: now },
+                                 { onConflict: 'user_email,resource_url' });
+                    if (window._libraryCompletions) window._libraryCompletions[url] = now;
+                    const dateStr = new Date(now).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    btn.classList.add('completed');
+                    btn.textContent = `✓ Completed ${dateStr}`;
+                }
+            } catch (err) {
+                console.error('Library completion error:', err);
+            }
+            btn.classList.remove('completing');
+        }
+
+        async function toggleResourceComplete(event, url, title, btnId) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (!currentUser) return;
+
+            const btn = document.getElementById(btnId);
+            if (!btn || btn.classList.contains('completing')) return;
+            btn.classList.add('completing');
+
+            const email     = currentUser.email.toLowerCase().trim();
+            const isAlready = btn.classList.contains('completed');
+
+            try {
+                if (isAlready) {
+                    // Unmark — delete the row
+                    await supabaseClient
+                        .from('resource_completions')
+                        .delete()
+                        .eq('user_email', email)
+                        .eq('resource_url', url);
+
+                    btn.classList.remove('completed');
+                    btn.textContent = '○ Mark Complete';
+                } else {
+                    // Mark complete — upsert
+                    const now = new Date().toISOString();
+                    await supabaseClient
+                        .from('resource_completions')
+                        .upsert({ user_email: email, resource_url: url, resource_name: title, completed_at: now },
+                                { onConflict: 'user_email,resource_url' });
+
+                    const dateStr = new Date(now).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    btn.classList.add('completed');
+                    btn.textContent = `✓ Completed ${dateStr}`;
+                }
+            } catch (err) {
+                console.error('Completion toggle error:', err);
+            }
+
+            btn.classList.remove('completing');
         }
 
         function scrollResourceCarousel(carouselId, direction) {
