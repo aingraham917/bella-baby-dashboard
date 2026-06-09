@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>5.5 Dashboard</title>
+    <title>5.6 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -7773,32 +7773,18 @@
                             </div>
                         </div>
                         <div class="nested-records" id="${expandId}">
-                            ${records.map((record, idx) => {
-                                let flagText = '';
-                                if (record.record_type === 'legacy') {
-                                    const calculatedFlags = calculateLegacyFlags(record);
-                                    const technicalFlags = record['Technical Flags:'];
-                                    if (calculatedFlags || technicalFlags) {
-                                        flagText = [calculatedFlags, technicalFlags].filter(Boolean).join(' • ');
-                                    }
-                                } else {
-                                    flagText = record['Delivery Standard Flags:'];
-                                }
-                                const flagHtml = flagText ? `<div class="nested-record-flags" style="color: #c92a2a; font-size: 12px; margin-top: 4px;"><strong>Flags:</strong> ${flagText}</div>` : '';
-                                
-                                return `
+                            ${records.map((record) => `
                                 <div class="nested-record" onclick="showRecordDetailsForPhoto(${records.findIndex(r => r.id === record.id)}, '${photographerName.replace(/'/g, "\\'")}')"
                                     >
                                     <div class="nested-record-left">
                                         <div class="nested-record-date">${formatDate(record.Date)}</div>
                                         <div class="nested-record-determination">${record['Quality Check Determination'] || record['Current Assessment Level'] || ''}</div>
-                                        ${flagHtml}
+                                        ${getFlagHtml(record)}
                                         ${record['Delivery Notes:'] ? `<div class="nested-record-notes" style="color: #666; font-size: 12px; margin-top: 4px;"><strong>Notes:</strong> ${record['Delivery Notes:']}</div>` : ''}
                                     </div>
                                     <div class="nested-record-score" style="color: ${getScoreColor(record['Average Gallery Score'], record.record_type)}; font-weight: bold; background: ${getScoreBgColor(record['Average Gallery Score'], record.record_type)}; padding: 8px 12px; border-radius: 20px; ${record.record_type === 'growth_assessment' && parseFloat(record['Average Gallery Score']) >= 1 && parseFloat(record['Average Gallery Score']) <= 4 ? 'background: #8b5cf6; color: white;' : ''}">${getNestedRecordDisplayValue(record['Average Gallery Score'], record.record_type)}</div>
                                 </div>
-                            `;
-                            }).join('')}
+                            `).join('')}
                         </div>
                     </div>
                 `;
@@ -7809,6 +7795,20 @@
             // Load recommended resources for photographers
             // No role check - just try to load; it will auto-hide if no flags
             setTimeout(loadPhotographerRecommendedResources, 200);
+        }
+
+        function getFlagHtml(record) {
+            let flagText = '';
+            if (record.record_type === 'legacy') {
+                const calculatedFlags = calculateLegacyFlags(record);
+                const technicalFlags = record['Technical Flags:'];
+                if (calculatedFlags || technicalFlags) {
+                    flagText = [calculatedFlags, technicalFlags].filter(Boolean).join(' • ');
+                }
+            } else {
+                flagText = record['Delivery Standard Flags:'];
+            }
+            return flagText ? `<div class="nested-record-flags" style="color: #c92a2a; font-size: 12px; margin-top: 4px;"><strong>Flags:</strong> ${flagText}</div>` : '';
         }
 
         function calculateLegacyFlags(record) {
@@ -7838,10 +7838,6 @@
             });
 
             return flaggedCategories.length > 0 ? flaggedCategories.join(', ') : null;
-        }
-            currentPage = page;
-            displayRecords();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function changeReviewPage(page) {
