@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4.0 Dashboard</title>
+    <title>Bella Baby QC Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -2098,6 +2098,17 @@
                             <tbody id="arSyncTableBody"><tr><td colspan="4" style="text-align:center;color:#999;">Loading...</td></tr></tbody>
                         </table>
                         <button class="batch-invite-btn" id="arBatchInviteBtn">Invite All Missing Users</button>
+
+                        <!-- AM Assignment Section -->
+                        <div style="margin-top: 40px; padding-top: 30px; border-top: 2px solid #e0e0e0;">
+                            <p style="color: #666; font-size: 13px; margin-bottom: 15px;">Photographers without AM assignment</p>
+                            <div id="arAMAssignStatus"></div>
+                            <table class="user-sync-table" id="arAMAssignTable" style="display: none;">
+                                <thead><tr><th>Photographer Name</th><th>Email</th><th>Assign AM</th><th>Action</th></tr></thead>
+                                <tbody id="arAMAssignTableBody"></tbody>
+                            </table>
+                            <div id="arAMAssignEmpty" style="text-align:center;color:#999;padding:20px;">All photographers have AM assignments!</div>
+                        </div>
                     </div>
 
                     <!-- Manage Roles Tab -->
@@ -4558,11 +4569,68 @@
                     status.innerHTML = '<div class="sync-status success">&#x2713; All photographers are invited!</div>';
                     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#999;">No missing users</td></tr>';
                     document.getElementById('arBatchInviteBtn').disabled = true;
-                    return;
+                } else {
+                    status.innerHTML = `<div class="sync-status loading">${missingUsers.length} photographer(s) need to be invited</div>`;
+                    tbody.innerHTML = missingUsers.map(user => `<tr><td>${user.name}</td><td>${user.email}</td><td>${user.level || 'N/A'}</td><td><button class="invite-btn-small" onclick="inviteSingleUser('${user.email}', '${user.name.replace(/'/g, "\'")}')">Invite</button></td></tr>`).join('');
+                    document.getElementById('arBatchInviteBtn').disabled = false;
                 }
-                status.innerHTML = `<div class="sync-status loading">${missingUsers.length} photographer(s) need to be invited</div>`;
-                tbody.innerHTML = missingUsers.map(user => `<tr><td>${user.name}</td><td>${user.email}</td><td>${user.level || 'N/A'}</td><td><button class="invite-btn-small" onclick="inviteSingleUser('${user.email}', '${user.name.replace(/'/g, "\'")}')">Invite</button></td></tr>`).join('');
-                document.getElementById('arBatchInviteBtn').disabled = false;
+
+                // Now load AM assignments for existing photographers
+                const { data: amMap, error: amError } = await supabaseClient
+                    .from('am_photographer_mapping')
+                    .select('Photographer, Photographer Email');
+                
+                const assignedPhotographers = new Set();
+                if (amMap) {
+                    amMap.forEach(row => {
+                        assignedPhotographers.add(row['Photographer Email'].toLowerCase());
+                    });
+                }
+
+                // Find photographers without AM assignment (only those who are invited)
+                const unassignedPhotographers = Object.values(photographerEmails)
+                    .filter(p => invitedEmails.has(p.email.toLowerCase()) && !assignedPhotographers.has(p.email.toLowerCase()));
+
+                const amAssignStatus = document.getElementById('arAMAssignStatus');
+                const amAssignTable = document.getElementById('arAMAssignTable');
+                const amAssignTableBody = document.getElementById('arAMAssignTableBody');
+                const amAssignEmpty = document.getElementById('arAMAssignEmpty');
+
+                if (unassignedPhotographers.length === 0) {
+                    amAssignStatus.innerHTML = '';
+                    amAssignTable.style.display = 'none';
+                    amAssignEmpty.style.display = 'block';
+                } else {
+                    amAssignStatus.innerHTML = `<div class="sync-status loading">${unassignedPhotographers.length} photographer(s) need AM assignment</div>`;
+                    amAssignEmpty.style.display = 'none';
+                    amAssignTable.style.display = 'table';
+
+                    // Get list of AMs
+                    const { data: amList } = await supabaseClient
+                        .from('user_roles')
+                        .select('user_email')
+                        .eq('role', 'am');
+                    
+                    const amOptions = (amList || [])
+                        .map(am => `<option value="${am.user_email}">${am.user_email}</option>`)
+                        .join('');
+
+                    amAssignTableBody.innerHTML = unassignedPhotographers.map((photo, idx) => `
+                        <tr>
+                            <td>${photo.name}</td>
+                            <td>${photo.email}</td>
+                            <td>
+                                <select id="amSelect_${idx}" style="padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+                                    <option value="">-- Select AM --</option>
+                                    ${amOptions}
+                                </select>
+                            </td>
+                            <td>
+                                <button class="invite-btn-small" onclick="assignPhotographerAM('${photo.email}', '${photo.name.replace(/'/g, "\\'")}', 'amSelect_${idx}')">Assign</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
             } catch (error) {
                 status.innerHTML = `<div class="sync-status error">Error: ${error.message}</div>`;
             }
@@ -8985,7 +9053,7 @@
                 // Get photographers and their names from am_photographer_mapping
                 const { data: photoList, error: photoError } = await supabaseClient
                     .from('am_photographer_mapping')
-                    .select('Photographer, Photographer Email');
+                    .select('"Photographer", "Photographer Email"');
 
                 if (photoError) throw photoError;
 
@@ -9102,6 +9170,47 @@
             const isOpen = content.style.display !== 'none';
             content.style.display = isOpen ? 'none' : 'block';
             arrow.textContent = isOpen ? '▼' : '▲';
+        }
+
+        async function assignPhotographerAM(photographerEmail, photographerName, selectId) {
+            const selectEl = document.getElementById(selectId);
+            const amEmail = selectEl ? selectEl.value : '';
+
+            if (!amEmail) {
+                alert('Please select an Area Manager');
+                return;
+            }
+
+            try {
+                // Get the AM name from user_roles/metadata
+                const { data: amRole } = await supabaseClient
+                    .from('user_roles')
+                    .select('user_email')
+                    .eq('user_email', amEmail)
+                    .single();
+
+                if (!amRole) {
+                    alert('AM not found');
+                    return;
+                }
+
+                // Insert into am_photographer_mapping
+                const { error } = await supabaseClient
+                    .from('am_photographer_mapping')
+                    .insert({
+                        'AM Email': amEmail,
+                        'AM': amEmail.split('@')[0], // Use email prefix as fallback for AM name
+                        'Photographer': photographerName,
+                        'Photographer Email': photographerEmail
+                    });
+
+                if (error) throw error;
+
+                alert(`✓ ${photographerName} has been assigned to ${amEmail}`);
+                loadARUserSync(); // Refresh the list
+            } catch (err) {
+                alert('Error assigning AM: ' + err.message);
+            }
         }
 
         init();
