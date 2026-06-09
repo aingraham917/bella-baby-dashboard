@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>7.4 Dashboard</title>
+    <title>7.5 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -6954,8 +6954,10 @@
                     const baseUrl = 'https://www.bellababyphotography.com/v2/galleries/';
                     const g1Code = record['Gallery #1 Access Code:'];
                     const g2Code = record['Gallery #2 Access Code:'];
-                    const g1LinkHtml = g1Code ? `&nbsp;·&nbsp;<a href="${baseUrl}${g1Code}" target="_blank" style="color:#4ba8a8;font-size:11px;font-weight:400;">🔗 View Gallery</a>` : '';
-                    const g2LinkHtml = g2Code ? `&nbsp;·&nbsp;<a href="${baseUrl}${g2Code}" target="_blank" style="color:#4ba8a8;font-size:11px;font-weight:400;">🔗 View Gallery</a>` : '';
+                    const g1Url = g1Code ? ('https://www.bellababyphotography.com/v2/galleries/' + g1Code.trim()) : null;
+                    const g2Url = g2Code ? ('https://www.bellababyphotography.com/v2/galleries/' + g2Code.trim()) : null;
+                    const g1LinkHtml = g1Url ? `&nbsp;·&nbsp;<a href="${g1Url}" target="_blank" rel="noreferrer noopener" style="color:#4ba8a8;font-size:11px;font-weight:400;">🔗 View Gallery</a>` : '';
+                    const g2LinkHtml = g2Url ? `&nbsp;·&nbsp;<a href="${g2Url}" target="_blank" rel="noreferrer noopener" style="color:#4ba8a8;font-size:11px;font-weight:400;">🔗 View Gallery</a>` : '';
                     
                     html += `
                         <div style="background: #f9f9f9; border: 1px solid #ddd; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 4px;">
@@ -7317,13 +7319,14 @@
                 data.forEach(record => {
                     const g1Code = record['Gallery #1 Access Code:'];
                     const g2Code = record['Gallery #2 Access Code:'];
-                    const baseUrl = 'https://www.bellababyphotography.com/v2/galleries/';
+                    const g1Url = g1Code ? ('https://www.bellababyphotography.com/v2/galleries/' + g1Code.trim()) : null;
+                    const g2Url = g2Code ? ('https://www.bellababyphotography.com/v2/galleries/' + g2Code.trim()) : null;
 
-                    const g1Link = g1Code
-                        ? `<a href="${baseUrl}${g1Code}" target="_blank" style="color: #4ba8a8; font-size: 12px; margin-left: 8px;">🔗 View Gallery</a>`
+                    const g1Link = g1Url
+                        ? `<a href="${g1Url}" target="_blank" rel="noreferrer noopener" style="color: #4ba8a8; font-size: 12px; margin-left: 8px;">🔗 View Gallery</a>`
                         : '';
-                    const g2Link = g2Code
-                        ? `<a href="${baseUrl}${g2Code}" target="_blank" style="color: #4ba8a8; font-size: 12px; margin-left: 8px;">🔗 View Gallery</a>`
+                    const g2Link = g2Url
+                        ? `<a href="${g2Url}" target="_blank" rel="noreferrer noopener" style="color: #4ba8a8; font-size: 12px; margin-left: 8px;">🔗 View Gallery</a>`
                         : '';
 
                     html += `
