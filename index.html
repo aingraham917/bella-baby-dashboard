@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bella Baby QC Dashboard</title>
+    <title>4.1C Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -9057,26 +9057,46 @@
 
                 if (photoError) throw photoError;
 
-                if (!photoList || photoList.length === 0) {
-                    container.innerHTML = '<p style="color: #999;">No photographers found.</p>';
-                    return;
+                // Build a map of photographers
+                const uniquePhotos = {};
+                if (photoList) {
+                    photoList.forEach(p => {
+                        const email = p['Photographer Email']?.toLowerCase();
+                        if (email && !uniquePhotos[email]) {
+                            uniquePhotos[email] = {
+                                name: p['Photographer'],
+                                email: p['Photographer Email']
+                            };
+                        }
+                    });
                 }
 
-                // Remove duplicates by email and sort
-                const uniquePhotos = {};
-                photoList.forEach(p => {
-                    const email = p['Photographer Email']?.toLowerCase();
-                    if (email && !uniquePhotos[email]) {
-                        uniquePhotos[email] = {
-                            name: p['Photographer'],
-                            email: p['Photographer Email']
-                        };
-                    }
-                });
+                // Also include trainers (they're photographers too)
+                const { data: trainers, error: trainError } = await supabaseClient
+                    .from('user_roles')
+                    .select('user_email')
+                    .eq('role', 'trainer');
+
+                if (!trainError && trainers) {
+                    trainers.forEach(trainer => {
+                        const email = trainer.user_email?.toLowerCase();
+                        if (email && !uniquePhotos[email]) {
+                            uniquePhotos[email] = {
+                                name: trainer.user_email, // Use email as fallback name
+                                email: trainer.user_email
+                            };
+                        }
+                    });
+                }
 
                 const photographers = Object.values(uniquePhotos).sort((a, b) => 
                     (a.name || a.email).localeCompare(b.name || b.email)
                 );
+
+                if (photographers.length === 0) {
+                    container.innerHTML = '<p style="color: #999;">No photographers found.</p>';
+                    return;
+                }
 
                 // Get all completed resources
                 const { data: completions, error: compError } = await supabaseClient
