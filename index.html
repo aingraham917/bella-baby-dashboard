@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>6.9 Dashboard</title>
+    <title>7.0 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -1441,19 +1441,19 @@
                     <div style="position: relative;">
                         <button id="learningBtn" style="padding: 8px 15px; background: #a8d5a3; color: #1a4d1a; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">Learning</button>
                         <div id="learningDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; margin-top: 5px;">
-                            <button id="resourcesLibraryOption" onclick="openResourcesLibrary('videos')" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; font-family: inherit;">📚 Resources Library</button>
-                            <a href="LMS.html" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; display: block; text-decoration: none; color: inherit; font-family: inherit;">📚 Courses</a>
-                            <button id="resourceViewsOption" onclick="openResourceViews()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; transition: background 0.2s; font-family: inherit;">📊 Resource Views</button>
+                            <button id="resourcesLibraryOption" onclick="openResourcesLibrary('videos')" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📚 Resources Library</button>
+                            <a href="LMS.html" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; display: block; text-decoration: none; color: inherit;">📚 Courses</a>
+                            <button id="resourceViewsOption" onclick="openResourceViews()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; transition: background 0.2s;">📊 Resource Views</button>
                         </div>
                     </div>
                     
                     <!-- TRAINING TEAM DROPDOWN -->
-                    <div id="trainingTeamWrapper" style="position: relative; display: none;">
-                        <button id="trainingTeamBtn" style="padding: 8px 15px; background: #4ba8a8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">Training Team</button>
+                    <div style="position: relative;">
+                        <button id="trainingTeamBtn" style="padding: 8px 15px; background: #4ba8a8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">Training</button>
                         <div id="trainingTeamDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; margin-top: 5px;">
-                            <button id="assessmentsOption" class="options-menu-item" onclick="openAssessments()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; font-family: inherit;">📋 My Assessments</button>
-                            <button id="adminAssessmentsOption" class="options-menu-item" onclick="openAdminAssessments()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; font-family: inherit;">📋 Manage Assessments</button>
-                            <a id="viewRubricOption" href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view?usp=sharing" target="_blank" class="options-menu-item" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; transition: background 0.2s; text-decoration: none; color: inherit; display: block; font-family: inherit;">📋 View Rubric</a>
+                            <button id="assessmentsOption" class="options-menu-item" onclick="openAssessments()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📋 My Assessments</button>
+                            <button id="adminAssessmentsOption" class="options-menu-item" onclick="openAdminAssessments()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📋 Manage Assessments</button>
+                            <a id="viewRubricOption" href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view?usp=sharing" target="_blank" class="options-menu-item" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; transition: background 0.2s; text-decoration: none; color: inherit; display: block;">📋 View Rubric</a>
                         </div>
                     </div>
                     
@@ -1461,11 +1461,10 @@
                     <div style="position: relative;">
                         <button id="optionsBtn" style="padding: 8px 15px; background: #666; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">Options</button>
                         <div id="optionsDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; margin-top: 5px;">
-                            <button id="chartsOption" class="options-menu-item" onclick="openCharts()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; font-family: inherit;">📊 Charts & Analytics</button>
-                            <button id="adminReportOption" class="options-menu-item" onclick="openAdminReport()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; font-family: inherit;">📁 Admin Tools</button>
-                            <button id="imageStorageOption" class="options-menu-item" onclick="openImageStoragePage()" style="display:none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; font-family: inherit;">💾 Image Storage</button>
-                            <button id="changePasswordOption" class="options-menu-item" onclick="openChangePasswordPage()" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; font-family: inherit;">👤 Edit Profile</button>
-                            <button id="reportIssueOption" class="options-menu-item" onclick="openReportIssuePage()" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; transition: background 0.2s; font-family: inherit;">🐛 Report an Issue</button>
+                            <button id="chartsOption" class="options-menu-item" onclick="openCharts()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📊 Charts & Analytics</button>
+                            <button id="adminReportOption" class="options-menu-item" onclick="openAdminReport()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📁 Admin Tools</button>
+                            <button id="imageStorageOption" class="options-menu-item" onclick="openImageStoragePage()" style="display:none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">🗄 Image Storage</button>
+                            <button id="changePasswordOption" class="options-menu-item" onclick="openChangePasswordPage()" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; transition: background 0.2s;">👤 Edit Profile</button>
                         </div>
                     </div>
                 </div>
@@ -1522,8 +1521,8 @@
 
                         <!-- Sort -->
                         <select id="sortSelect" class="sort-select" style="min-width:150px;padding-top:6px;padding-bottom:6px;">
-                            <option value="a-z">A - Z</option>
-                            <option value="z-a">Z - A</option>
+                            <option value="a-z" selected>Sort: A – Z</option>
+                            <option value="z-a">Z – A</option>
                             <option value="score-high">Score High to Low</option>
                             <option value="score-low">Score Low to High</option>
                         </select>
@@ -2428,54 +2427,7 @@
                 </div>
             </div>
         </div>
-
-            <!-- REPORT AN ISSUE PAGE -->
-            <div id="reportIssuePage" class="page-container" style="display: none; flex-direction: column;">
-                <div class="main-content">
-                    <h2 style="margin: 0 0 5px 0;">🐛 Report an Issue</h2>
-                    <p style="color: #999; font-size: 13px; margin-bottom: 30px;">Help us improve by reporting any issues you encounter. Include as much detail as possible!</p>
-                    <div id="reportIssueMessage"></div>
-                    <form id="reportIssueForm">
-                        <div class="form-group">
-                            <label for="issueType">Issue Type <span style="color: #c92a2a;">*</span></label>
-                            <select id="issueType" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
-                                <option value="">-- Select an issue type --</option>
-                                <option value="button_link">Button or Link Issue</option>
-                                <option value="lms">LMS / Course Issue</option>
-                                <option value="resource_library">Resource Library Issue</option>
-                                <option value="broken_link">Broken Link</option>
-                                <option value="performance">Performance/Loading Issue</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="issueTitle">Title <span style="color: #c92a2a;">*</span></label>
-                            <input type="text" id="issueTitle" placeholder="Brief title of the issue" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
-                        </div>
-                        <div class="form-group">
-                            <label for="issueDescription">Description <span style="color: #c92a2a;">*</span></label>
-                            <textarea id="issueDescription" placeholder="Please describe the issue in detail. What were you trying to do? What happened?" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box; min-height: 150px; font-family: inherit; resize: vertical;"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="issueLocation">Where did this happen? (optional)</label>
-                            <input type="text" id="issueLocation" placeholder="e.g., Resources Library, Growth Assessments page, etc." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
-                        </div>
-                        <div class="form-group">
-                            <label for="issueBrowserInfo">Browser/Device (optional)</label>
-                            <input type="text" id="issueBrowserInfo" placeholder="e.g., Chrome on Windows, Safari on iPhone, etc." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
-                        </div>
-                        <div class="form-group">
-                            <label for="issueScreenshot">Upload Screenshot (optional)</label>
-                            <input type="file" id="issueScreenshot" accept="image/*" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
-                            <div id="screenshotPreview" style="margin-top: 10px; font-size: 12px; color: #666;"></div>
-                        </div>
-                        <div style="display: flex; gap: 10px;">
-                            <button type="submit" style="padding: 10px 20px; background: #4ba8a8; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Submit Report</button>
-                            <button type="button" onclick="goToDashboard()" style="padding: 10px 20px; background: #999; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+    </div>
 
     </div>
 
@@ -3804,15 +3756,10 @@
             on('closeChangePassword', 'click', closeChangePasswordModal);
             on('changePasswordForm', 'submit', handleChangePassword);
 
-            // Report an Issue
-            on('reportIssueForm', 'submit', submitIssueReport);
-
             // Options Dropdown Toggle
             on('optionsBtn', 'click', (e) => {
                 e.stopPropagation();
                 const dropdown = document.getElementById('optionsDropdown');
-                document.getElementById('learningDropdown').style.display = 'none';
-                document.getElementById('trainingTeamDropdown').style.display = 'none';
                 dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
             });
 
@@ -3820,8 +3767,6 @@
             on('learningBtn', 'click', (e) => {
                 e.stopPropagation();
                 const dropdown = document.getElementById('learningDropdown');
-                document.getElementById('optionsDropdown').style.display = 'none';
-                document.getElementById('trainingTeamDropdown').style.display = 'none';
                 dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
             });
 
@@ -3829,8 +3774,6 @@
             on('trainingTeamBtn', 'click', (e) => {
                 e.stopPropagation();
                 const dropdown = document.getElementById('trainingTeamDropdown');
-                document.getElementById('optionsDropdown').style.display = 'none';
-                document.getElementById('learningDropdown').style.display = 'none';
                 dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
             });
 
@@ -4476,77 +4419,6 @@
             loadTrainingVideos();
         }
 
-        function openReportIssuePage() {
-            showPage('reportIssuePage');
-            document.getElementById('reportIssueMessage').innerHTML = '';
-            document.getElementById('reportIssueForm').reset();
-        }
-
-        async function submitIssueReport(event) {
-            event.preventDefault();
-            const messageDiv = document.getElementById('reportIssueMessage');
-            
-            try {
-                const issueType = document.getElementById('issueType').value;
-                const issueTitle = document.getElementById('issueTitle').value.trim();
-                const issueDescription = document.getElementById('issueDescription').value.trim();
-                const issueLocation = document.getElementById('issueLocation').value.trim();
-                const issueBrowserInfo = document.getElementById('issueBrowserInfo').value.trim();
-                const screenshotFile = document.getElementById('issueScreenshot').files[0];
-
-                if (!issueType || !issueTitle || !issueDescription) {
-                    messageDiv.innerHTML = '<div class="password-error">Please fill in all required fields</div>';
-                    return;
-                }
-
-                messageDiv.innerHTML = '<div class="password-success">Uploading...</div>';
-                
-                let screenshotUrl = null;
-
-                // Upload screenshot if provided
-                if (screenshotFile) {
-                    const fileName = `${Date.now()}_${currentUser.email.replace(/[^a-zA-Z0-9]/g, '_')}_${screenshotFile.name}`;
-                    const { data, error } = await supabaseClient.storage
-                        .from('bugs')
-                        .upload(fileName, screenshotFile);
-
-                    if (error) throw new Error(`Screenshot upload failed: ${error.message}`);
-                    
-                    // Get public URL
-                    const { data: publicData } = supabaseClient.storage
-                        .from('bugs')
-                        .getPublicUrl(fileName);
-                    screenshotUrl = publicData.publicUrl;
-                }
-
-                // Insert report record
-                const { data, error } = await supabaseClient
-                    .from('issue_reports')
-                    .insert([{
-                        user_email: currentUser.email,
-                        user_role: getCurrentUserRole(),
-                        issue_type: issueType,
-                        title: issueTitle,
-                        description: issueDescription,
-                        location: issueLocation || null,
-                        browser_info: issueBrowserInfo || null,
-                        screenshot_url: screenshotUrl,
-                        status: 'new',
-                        created_at: new Date().toISOString()
-                    }]);
-
-                if (error) throw error;
-
-                messageDiv.innerHTML = '<div class="password-success">✓ Thank you! Your issue report has been submitted. Our team will look into it shortly.</div>';
-                setTimeout(() => {
-                    goToDashboard();
-                }, 2000);
-            } catch (error) {
-                console.error('Error submitting issue report:', error);
-                messageDiv.innerHTML = `<div class="password-error">Error: ${error.message}</div>`;
-            }
-        }
-
         function openChangePasswordPage() {
             showPage('changePasswordPage');
             document.getElementById('changePasswordPageMessage').innerHTML = '';
@@ -4655,7 +4527,7 @@
 
         function showPage(pageId) {
             // Hide all pages
-            const allPages = ['dashboardPage','manageAssessmentsPage','myAssessmentsPage','assessmentFormPage','recordDetailPage','chartsPage','adminReportsPage','imageStoagePage','changePasswordPage','trainingLibraryPage','resourceViewsPage','reportIssuePage'];
+            const allPages = ['dashboardPage','manageAssessmentsPage','myAssessmentsPage','assessmentFormPage','recordDetailPage','chartsPage','adminReportsPage','imageStoagePage','changePasswordPage','trainingLibraryPage','resourceViewsPage'];
             allPages.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
 
             // Show selected page
@@ -5148,7 +5020,6 @@
                 if (e.target.id === 'changePasswordModal') closeChangePasswordModal();
             });
             
-            
             filterBtns.forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     document.querySelectorAll('.type-filter').forEach(b => b.classList.remove('active'));
@@ -5488,12 +5359,6 @@
                 const controlsBar = document.getElementById('dashboardControlsBar');
                 if (controlsBar) {
                     controlsBar.style.display = currentUserRole !== 'user' ? 'flex' : 'none';
-                }
-
-                // Training Team button (non-photographers only)
-                const trainingTeamWrapper = document.getElementById('trainingTeamWrapper');
-                if (trainingTeamWrapper) {
-                    trainingTeamWrapper.style.display = currentUserRole !== 'user' ? 'block' : 'none';
                 }
 
                 // Assessments (PSS: trainer, area_manager)
@@ -9402,8 +9267,23 @@
                     });
                 }
 
-                // Also include trainers (they're photographers too)
-                const { data: trainers, error: trainError } = await supabaseClient
+                // Also include users (photographers with user role)
+                const { data: userRoles, error: userError } = await supabaseClient
+                    .from('user_roles')
+                    .select('user_email')
+                    .eq('role', 'user');
+
+                if (!userError && userRoles) {
+                    userRoles.forEach(u => {
+                        const email = (u.user_email || '').toLowerCase().trim();
+                        if (email && !uniquePhotos[email]) {
+                            uniquePhotos[email] = {
+                                name: u.user_email,
+                                email: u.user_email
+                            };
+                        }
+                    });
+                }
                     .from('user_roles')
                     .select('user_email')
                     .eq('role', 'trainer');
@@ -9436,21 +9316,22 @@
 
                 if (compError) throw compError;
 
-                // Group completions by email
+                // Group completions by email (normalize to lowercase)
                 const completionsByEmail = {};
                 if (completions) {
                     completions.forEach(comp => {
-                        if (!completionsByEmail[comp.user_email]) {
-                            completionsByEmail[comp.user_email] = [];
+                        const emailKey = (comp.user_email || '').toLowerCase().trim();
+                        if (!completionsByEmail[emailKey]) {
+                            completionsByEmail[emailKey] = [];
                         }
-                        completionsByEmail[comp.user_email].push(comp);
+                        completionsByEmail[emailKey].push(comp);
                     });
                 }
 
                 // Build HTML
                 let html = '';
                 photographers.forEach((photo, idx) => {
-                    const email = photo.email.toLowerCase();
+                    const email = (photo.email || '').toLowerCase().trim();
                     const displayName = photo.name || email;
                     const completedResources = completionsByEmail[email] || [];
                     const cardId = 'rvCard_' + idx;
