@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>6.3 Dashboard</title>
+    <title>6.4 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -1448,8 +1448,8 @@
                     </div>
                     
                     <!-- TRAINING TEAM DROPDOWN -->
-                    <div style="position: relative;">
-                        <button id="trainingTeamBtn" style="display: none; padding: 8px 15px; background: #4ba8a8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">Training Team</button>
+                    <div id="trainingTeamWrapper" style="position: relative; display: none;">
+                        <button id="trainingTeamBtn" style="padding: 8px 15px; background: #4ba8a8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">Training Team</button>
                         <div id="trainingTeamDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; margin-top: 5px;">
                             <button id="assessmentsOption" class="options-menu-item" onclick="openAssessments()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; font-family: inherit;">📋 My Assessments</button>
                             <button id="adminAssessmentsOption" class="options-menu-item" onclick="openAdminAssessments()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; font-family: inherit;">📋 Manage Assessments</button>
@@ -5497,9 +5497,9 @@
                 }
 
                 // Training Team button (non-photographers only)
-                const trainingTeamBtn = document.getElementById('trainingTeamBtn');
-                if (trainingTeamBtn) {
-                    trainingTeamBtn.style.display = currentUserRole !== 'user' ? 'block' : 'none';
+                const trainingTeamWrapper = document.getElementById('trainingTeamWrapper');
+                if (trainingTeamWrapper) {
+                    trainingTeamWrapper.style.display = currentUserRole !== 'user' ? 'block' : 'none';
                 }
 
                 // Assessments (PSS: trainer, area_manager)
