@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>10.6 Dashboard</title>
+    <title>10.7 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -9416,6 +9416,24 @@
                     });
                 }
 
+                // Also include users (photographers with user role)
+                const { data: userRoles, error: userError } = await supabaseClient
+                    .from('user_roles')
+                    .select('user_email')
+                    .eq('role', 'user');
+
+                if (!userError && userRoles) {
+                    userRoles.forEach(u => {
+                        const email = (u.user_email || '').toLowerCase().trim();
+                        if (email && !uniquePhotos[email]) {
+                            uniquePhotos[email] = {
+                                name: u.user_email,
+                                email: u.user_email
+                            };
+                        }
+                    });
+                }
+
                 // Also include trainers (they're photographers too)
                 const { data: trainers, error: trainError } = await supabaseClient
                     .from('user_roles')
@@ -9424,10 +9442,10 @@
 
                 if (!trainError && trainers) {
                     trainers.forEach(trainer => {
-                        const email = trainer.user_email?.toLowerCase();
+                        const email = (trainer.user_email || '').toLowerCase().trim();
                         if (email && !uniquePhotos[email]) {
                             uniquePhotos[email] = {
-                                name: trainer.user_email, // Use email as fallback name
+                                name: trainer.user_email,
                                 email: trainer.user_email
                             };
                         }
@@ -9450,21 +9468,22 @@
 
                 if (compError) throw compError;
 
-                // Group completions by email
+                // Group completions by email — normalize to lowercase
                 const completionsByEmail = {};
                 if (completions) {
                     completions.forEach(comp => {
-                        if (!completionsByEmail[comp.user_email]) {
-                            completionsByEmail[comp.user_email] = [];
+                        const emailKey = (comp.user_email || '').toLowerCase().trim();
+                        if (!completionsByEmail[emailKey]) {
+                            completionsByEmail[emailKey] = [];
                         }
-                        completionsByEmail[comp.user_email].push(comp);
+                        completionsByEmail[emailKey].push(comp);
                     });
                 }
 
                 // Build HTML
                 let html = '';
                 photographers.forEach((photo, idx) => {
-                    const email = photo.email.toLowerCase();
+                    const email = (photo.email || '').toLowerCase().trim();
                     const displayName = photo.name || email;
                     const completedResources = completionsByEmail[email] || [];
                     const cardId = 'rvCard_' + idx;
