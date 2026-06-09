@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>7.8 Dashboard</title>
+    <title>7.9 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -1547,6 +1547,7 @@
                     </div>
 
                     <!-- RECOMMENDED FOR YOU CAROUSEL -->
+                    <div id="inspirationalQuoteBanner"></div>
                     <div class="recommended-for-you" id="photographerRecommendedResources"></div>
 
                     </div><!-- end main-content -->
@@ -2464,7 +2465,15 @@
 
             <!-- PENDING APPROVALS TAB -->
             <div id="pendingApprovalsTabContent" style="display: none; margin-top: 20px;">
-                <div id="pendingApprovalsList" style="margin-top: 20px;">Loading pending approvals...</div>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                    <select id="pendingFilterSelect" onchange="applyPendingFilter()" style="padding: 7px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; cursor: pointer;">
+                        <option value="all">Filter: View All</option>
+                        <option value="flagged">Flagged Only</option>
+                        <option value="high_score">High Score (13–16)</option>
+                    </select>
+                    <span id="pendingFilterCount" style="font-size: 12px; color: #999;"></span>
+                </div>
+                <div id="pendingApprovalsList" style="margin-top: 12px;">Loading pending approvals...</div>
             </div>
         </div>
     </div>
@@ -6924,6 +6933,8 @@
             }
         }
 
+        let _pendingAssessmentsRaw = [];
+
         async function loadPendingAssessments() {
             try {
                 const { data, error } = await supabaseClient
@@ -6934,12 +6945,41 @@
 
                 if (error) throw error;
 
-                if (!data || data.length === 0) {
-                    document.getElementById('pendingApprovalsList').innerHTML = '<p style="color: #999; text-align: center;">No pending approvals</p>';
-                    return;
-                }
+                _pendingAssessmentsRaw = data || [];
+                renderPendingAssessments(_pendingAssessmentsRaw);
+            } catch (err) {
+                console.error('Error loading pending assessments:', err);
+                document.getElementById('pendingApprovalsList').innerHTML = '<p style="color: #c92a2a;">Error loading pending assessments</p>';
+            }
+        }
 
-                let html = '<div style="display: grid; gap: 12px;">';
+        function applyPendingFilter() {
+            const filter = document.getElementById('pendingFilterSelect')?.value || 'all';
+            let filtered = _pendingAssessmentsRaw;
+
+            if (filter === 'flagged') {
+                filtered = _pendingAssessmentsRaw.filter(r => r['Delivery Standard Flags:'] && r['Delivery Standard Flags:'].trim() !== '');
+            } else if (filter === 'high_score') {
+                filtered = _pendingAssessmentsRaw.filter(r => {
+                    const avgScore = parseFloat(r['Average Gallery Score']) || 0;
+                    return avgScore >= 13;
+                });
+            }
+
+            renderPendingAssessments(filtered);
+        }
+
+        function renderPendingAssessments(data) {
+            const countEl = document.getElementById('pendingFilterCount');
+            if (!data || data.length === 0) {
+                document.getElementById('pendingApprovalsList').innerHTML = '<p style="color: #999; text-align: center;">No pending approvals</p>';
+                if (countEl) countEl.textContent = '';
+                return;
+            }
+
+            if (countEl) countEl.textContent = `${data.length} review${data.length !== 1 ? 's' : ''}`;
+
+            let html = '<div style="display: grid; gap: 12px;">';
                 data.forEach(record => {
                     const g1Score = (parseInt(record['Core Skills (1)'] || 0) + 
                                    parseInt(record['Subject and Posing (1)'] || 0) + 
@@ -7039,10 +7079,6 @@
                 });
                 html += '</div>';
                 document.getElementById('pendingApprovalsList').innerHTML = html;
-            } catch (err) {
-                console.error('Error loading pending assessments:', err);
-                document.getElementById('pendingApprovalsList').innerHTML = '<p style="color: #c92a2a;">Error loading pending assessments</p>';
-            }
         }
 
         async function saveEditedPending(recordId) {
@@ -7607,7 +7643,23 @@
 
 
             if (filtered.length === 0) {
-                recordsContainer.innerHTML = '<div class="no-records">No records found</div>';
+                const role = getCurrentUserRole();
+                if (role === 'user' || role === 'trainer') {
+                    recordsContainer.innerHTML = `
+                        <div style="text-align: center; padding: 60px 30px; max-width: 500px; margin: 0 auto;">
+                            <div style="font-size: 48px; margin-bottom: 20px;">📷</div>
+                            <h3 style="margin: 0 0 12px 0; color: #333; font-size: 20px;">No reviews yet — but you're in the right place!</h3>
+                            <p style="color: #777; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0;">
+                                Once you've had your first quality review, it will show up right here. In the meantime, 
+                                the Resources Library is full of tips, guides, and videos to help you grow.
+                            </p>
+                            <button onclick="openResourcesLibrary('videos')" style="padding: 10px 24px; background: #4ba8a8; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                                📚 Explore the Resources Library
+                            </button>
+                        </div>`;
+                } else {
+                    recordsContainer.innerHTML = '<div class="no-records">No records found</div>';
+                }
                 return;
             }
 
@@ -7767,6 +7819,7 @@
                 `;
 
                 // Load recommended resources for this photographer
+                showInspirationalQuote();
                 setTimeout(loadPhotographerRecommendedResources, 200);
                 return;
             }
@@ -7882,6 +7935,39 @@
             // Load recommended resources for photographers
             // No role check - just try to load; it will auto-hide if no flags
             setTimeout(loadPhotographerRecommendedResources, 200);
+        }
+
+        function showInspirationalQuote() {
+            const container = document.getElementById('inspirationalQuoteBanner');
+            if (!container) return;
+            const role = getCurrentUserRole();
+            if (role !== 'user' && role !== 'trainer') { container.innerHTML = ''; return; }
+
+            const quotes = [
+                { quote: "Every expert was once a beginner. Keep going.", author: "Helen Hayes" },
+                { quote: "Photography is the story I fail to put into words.", author: "Destin Sparks" },
+                { quote: "The best camera is the one that's with you — and the best photographer is the one who never stops learning.", author: "Bella Baby Training" },
+                { quote: "You don't take a photograph, you make it.", author: "Ansel Adams" },
+                { quote: "Light makes photography. Embrace light. Admire it. Love it. But above all, know light.", author: "George Eastman" },
+                { quote: "Growth is not a destination. It's a direction.", author: "Bella Baby Training" },
+                { quote: "A great photograph is one that fully expresses what one feels, in the deepest sense.", author: "Ansel Adams" },
+                { quote: "The secret to getting ahead is getting started.", author: "Mark Twain" },
+                { quote: "Your instincts will improve with every session. Trust the process.", author: "Bella Baby Training" },
+                { quote: "In photography, there are no accidents — only discoveries.", author: "Cartier-Bresson" },
+                { quote: "Excellence is not a destination but a continuous journey that never ends.", author: "Brian Tracy" },
+                { quote: "Every session is a chance to see something you've never seen before.", author: "Bella Baby Training" },
+            ];
+
+            const q = quotes[Math.floor(Math.random() * quotes.length)];
+            container.innerHTML = `
+                <div style="margin-bottom: 20px; padding: 16px 20px; background: linear-gradient(135deg, #f0fafa 0%, #e8f5e9 100%); border-left: 4px solid #4ba8a8; border-radius: 6px; display: flex; align-items: flex-start; gap: 14px;">
+                    <span style="font-size: 24px; line-height: 1; flex-shrink: 0;">✨</span>
+                    <div>
+                        <p style="margin: 0 0 4px 0; font-size: 14px; color: #2c5f5f; font-style: italic; line-height: 1.5;">"${q.quote}"</p>
+                        <p style="margin: 0; font-size: 11px; color: #888; font-weight: 600;">— ${q.author}</p>
+                    </div>
+                </div>
+            `;
         }
 
         function openGallery(code) {
