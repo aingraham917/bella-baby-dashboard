@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>8.1 Dashboard</title>
+    <title>8.2 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -6958,7 +6958,13 @@
             let filtered = _pendingAssessmentsRaw;
 
             if (filter === 'flagged') {
-                filtered = _pendingAssessmentsRaw.filter(r => r['Delivery Standard Flags:'] && r['Delivery Standard Flags:'].trim() !== '');
+                filtered = _pendingAssessmentsRaw.filter(r => {
+                    const flags = (r['Delivery Standard Flags:'] || '').trim();
+                    const csFlags = (r['Gallery #1 Core Skills Flags'] || '') + (r['Gallery #2 Core Skills Flags'] || '');
+                    const hasDeliveryFlag = flags !== '' && flags !== 'No Delivery Standard Flags';
+                    const hasCsFlag = csFlags.trim() !== '';
+                    return hasDeliveryFlag || hasCsFlag;
+                });
             } else if (filter === 'high_score') {
                 filtered = _pendingAssessmentsRaw.filter(r => {
                     const avgScore = parseFloat(r['Average Gallery Score']) || 0;
@@ -7033,39 +7039,76 @@
                             <button onclick="toggleEditPending('${recordId}')" style="width: 100%; padding: 6px; background: #e3f2fd; color: #1976d2; border: 1px solid #90caf9; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600; margin-bottom: 8px;">✎ Edit Scores & Notes</button>
                             
                             <div id="${editId}" style="display: none; background: white; border: 1px solid #e0e0e0; border-radius: 3px; padding: 12px; margin-bottom: 8px; font-size: 12px;">
-                                <p style="font-weight:600;color:#333;margin:0 0 10px 0;font-size:13px;">Gallery #1</p>
+                                
+                                <!-- Gallery #1 -->
+                                <p style="font-weight:700;color:#4ba8a8;margin:0 0 8px 0;font-size:13px;border-bottom:1px solid #e8f5f5;padding-bottom:6px;">Gallery #1</p>
+                                <div style="margin-bottom:8px;">
+                                    <label style="display:block;font-weight:600;margin-bottom:3px;">Access Code:</label>
+                                    <input type="text" id="edit-g1-code-${recordId}" value="${record['Gallery #1 Access Code:'] || ''}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;box-sizing:border-box;">
+                                </div>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
                                     <div><label style="display:block;font-weight:600;margin-bottom:3px;">Core Skills (1-4):</label>
                                     <input type="number" id="edit-g1-core-${recordId}" min="1" max="4" value="${record['Core Skills (1)'] || ''}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;"></div>
                                     <div><label style="display:block;font-weight:600;margin-bottom:3px;">Subject &amp; Posing (1-4):</label>
                                     <input type="number" id="edit-g1-subj-${recordId}" min="1" max="4" value="${record['Subject and Posing (1)'] || ''}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;"></div>
-                                    <div><label style="display:block;font-weight:600;margin-bottom:3px;">Composition (1-4):</label>
+                                    <div><label style="display:block;font-weight:600;margin-bottom:3px;">Gallery Experience (1-4):</label>
                                     <input type="number" id="edit-g1-gallery-exp-${recordId}" min="1" max="4" value="${record['Gallery Experience (1)'] || ''}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;"></div>
                                     <div><label style="display:block;font-weight:600;margin-bottom:3px;">Editing (1-4):</label>
                                     <input type="number" id="edit-g1-edit-${recordId}" min="1" max="4" value="${record['Editing / Bella Baby Standards (1)'] || ''}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;"></div>
                                 </div>
+                                <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:4px;padding:8px;margin-bottom:8px;">
+                                    <label style="display:block;font-weight:600;margin-bottom:6px;color:#b45309;font-size:11px;">G1 Core Skills Flags:</label>
+                                    ${['Exposure','Focus','White Balance'].map(f => `
+                                        <label style="display:block;margin-bottom:4px;font-size:11px;cursor:pointer;">
+                                            <input type="checkbox" name="edit-g1csflag-${recordId}" value="${f}" ${(record['Gallery #1 Core Skills Flags']||'').includes(f) ? 'checked' : ''}> ${f}
+                                        </label>`).join('')}
+                                </div>
                                 <div style="margin-bottom:12px;"><label style="display:block;font-weight:600;margin-bottom:3px;">Gallery #1 Feedback:</label>
-                                <textarea id="edit-g1-fb-${recordId}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;font-size:12px;resize:vertical;height:50px;">${record['Gallery #1 Feedback:'] || ''}</textarea></div>
+                                <textarea id="edit-g1-fb-${recordId}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;font-size:12px;resize:vertical;height:60px;box-sizing:border-box;">${record['Gallery #1 Feedback:'] || ''}</textarea></div>
 
-                                <p style="font-weight:600;color:#333;margin:0 0 10px 0;font-size:13px;">Gallery #2</p>
+                                <!-- Gallery #2 -->
+                                <p style="font-weight:700;color:#4ba8a8;margin:0 0 8px 0;font-size:13px;border-bottom:1px solid #e8f5f5;padding-bottom:6px;">Gallery #2</p>
+                                <div style="margin-bottom:8px;">
+                                    <label style="display:block;font-weight:600;margin-bottom:3px;">Access Code:</label>
+                                    <input type="text" id="edit-g2-code-${recordId}" value="${record['Gallery #2 Access Code:'] || ''}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;box-sizing:border-box;">
+                                </div>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
                                     <div><label style="display:block;font-weight:600;margin-bottom:3px;">Core Skills (1-4):</label>
                                     <input type="number" id="edit-g2-core-${recordId}" min="1" max="4" value="${record['Core Skills (2)'] || ''}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;"></div>
                                     <div><label style="display:block;font-weight:600;margin-bottom:3px;">Subject &amp; Posing (1-4):</label>
                                     <input type="number" id="edit-g2-subj-${recordId}" min="1" max="4" value="${record['Subject and Posing (2)'] || ''}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;"></div>
-                                    <div><label style="display:block;font-weight:600;margin-bottom:3px;">Composition (1-4):</label>
+                                    <div><label style="display:block;font-weight:600;margin-bottom:3px;">Gallery Experience (1-4):</label>
                                     <input type="number" id="edit-g2-gallery-exp-${recordId}" min="1" max="4" value="${record['Gallery Experience (2)'] || ''}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;"></div>
                                     <div><label style="display:block;font-weight:600;margin-bottom:3px;">Editing (1-4):</label>
                                     <input type="number" id="edit-g2-edit-${recordId}" min="1" max="4" value="${record['Editing / Bella Baby Standards (2)'] || ''}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;"></div>
                                 </div>
+                                <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:4px;padding:8px;margin-bottom:8px;">
+                                    <label style="display:block;font-weight:600;margin-bottom:6px;color:#b45309;font-size:11px;">G2 Core Skills Flags:</label>
+                                    ${['Exposure','Focus','White Balance'].map(f => `
+                                        <label style="display:block;margin-bottom:4px;font-size:11px;cursor:pointer;">
+                                            <input type="checkbox" name="edit-g2csflag-${recordId}" value="${f}" ${(record['Gallery #2 Core Skills Flags']||'').includes(f) ? 'checked' : ''}> ${f}
+                                        </label>`).join('')}
+                                </div>
                                 <div style="margin-bottom:12px;"><label style="display:block;font-weight:600;margin-bottom:3px;">Gallery #2 Feedback:</label>
-                                <textarea id="edit-g2-fb-${recordId}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;font-size:12px;resize:vertical;height:50px;">${record['Gallery #2 Feedback:'] || ''}</textarea></div>
+                                <textarea id="edit-g2-fb-${recordId}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;font-size:12px;resize:vertical;height:60px;box-sizing:border-box;">${record['Gallery #2 Feedback:'] || ''}</textarea></div>
 
+                                <!-- Delivery Standard Flags -->
+                                <p style="font-weight:700;color:#333;margin:0 0 8px 0;font-size:13px;border-bottom:1px solid #eee;padding-bottom:6px;">Delivery Standard Flags</p>
+                                <div style="background:#f9f9f9;border:1px solid #eee;border-radius:4px;padding:10px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+                                    ${['No Delivery Standard Flags','Metadata','Notes','Image Count','Image Number Sequence','Image Order','Image File Size','Image Aspect Ratio','Intro/Outro Old or Missing','Copyright Slide Missing','Capitalization/Spelling','Baby Naming','Safety Concerns','Bella Style','Other'].map(f => `
+                                        <label style="display:block;font-size:11px;cursor:pointer;padding:2px 0;">
+                                            <input type="checkbox" name="edit-techflag-${recordId}" value="${f}" ${(record['Delivery Standard Flags:']||'').includes(f) ? 'checked' : ''}> ${f}
+                                        </label>`).join('')}
+                                </div>
+
+                                <!-- Delivery Notes -->
                                 <div style="margin-bottom:12px;"><label style="display:block;font-weight:600;margin-bottom:3px;">Delivery Notes:</label>
-                                <textarea id="edit-notes-${recordId}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;font-size:12px;resize:vertical;height:40px;">${record['Delivery Notes:'] || ''}</textarea></div>
+                                <textarea id="edit-notes-${recordId}" style="width:100%;padding:4px;border:1px solid #ddd;border-radius:3px;font-size:12px;resize:vertical;height:50px;box-sizing:border-box;">${record['Delivery Notes:'] || ''}</textarea></div>
+
+                                <!-- Internal Notes -->
                                 <div style="margin-bottom:12px;background:#fffde7;border:1px solid #ffe082;border-radius:4px;padding:8px;">
-                                    <label style="display:block;font-weight:600;margin-bottom:3px;color:#b45309;">🔒 Internal Notes <span style="font-weight:400;font-size:11px;color:#888;">(PSS & admin only — not visible to photographer)</span></label>
-                                    <textarea id="edit-internal-${recordId}" style="width:100%;padding:4px;border:1px solid #ffe082;border-radius:3px;font-size:12px;resize:vertical;height:50px;background:white;">${record.admin_notes || ''}</textarea>
+                                    <label style="display:block;font-weight:600;margin-bottom:3px;color:#b45309;">🔒 Internal Notes <span style="font-weight:400;font-size:11px;color:#888;">(not visible to photographer)</span></label>
+                                    <textarea id="edit-internal-${recordId}" style="width:100%;padding:4px;border:1px solid #ffe082;border-radius:3px;font-size:12px;resize:vertical;height:50px;background:white;box-sizing:border-box;">${record.admin_notes || ''}</textarea>
                                 </div>
                                 <button onclick="saveEditedPending('${recordId}')" style="width:100%;padding:8px;background:#4ba8a8;color:white;border:none;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600;">💾 Save Changes</button>
                             </div>
@@ -7084,32 +7127,47 @@
         async function saveEditedPending(recordId) {
             try {
                 const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : null; };
+                const getChecked = (name) => [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(cb => cb.value);
 
                 const g1Core = getVal(`edit-g1-core-${recordId}`);
                 const g1Subj = getVal(`edit-g1-subj-${recordId}`);
                 const g1GalleryExp = getVal(`edit-g1-gallery-exp-${recordId}`);
                 const g1Edit = getVal(`edit-g1-edit-${recordId}`);
                 const g1Fb   = getVal(`edit-g1-fb-${recordId}`);
+                const g1Code = getVal(`edit-g1-code-${recordId}`);
                 const g2Core = getVal(`edit-g2-core-${recordId}`);
                 const g2Subj = getVal(`edit-g2-subj-${recordId}`);
                 const g2GalleryExp = getVal(`edit-g2-gallery-exp-${recordId}`);
                 const g2Edit = getVal(`edit-g2-edit-${recordId}`);
                 const g2Fb   = getVal(`edit-g2-fb-${recordId}`);
+                const g2Code = getVal(`edit-g2-code-${recordId}`);
                 const notes    = getVal(`edit-notes-${recordId}`);
                 const internal = getVal(`edit-internal-${recordId}`);
 
+                // Core Skills flags
+                const g1csFlags = getChecked(`edit-g1csflag-${recordId}`).join(', ');
+                const g2csFlags = getChecked(`edit-g2csflag-${recordId}`).join(', ');
+
+                // Delivery Standard flags
+                const techFlags = getChecked(`edit-techflag-${recordId}`).join(', ');
+
                 const updateData = {};
+                if (g1Code !== null) updateData['Gallery #1 Access Code:'] = g1Code;
                 if (g1Core !== null) updateData['Core Skills (1)'] = g1Core;
                 if (g1Subj !== null) updateData['Subject and Posing (1)'] = g1Subj;
                 if (g1GalleryExp !== null) updateData['Gallery Experience (1)'] = g1GalleryExp;
                 if (g1Edit !== null) updateData['Editing / Bella Baby Standards (1)'] = g1Edit;
-                if (g1Fb   !== null) updateData['Gallery #1 Feedback:'] = g1Fb;
+                if (g1Fb !== null) updateData['Gallery #1 Feedback:'] = g1Fb;
+                updateData['Gallery #1 Core Skills Flags'] = g1csFlags;
+                if (g2Code !== null) updateData['Gallery #2 Access Code:'] = g2Code;
                 if (g2Core !== null) updateData['Core Skills (2)'] = g2Core;
                 if (g2Subj !== null) updateData['Subject and Posing (2)'] = g2Subj;
                 if (g2GalleryExp !== null) updateData['Gallery Experience (2)'] = g2GalleryExp;
                 if (g2Edit !== null) updateData['Editing / Bella Baby Standards (2)'] = g2Edit;
-                if (g2Fb   !== null) updateData['Gallery #2 Feedback:'] = g2Fb;
-                if (notes    !== null) updateData['Delivery Notes:'] = notes;
+                if (g2Fb !== null) updateData['Gallery #2 Feedback:'] = g2Fb;
+                updateData['Gallery #2 Core Skills Flags'] = g2csFlags;
+                updateData['Delivery Standard Flags:'] = techFlags;
+                if (notes !== null) updateData['Delivery Notes:'] = notes;
                 if (internal !== null) updateData['admin_notes'] = internal;
 
                 // Recalculate scores
@@ -7126,11 +7184,6 @@
                     updateData['Current Assessment Level'] = n >= 14 ? 'Master (14-16)' : n >= 11 ? 'Proficient (11-13)' : n >= 8 ? 'Needs Improvement (8-10)' : 'Below Standards (0-7)';
                 }
 
-                if (Object.keys(updateData).length === 0) {
-                    alert('No changes to save.');
-                    return;
-                }
-
                 const { error } = await supabaseClient
                     .from('growth_assessments')
                     .update(updateData)
@@ -7138,7 +7191,6 @@
 
                 if (error) throw error;
 
-                // Visual feedback then reload the list
                 const saveBtn = document.querySelector(`#edit-${recordId} button`);
                 if (saveBtn) {
                     saveBtn.textContent = '✓ Saved!';
