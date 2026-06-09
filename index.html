@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3.4 Dashboard</title>
+    <title>3.5 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -784,9 +784,7 @@
         }
 
         .rfy-complete-btn {
-            width: 100%;
-            margin-top: 10px;
-            padding: 8px 12px;
+            padding: 9px 16px;
             font-size: 12px;
             background: white;
             color: #888;
@@ -795,7 +793,7 @@
             cursor: pointer;
             font-weight: 500;
             transition: all 0.2s;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
@@ -880,7 +878,6 @@
         }
 
         .rfy-btn {
-            align-self: flex-start;
             padding: 9px 16px;
             font-size: 12px;
             background: #4ba8a8;
@@ -894,11 +891,21 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            margin-top: auto;
         }
 
         .rfy-btn:hover {
             background: #3a9090;
+        }
+
+        .rfy-button-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .rfy-button-group .rfy-complete-btn {
+            margin-left: auto;
         }
 
         .rfy-controls {
@@ -8783,10 +8790,12 @@
                         <div class="rfy-card-body">
                             ${resource.keyword ? `<p class="rfy-card-category">${escapeHtml(resource.keyword)}</p>` : ''}
                             <h4 class="rfy-card-title">${escapeHtml(resource.title)}</h4>
-                            <button class="rfy-btn" onclick="event.preventDefault(); window.open('${safeUrl}', '_blank');">
-                                ${btnLabel}
-                            </button>
-                            ${completeBtn}
+                            <div class="rfy-button-group">
+                                <button class="rfy-btn" onclick="event.preventDefault(); window.open('${safeUrl}', '_blank');">
+                                    ${btnLabel}
+                                </button>
+                                ${completeBtn}
+                            </div>
                         </div>
                     </a>
                 `;
