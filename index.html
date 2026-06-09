@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>10.3 Dashboard</title>
+    <title>Bella Baby QC Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -1533,8 +1533,12 @@
                         <div class="loading">Loading records...</div>
                     </div>
 
-                    <!-- RECOMMENDED FOR YOU CAROUSEL -->
-                    <div class="recommended-for-you" id="photographerRecommendedResources"></div>
+                    <!-- DIVIDER + QUOTE + CAROUSEL -->
+                    <div id="quoteAndCarouselSection" style="display:none;">
+                        <hr style="border:none;border-top:1px solid #e8e8e8;margin:32px 0 28px 0;">
+                        <div id="inspirationalQuoteBanner"></div>
+                        <div class="recommended-for-you" id="photographerRecommendedResources"></div>
+                    </div>
 
                     </div><!-- end main-content -->
                 </div>
@@ -1542,7 +1546,10 @@
             <!-- MANAGE ASSESSMENTS PAGE -->
             <div id="manageAssessmentsPage" class="page-container" style="display: none; flex-direction: column;">
                 <div class="main-content">
-                    <h2 style="margin: 0 0 20px 0;">Manage Assessments</h2>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                        <h2 style="margin:0;">Manage Assessments</h2>
+                        <button onclick="bulkArchiveCycle()" style="padding:8px 16px;background:#f0f0f0;color:#555;border:1px solid #ddd;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;" title="Archive all completed reviews from this cycle">📦 Archive This Cycle</button>
+                    </div>
                     
                     <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #e0e0e0; padding-bottom: 15px;">
                         <button id="assignmentStatusTabBtn" onclick="switchAssessmentTab('status')" style="padding: 10px 20px; background: none; border: none; border-bottom: 3px solid #4ba8a8; color: #4ba8a8; font-weight: 600; cursor: pointer;">📌 Assignment Status</button>
@@ -1556,6 +1563,17 @@
 
                     <!-- Pending Approvals Tab -->
                     <div id="assessmentPendingContent" style="display: none;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin: 12px 0 8px 0; flex-wrap: wrap; gap: 8px;">
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <select id="pendingFilterSelect" onchange="applyPendingFilter()" style="padding: 7px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; cursor: pointer;">
+                                    <option value="all">Filter: View All</option>
+                                    <option value="flagged">Flagged Only</option>
+                                    <option value="high_score">High Score (13–16)</option>
+                                </select>
+                                <span id="pendingFilterCount" style="font-size: 12px; color: #999;"></span>
+                            </div>
+                            <button onclick="openBulkApproveModal()" style="padding:7px 14px;background:#a8d5a3;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">✓ Bulk Approve</button>
+                        </div>
                         <div id="pendingApprovalsList">Loading pending approvals...</div>
                     </div>
                 </div>
@@ -7503,69 +7521,60 @@
             }
         }
 
-        function calculateTeamStats(records) {
-            if (!records || records.length === 0) {
-                return {
-                    avgGrowthScore: 0,
-                    avgLegacyScore: 0,
-                    byLevel: {}
-                };
+        function calculateTeamStats(photographers) {
+            // photographers is an array of [name, records[]] pairs
+            if (!photographers || photographers.length === 0) {
+                return { avgGrowthScore: '—', avgLegacyScore: '—', hasLegacy: false, byLevel: {} };
             }
-            
-            const stats = {
-                avgGrowthScore: 0,
-                avgLegacyScore: 0,
-                byLevel: {}
-            };
-            
-            let growthCount = 0;
-            let growthSum = 0;
-            let legacyCount = 0;
-            let legacySum = 0;
-            
-            records.forEach(record => {
-                const level = record['Photographer Level'] || 'Unknown';
-                
+
+            const stats = { avgGrowthScore: '—', avgLegacyScore: '—', hasLegacy: false, byLevel: {} };
+            const growthPhotogAvgs = [];
+            const legacyPhotogAvgs = [];
+
+            photographers.forEach(([name, records]) => {
+                const growthRecords = records.filter(r => r.record_type === 'growth_assessment');
+                const legacyRecords = records.filter(r => r.record_type === 'legacy');
+                const mostRecent = records[0];
+                const level = mostRecent?.['Current Assessment Level'] || mostRecent?.['Quality Check Determination'] || 'Unknown';
+
                 if (!stats.byLevel[level]) {
-                    stats.byLevel[level] = { count: 0, growthSum: 0, legacySum: 0 };
+                    stats.byLevel[level] = { count: 0, growthAvgs: [], legacyAvgs: [] };
                 }
-                
                 stats.byLevel[level].count++;
-                
-                // Growth assessment scores
-                if (record['Gallery #1 Score:']) {
-                    const g1 = parseFloat(record['Gallery #1 Score:']) || 0;
-                    growthSum += g1;
-                    growthCount++;
-                    stats.byLevel[level].growthSum += g1;
+
+                if (growthRecords.length > 0) {
+                    const validScores = growthRecords.map(r => parseFloat(r['Average Gallery Score'])).filter(s => !isNaN(s) && s > 0);
+                    if (validScores.length > 0) {
+                        const avg = validScores.reduce((a, b) => a + b, 0) / validScores.length;
+                        growthPhotogAvgs.push(avg);
+                        stats.byLevel[level].growthAvgs.push(avg);
+                    }
                 }
-                
-                if (record['Gallery #2 Score:']) {
-                    const g2 = parseFloat(record['Gallery #2 Score:']) || 0;
-                    growthSum += g2;
-                    growthCount++;
-                    stats.byLevel[level].growthSum += g2;
-                }
-                
-                // Legacy scores (if available)
-                if (record['overall_score']) {
-                    const legacyScore = parseFloat(record['overall_score']) || 0;
-                    legacySum += legacyScore;
-                    legacyCount++;
-                    stats.byLevel[level].legacySum += legacyScore;
+
+                if (legacyRecords.length > 0) {
+                    const validScores = legacyRecords.map(r => parseFloat(r['Average Gallery Score'])).filter(s => !isNaN(s) && s > 0);
+                    if (validScores.length > 0) {
+                        const avg = validScores.reduce((a, b) => a + b, 0) / validScores.length;
+                        legacyPhotogAvgs.push(avg);
+                        stats.byLevel[level].legacyAvgs.push(avg);
+                    }
                 }
             });
-            
-            stats.avgGrowthScore = growthCount > 0 ? (growthSum / growthCount).toFixed(1) : 0;
-            stats.avgLegacyScore = legacyCount > 0 ? (legacySum / legacyCount).toFixed(1) : 0;
-            
-            // Calculate averages per level
+
+            if (growthPhotogAvgs.length > 0) {
+                stats.avgGrowthScore = (growthPhotogAvgs.reduce((a, b) => a + b, 0) / growthPhotogAvgs.length).toFixed(1);
+            }
+            if (legacyPhotogAvgs.length > 0) {
+                stats.avgLegacyScore = (legacyPhotogAvgs.reduce((a, b) => a + b, 0) / legacyPhotogAvgs.length).toFixed(1);
+                stats.hasLegacy = true;
+            }
+
             Object.keys(stats.byLevel).forEach(level => {
-                const levelData = stats.byLevel[level];
-                levelData.avgGrowth = levelData.growthSum > 0 ? (levelData.growthSum / levelData.count).toFixed(1) : 0;
-                levelData.avgLegacy = levelData.legacySum > 0 ? (levelData.legacySum / levelData.count).toFixed(1) : 0;
+                const d = stats.byLevel[level];
+                d.avgGrowth = d.growthAvgs.length > 0 ? (d.growthAvgs.reduce((a, b) => a + b, 0) / d.growthAvgs.length).toFixed(1) : '—';
+                d.avgLegacy = d.legacyAvgs.length > 0 ? (d.legacyAvgs.reduce((a, b) => a + b, 0) / d.legacyAvgs.length).toFixed(1) : '—';
             });
-            
+
             return stats;
         }
 
@@ -7750,6 +7759,7 @@
                 `;
 
                 // Load recommended resources for this photographer
+                showInspirationalQuote();
                 setTimeout(loadPhotographerRecommendedResources, 200);
                 return;
             }
@@ -7758,8 +7768,8 @@
             let html = '';
             
             // Add team status card if AM is viewing their team
-            if (amViewMode === 'team' && getCurrentUserRole() === 'am' && filtered.length > 0) {
-                const teamStats = calculateTeamStats(filtered);
+            if (amViewMode === 'team' && getCurrentUserRole() === 'am' && photographers.length > 0) {
+                const teamStats = calculateTeamStats(photographers);
                 const levelRows = Object.entries(teamStats.byLevel)
                     .sort((a, b) => {
                         const order = { 'Pre-Foundation': 0, 'Foundation': 1, 'Ambassador': 2, 'Advanced Ambassador': 3 };
@@ -7769,12 +7779,13 @@
                         <tr style="border-bottom: 1px solid #f0f0f0;">
                             <td style="padding: 8px 12px; font-size: 12px; color: #666;">${level}</td>
                             <td style="padding: 8px 12px; text-align: center; font-size: 12px; color: #333;"><strong>${data.count}</strong></td>
-                            <td style="padding: 8px 12px; text-align: center; font-size: 12px; color: #003d7a;"><strong>${data.avgGrowth}</strong> / 16</td>
-                            ${teamStats.avgLegacyScore > 0 ? `<td style="padding: 8px 12px; text-align: center; font-size: 12px; color: #1a472a;"><strong>${data.avgLegacy}</strong></td>` : ''}
+                            <td style="padding: 8px 12px; text-align: center; font-size: 12px; color: #003d7a;"><strong>${data.avgGrowth}</strong></td>
+                            ${teamStats.hasLegacy ? `<td style="padding: 8px 12px; text-align: center; font-size: 12px; color: #1a472a;"><strong>${data.avgLegacy}</strong></td>` : ''}
                         </tr>
                     `).join('');
                 
-                const legacyHeader = teamStats.avgLegacyScore > 0 ? '<th style="padding: 8px 12px; font-size: 12px; font-weight: 600; text-align: center;">Legacy Avg</th>' : '';
+                const legacyHeader = teamStats.hasLegacy ? '<th style="padding: 8px 12px; font-size: 12px; font-weight: 600; text-align: center;">Legacy Avg</th>' : '';
+                const totalPhotogs = photographers.length;
                 
                 html = `
                     <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 18px; margin-bottom: 20px;">
@@ -7784,17 +7795,19 @@
                             <div style="background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 6px; padding: 12px; text-align: center;">
                                 <div style="font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 6px;">Avg Growth Score</div>
                                 <div style="font-size: 26px; font-weight: 700; color: #003d7a;">${teamStats.avgGrowthScore}</div>
-                                <div style="font-size: 10px; color: #999; margin-top: 4px;">/ 16</div>
+                                <div style="font-size: 10px; color: #999; margin-top: 4px;">avg of photographer averages</div>
                             </div>
-                            ${teamStats.avgLegacyScore > 0 ? `
+                            ${teamStats.hasLegacy ? `
                             <div style="background: #f0f8f0; border: 1px solid #b3dfb8; border-radius: 6px; padding: 12px; text-align: center;">
                                 <div style="font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 6px;">Avg Legacy Score</div>
                                 <div style="font-size: 26px; font-weight: 700; color: #1a472a;">${teamStats.avgLegacyScore}</div>
+                                <div style="font-size: 10px; color: #999; margin-top: 4px;">avg of photographer averages</div>
                             </div>
                             ` : ''}
                             <div style="background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px; text-align: center;">
-                                <div style="font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 6px;">Total Photographers</div>
-                                <div style="font-size: 26px; font-weight: 700; color: #333;">${Object.keys(teamStats.byLevel).reduce((sum, level) => sum + teamStats.byLevel[level].count, 0)}</div>
+                                <div style="font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 6px;">My Team</div>
+                                <div style="font-size: 26px; font-weight: 700; color: #333;">${totalPhotogs}</div>
+                                <div style="font-size: 10px; color: #999; margin-top: 4px;">photographers</div>
                             </div>
                         </div>
                         
