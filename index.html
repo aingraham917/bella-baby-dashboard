@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>11.2 Dashboard</title>
+    <title>Bella Baby QC Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -7882,7 +7882,7 @@
                             const flagHtml = flagText ? `<div style="font-size:11px;color:#c92a2a;margin-top:3px;">⚑ ${flagText}</div>` : '';
                             
                             return `
-                            <div onclick="showRecordDetailsForPhoto(${startIdx + idx}, '${photogName.replace(/'/g, "\'")}')"
+                            <div onclick="showRecordDetailsById('${record.id}')"
                                  style="background:white;border:1px solid #e8e8e8;border-radius:6px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:border-color 0.15s;"
                                  onmouseover="this.style.borderColor='#4ba8a8'" onmouseout="this.style.borderColor='#e8e8e8'">
                                 <div>
@@ -7999,7 +7999,7 @@
                         </div>
                         <div class="nested-records" id="${expandId}">
                             ${records.map((record) => `
-                                <div class="nested-record" onclick="showRecordDetailsForPhoto(${records.findIndex(r => r.id === record.id)}, '${photographerName.replace(/'/g, "\\'")}')"
+                                <div class="nested-record" onclick="showRecordDetailsById('${record.id}')"
                                     >
                                     <div class="nested-record-left">
                                         <div class="nested-record-date">${formatDate(record.Date)}</div>
@@ -8172,6 +8172,17 @@
             }
             
             const record = photographerRecords[recordIndex];
+            showRecordDetails(record);
+        }
+
+        // Robust lookup by record id — avoids index-mismatch bugs between grouped and flat arrays
+        function showRecordDetailsById(recordId) {
+            const record = allRecords.find(r => String(r.id) === String(recordId));
+            if (!record) {
+                document.getElementById('recordDetailContent').innerHTML = '<p>Record not found</p>';
+                showPage('recordDetailPage');
+                return;
+            }
             showRecordDetails(record);
         }
 
