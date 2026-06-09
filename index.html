@@ -8982,16 +8982,17 @@
             container.innerHTML = '<p style="color: #999;">Loading...</p>';
 
             try {
-                // Get all users with role 'user' (photographers)
-                const { data: photographers, error: photoError } = await supabaseClient
-                    .from('user_roles')
-                    .select('email, first_name, last_name')
-                    .eq('role', 'user')
-                    .order('email');
+                // Get photographers from the already-loaded allUserRoles object (loaded during init)
+                const photographers = [];
+                Object.entries(allUserRoles).forEach(([email, role]) => {
+                    if (role === 'user') {
+                        photographers.push({ user_email: email });
+                    }
+                });
 
-                if (photoError) throw photoError;
+                photographers.sort((a, b) => a.user_email.localeCompare(b.user_email));
 
-                if (!photographers || photographers.length === 0) {
+                if (photographers.length === 0) {
                     container.innerHTML = '<p style="color: #999;">No photographers found.</p>';
                     return;
                 }
@@ -9017,9 +9018,8 @@
                 // Build HTML
                 let html = '';
                 photographers.forEach((photo, idx) => {
-                    const email = photo.email.toLowerCase();
+                    const email = photo.user_email.toLowerCase();
                     const completedResources = completionsByEmail[email] || [];
-                    const displayName = `${photo.first_name || ''} ${photo.last_name || ''}`.trim() || email;
                     const cardId = 'rvCard_' + idx;
                     const contentId = 'rvContent_' + idx;
 
@@ -9030,8 +9030,7 @@
                                 onmouseout="this.style.background='white'"
                                 onclick="toggleResourceCard('${cardId}','${contentId}')">
                                 <div>
-                                    <div style="font-weight: 600; font-size: 14px; color: #333;">${escapeHtml(displayName)}</div>
-                                    <div style="font-size: 12px; color: #999; margin-top: 3px;">${escapeHtml(email)}</div>
+                                    <div style="font-weight: 600; font-size: 14px; color: #333;">${escapeHtml(email)}</div>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 12px; flex-shrink: 0;">
                                     <span style="background: #e8f5f5; color: #4ba8a8; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600;">${completedResources.length}</span>
