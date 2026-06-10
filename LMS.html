@@ -15,7 +15,7 @@
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;min-height:100vh;}
 
         /* ── AUTH ── */
-        .auth-container{width:100%;display:flex;justify-content:center;align-items:center;background:#f7f7f8;min-height:100vh;}
+        .auth-container{width:100%;display:none !important;justify-content:center;align-items:center;background:#f7f7f8;min-height:100vh;}
         .auth-card{background:white;border-radius:12px;padding:40px 50px;width:520px;max-width:95vw;box-shadow:0 4px 20px rgba(0,0,0,0.1);}
         .logo-section{text-align:center;margin-bottom:30px;}
         .logo-img{width:100px;height:auto;margin-bottom:15px;}
@@ -551,24 +551,47 @@
     </div>
 
     <div class="top-bar">
-        <div class="top-bar-left">
-            <span>Logged in as <strong id="userEmailDisplay"></strong></span>
-            <div class="options-wrap">
-                <button id="optionsBtn">Options ▾</button>
-                <div class="options-dd" id="optionsDD">
-                    <a href="index.html">🏠 Growth Assessments</a>
-                    <button id="ddMyTraining"  onclick="showView('learner');closeDD();"  style="display:none;">📚 My Training</button>
-                    <button id="ddBrowse"      onclick="showView('browse');closeDD();"   style="display:none;">🎬 Training Library</button>
-                    <button id="ddAMView"      onclick="showView('am');closeDD();"       style="display:none;">👥 My Team Progress</button>
-                    <button id="ddAdminView"   onclick="showView('admin');closeDD();"    style="display:none;">📊 Learner Progress</button>
-                    <button id="ddAssign"      onclick="showView('assign');closeDD();"   style="display:none;">📋 Assign Training</button>
-                    <button id="ddCurriculum"  onclick="showView('curriculum');closeDD();" style="display:none;">🗂 Manage Curriculum</button>
-                    <button onclick="openChangePW();closeDD();">👤 Change Password</button>
+        <div class="top-bar-left" style="display: flex; align-items: center; gap: 20px;">
+            <span style="font-size: 13px;">Logged in as <strong id="userEmail"></strong></span>
+            
+            <!-- LEARNING DROPDOWN -->
+            <div style="position: relative;">
+                <button id="learningBtn" style="padding: 8px 15px; background: #a8d5a3; color: #1a4d1a; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">Learning</button>
+                <div id="learningDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; margin-top: 5px;">
+                    <button id="resourcesLibraryOption" onclick="openResourcesLibrary('videos')" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📚 Resources Library</button>
+                    <a href="index.html" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; display: block; text-decoration: none; color: inherit;">🏠 Assessments</a>
+                    <button id="resourceViewsOption" onclick="openResourceViews()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; transition: background 0.2s;">📊 Resource Views</button>
+                </div>
+            </div>
+            
+            <!-- TRAINING TEAM DROPDOWN -->
+            <div id="trainingTeamWrapper" style="position: relative; display: none;">
+                <button id="trainingTeamBtn" style="padding: 8px 15px; background: #4ba8a8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">Training</button>
+                <div id="trainingTeamDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; margin-top: 5px;">
+                    <button id="assessmentsOption" class="options-menu-item" onclick="openAssessments()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📋 My Assessments</button>
+                    <button id="adminAssessmentsOption" class="options-menu-item" onclick="openAdminAssessments()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📋 Manage Assessments</button>
+                    <a id="viewRubricOption" href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view?usp=sharing" target="_blank" class="options-menu-item" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; transition: background 0.2s; text-decoration: none; color: inherit; display: block;">📋 View Rubric</a>
+                </div>
+            </div>
+            
+            <!-- OPTIONS DROPDOWN -->
+            <div style="position: relative;">
+                <button id="optionsBtn" style="padding: 8px 15px; background: #666; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">Options</button>
+                <div id="optionsDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; margin-top: 5px;">
+                    <!-- LMS Navigation -->
+                    <button id="ddMyTraining" class="options-menu-item" onclick="showView('learner'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📚 My Training</button>
+                    <button id="ddBrowse" class="options-menu-item" onclick="showView('browse'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">🎬 Training Library</button>
+                    <button id="ddAMView" class="options-menu-item" onclick="showView('am'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">👥 My Team Progress</button>
+                    <button id="ddAdminView" class="options-menu-item" onclick="showView('admin'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📊 Learner Progress</button>
+                    <button id="ddAssign" class="options-menu-item" onclick="showView('assign'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📋 Assign Training</button>
+                    <button id="ddCurriculum" class="options-menu-item" onclick="showView('curriculum'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">🗂 Manage Curriculum</button>
+                    <!-- Account Options -->
+                    <button id="changePasswordOption" class="options-menu-item" onclick="openChangePasswordPage(); closeAllDropdowns();" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; transition: background 0.2s; border-top: 1px solid #f0f0f0; margin-top: 5px;">👤 Edit Profile</button>
                 </div>
             </div>
         </div>
         <div class="top-bar-right">
-            <button class="logout-btn-top" onclick="handleLogout()">Log Out</button>
+            <button class="logout-btn" id="logoutBtn" style="background: #9e9e9e; color: white; margin: 0; padding: 6px 14px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer;">Log Out</button>
         </div>
     </div>
 
@@ -998,14 +1021,14 @@ async function loadRoles() {
 // SHOW / HIDE
 // ══════════════════════════════════════════════
 function showAuth() {
-    document.getElementById('authContainer').style.display = 'flex';
+    document.getElementById('authContainer').style.display = 'flex !important';
     document.getElementById('dashboard').classList.remove('active');
 }
 
 function showDashboard() {
     document.getElementById('authContainer').style.display = 'none';
     document.getElementById('dashboard').classList.add('active');
-    document.getElementById('userEmailDisplay').textContent = currentUser.email;
+    document.getElementById('userEmail').textContent = currentUser.email;
 
     // Wire up options menu visibility
     if (!isPhotog()) document.getElementById('ddBrowse').style.display = 'block';
@@ -3224,14 +3247,39 @@ async function handleChangePW() {
     if (!error) setTimeout(closeChangePW, 1500);
 }
 
-// ── Options dropdown
+// ── Dropdown toggles (matching index.html structure)
+function closeAllDropdowns() {
+    document.getElementById('learningDropdown').style.display = 'none';
+    document.getElementById('trainingTeamDropdown').style.display = 'none';
+    document.getElementById('optionsDropdown').style.display = 'none';
+}
+
+document.getElementById('learningBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    const dd = document.getElementById('learningDropdown');
+    const isOpen = dd.style.display !== 'none';
+    closeAllDropdowns();
+    if (!isOpen) dd.style.display = 'block';
+});
+
+document.getElementById('trainingTeamBtn')?.addEventListener('click', e => {
+    e.stopPropagation();
+    const dd = document.getElementById('trainingTeamDropdown');
+    const isOpen = dd.style.display !== 'none';
+    closeAllDropdowns();
+    if (!isOpen) dd.style.display = 'block';
+});
+
 document.getElementById('optionsBtn').addEventListener('click', e => {
     e.stopPropagation();
-    const dd = document.getElementById('optionsDD');
-    dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+    const dd = document.getElementById('optionsDropdown');
+    const isOpen = dd.style.display !== 'none';
+    closeAllDropdowns();
+    if (!isOpen) dd.style.display = 'block';
 });
-document.addEventListener('click', () => { document.getElementById('optionsDD').style.display = 'none'; });
-function closeDD() { document.getElementById('optionsDD').style.display = 'none'; }
+
+// Close dropdowns when clicking elsewhere
+document.addEventListener('click', closeAllDropdowns);
 
 // Enter key handled by form submit
 
