@@ -941,7 +941,7 @@ let progressMap   = {};         // module_id → progress row
 let allModules    = [];         // full module catalog
 let allPaths      = [];
 let previousView  = null;
-let _initComplete = false;      // flag to prevent duplicate auth handling during init
+let _handlingAuth = false;      // flag to prevent duplicate auth handling
 
 // ══════════════════════════════════════════════
 // ROLE HELPERS
@@ -969,39 +969,30 @@ async function init() {
         }
     }
 
-    // Check for existing session first — this carries over from index.html
-    // since both files share the same domain and localStorage
-    try {
-        const { data: { session }, error } = await sb.auth.getSession();
-        if (session && session.user) {
-            currentUser = session.user;
-            await boot();
-        }
-    } catch(e) {
-        console.warn('getSession error', e);
+    const { data: { session } } = await sb.auth.getSession();
+    
+    if (session) {
+        currentUser = session.user;
+        await showDashboard();
+    } else {
+        showAuth();
     }
 
-    // Always watch for auth changes (handles logout and login on this page)
-    sb.auth.onAuthStateChange(async (_e, session) => {
-        // Skip if we just completed init (prevents duplicate handling)
-        if (_initComplete && _e !== 'SIGNED_OUT') return;
-        
-        if (session && session.user) {
+    sb.auth.onAuthStateChange((event, session) => {
+        // Only handle initial SIGNED_IN and SIGNED_OUT — ignore TOKEN_REFRESHED etc.
+        if (event === 'SIGNED_IN' && _handlingAuth) return;
+        if (event === 'TOKEN_REFRESHED') return; // ignore token refreshes
+        if (event === 'SIGNED_IN' && session && session.user) {
             currentUser = session.user;
-            await boot();
-        } else {
+            if (!_handlingAuth) {
+                showDashboard();
+            }
+        } else if (event === 'SIGNED_OUT') {
             currentUser = null;
+            _handlingAuth = false;
             showAuth();
         }
     });
-
-    // Mark init as complete
-    _initComplete = true;
-
-    // If no session found initially, show login
-    if (!currentUser) {
-        showAuth();
-    }
 }
 
 async function boot() {
@@ -1036,7 +1027,10 @@ function showAuth() {
     document.getElementById('dashboard').classList.remove('active');
 }
 
-function showDashboard() {
+async function showDashboard() {
+    // Load roles first
+    await loadRoles();
+    
     document.getElementById('authContainer').style.display = 'none';
     document.getElementById('dashboard').classList.add('active');
     
