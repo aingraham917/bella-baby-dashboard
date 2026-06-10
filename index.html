@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>11.3 Dashboard</title>
+    <title>11.4 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -432,7 +432,7 @@
         }
 
         .photographer-header {
-            padding: 20px;
+            padding: 10px 16px;
             background: #fafafa;
             border-bottom: 1px solid #e0e0e0;
             cursor: pointer;
@@ -453,46 +453,47 @@
         .photographer-name {
             font-weight: 600;
             color: #333;
-            font-size: 16px;
-            margin-bottom: 5px;
+            font-size: 14px;
+            margin-bottom: 2px;
         }
 
         .photographer-meta {
             color: #999;
-            font-size: 13px;
+            font-size: 12px;
         }
 
         .photographer-right {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 12px;
         }
 
         .score-badge {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
-            padding: 8px 16px;
+            gap: 6px;
+            padding: 4px 10px;
             background: #e8f5f5;
-            border-radius: 6px;
+            border-radius: 20px;
         }
 
         .score-badge-label {
-            font-size: 11px;
+            font-size: 10px;
             color: #666;
             text-transform: uppercase;
-            margin-bottom: 4px;
+            font-weight: 600;
         }
 
         .score-badge-value {
-            font-size: 20px;
-            font-weight: 600;
+            font-size: 15px;
+            font-weight: 700;
             color: #4ba8a8;
         }
 
         .expand-icon {
             color: #999;
-            font-size: 18px;
+            font-size: 14px;
             transition: transform 0.3s;
         }
 
@@ -510,7 +511,7 @@
         }
 
         .nested-record {
-            padding: 15px 20px;
+            padding: 9px 16px;
             border-top: 1px solid #e0e0e0;
             cursor: pointer;
             transition: background 0.2s;
@@ -529,8 +530,8 @@
 
         .nested-record-date {
             color: #999;
-            font-size: 12px;
-            margin-bottom: 4px;
+            font-size: 11px;
+            margin-bottom: 2px;
         }
 
         .nested-record-determination {
@@ -542,7 +543,7 @@
         .nested-record-score {
             background: #4ba8a8;
             color: white;
-            padding: 4px 12px;
+            padding: 3px 10px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
@@ -7974,10 +7975,10 @@
                                 <div class="photographer-meta">QC Count: ${records.length} • Most Recent: ${mostRecentDate}</div>
                             </div>
                             <div class="photographer-right">
-                                <div class="score-badge" style="background: ${getScoreBgColor(sixMonthAvg, records[0]?.record_type)}; border-color: ${getScoreColor(sixMonthAvg, records[0]?.record_type)}; border: 2px solid ${getScoreColor(sixMonthAvg, records[0]?.record_type)};">
-                                    <div style="font-size: 11px; font-weight: 700; color: ${labelColor}; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">${typeLabel}</div>
-                                    <div class="score-badge-value" style="color: ${getScoreColor(sixMonthAvg, records[0]?.record_type)}; margin-bottom: 4px;">${sixMonthAvg}</div>
-                                    <div style="font-size: 10px; color: #999; font-weight: 600;">6-MO AVG</div>
+                                <div class="score-badge" style="background: ${getScoreBgColor(sixMonthAvg, records[0]?.record_type)}; border: 1px solid ${getScoreColor(sixMonthAvg, records[0]?.record_type)};">
+                                    <div class="score-badge-label" style="color: ${getScoreColor(sixMonthAvg, records[0]?.record_type)};">${typeLabel}</div>
+                                    <div class="score-badge-value" style="color: ${getScoreColor(sixMonthAvg, records[0]?.record_type)};">${sixMonthAvg}</div>
+                                    <div style="font-size: 10px; color: #999; font-weight: 600;">6-mo avg</div>
                                 </div>
                                 <div class="expand-icon">▼</div>
                             </div>
@@ -8085,6 +8086,14 @@
             const card = element.parentElement;
             element.classList.toggle('show');
             card.classList.toggle('expanded');
+        }
+
+        function togglePendingCard(detailId, headerEl) {
+            const detail = document.getElementById(detailId);
+            const chevron = headerEl.querySelector('.pending-chevron');
+            const isOpen = detail.style.display !== 'none';
+            detail.style.display = isOpen ? 'none' : 'block';
+            if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
         }
 
         function closeModal() {
@@ -9929,12 +9938,13 @@
             }
             if (countEl) countEl.textContent = `${data.length} review${data.length !== 1 ? 's' : ''}`;
 
-            let html = '<div style="display: grid; gap: 12px;">';
+            let html = '<div style="display: grid; gap: 8px;">';
             data.forEach(record => {
                 const g1Score = (parseInt(record['Core Skills (1)'] || 0) + parseInt(record['Subject and Posing (1)'] || 0) + parseInt(record['Gallery Experience (1)'] || 0) + parseInt(record['Editing / Bella Baby Standards (1)'] || 0));
                 const g2Score = (parseInt(record['Core Skills (2)'] || 0) + parseInt(record['Subject and Posing (2)'] || 0) + parseInt(record['Gallery Experience (2)'] || 0) + parseInt(record['Editing / Bella Baby Standards (2)'] || 0));
                 const recordId = record.id;
                 const editId = `edit-${recordId}`;
+                const detailId = `detail-${recordId}`;
                 const g1Code = record['Gallery #1 Access Code:'];
                 const g2Code = record['Gallery #2 Access Code:'];
                 const g1Url = g1Code ? ('https://www.bellababyphotography.com/v2/galleries/' + g1Code.trim()) : null;
@@ -9943,36 +9953,45 @@
                 const g2LinkHtml = g2Url ? `&nbsp;·&nbsp;<button type="button" onclick="openGallery('${g2Code.trim()}')" style="background:none;border:none;color:#4ba8a8;font-size:11px;font-weight:400;cursor:pointer;padding:0;text-decoration:underline;">🔗 View Gallery</button>` : '';
 
                 html += `
-                    <div style="background: #f9f9f9; border: 1px solid #ddd; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 4px;">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-                            <div>
-                                <h4 style="margin: 0 0 3px 0; font-size: 14px; font-weight: 600;">${record['Photographer Name']}</h4>
-                                <p style="margin: 0; font-size: 11px; color: #666;">${record['Photographer Email'] || ''}</p>
-                                <p style="margin: 2px 0 0 0; font-size: 11px; color: #666;">Reviewed by: ${record['PSS Reviewer Name']} on ${record['Date']}</p>
+                    <div style="background: white; border: 1px solid #e0e0e0; border-left: 3px solid #f59e0b; border-radius: 6px; overflow: hidden;">
+                        <!-- COLLAPSED HEADER — always visible, click to expand -->
+                        <div onclick="togglePendingCard('${detailId}', this)"
+                             style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; cursor: pointer; background: #fafafa; transition: background 0.2s;"
+                             onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='#fafafa'">
+                            <div style="flex: 1; min-width: 0;">
+                                <span style="font-weight: 600; font-size: 13px; color: #333;">${record['Photographer Name']}</span>
+                                <span style="font-size: 12px; color: #999; margin-left: 10px;">Reviewed by ${record['PSS Reviewer Name']} · ${record['Date']}</span>
                             </div>
-                            <span style="background: #f59e0b; color: white; padding: 3px 6px; border-radius: 3px; font-size: 11px; font-weight: 600;">PENDING</span>
+                            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                                <span style="background: #f59e0b; color: white; padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 600;">PENDING</span>
+                                <span style="color: #ccc; font-size: 12px; transition: transform 0.25s;" class="pending-chevron">▼</span>
+                            </div>
                         </div>
 
-                        <div style="background: white; border: 1px solid #e0e0e0; border-radius: 3px; padding: 10px; margin-bottom: 10px; font-size: 12px;">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                                <div><strong>Gallery #1 Score:</strong> ${g1Score} / 16${g1LinkHtml}</div>
-                                <div><strong>Gallery #2 Score:</strong> ${g2Score} / 16${g2LinkHtml}</div>
-                                <div style="color:#555;">G1 Core Skills: ${record['Core Skills (1)'] || '-'}</div>
-                                <div style="color:#555;">G2 Core Skills: ${record['Core Skills (2)'] || '-'}</div>
-                                <div style="color:#555;">G1 Subject/Posing: ${record['Subject and Posing (1)'] || '-'}</div>
-                                <div style="color:#555;">G2 Subject/Posing: ${record['Subject and Posing (2)'] || '-'}</div>
-                                <div style="color:#555;">G1 Gallery Experience: ${record['Gallery Experience (1)'] || '-'}</div>
-                                <div style="color:#555;">G2 Gallery Experience: ${record['Gallery Experience (2)'] || '-'}</div>
-                                <div style="color:#555;">G1 Editing: ${record['Editing / Bella Baby Standards (1)'] || '-'}</div>
-                                <div style="color:#555;">G2 Editing: ${record['Editing / Bella Baby Standards (2)'] || '-'}</div>
-                            </div>
-                            ${record['Gallery #1 Feedback:'] ? `<div style="margin-top:6px;padding-top:6px;border-top:1px solid #f0f0f0;font-size:11px;color:#555;"><strong>G1 Feedback:</strong> ${record['Gallery #1 Feedback:']}</div>` : ''}
-                            ${record['Gallery #2 Feedback:'] ? `<div style="margin-top:4px;font-size:11px;color:#555;"><strong>G2 Feedback:</strong> ${record['Gallery #2 Feedback:']}</div>` : ''}
-                            ${record['Delivery Notes:'] ? `<div style="margin-top:6px;padding-top:6px;border-top:1px solid #f0f0f0;font-size:11px;color:#c92a2a;"><strong>⚠️ Delivery Notes:</strong> ${record['Delivery Notes:']}</div>` : ''}
-                        </div>
+                        <!-- EXPANDED DETAIL — hidden by default -->
+                        <div id="${detailId}" style="display: none; padding: 12px 14px; border-top: 1px solid #e0e0e0;">
+                            <p style="margin: 0 0 2px 0; font-size: 11px; color: #888;">${record['Photographer Email'] || ''}</p>
 
-                        ${record.admin_notes ? `<div style="background:#fff8e1;border:1px solid #ffe082;border-radius:3px;padding:8px 10px;margin-bottom:8px;font-size:12px;"><strong style="color:#b45309;">🔒 Internal Notes:</strong> <span style="color:#555;">${record.admin_notes}</span></div>` : ''}
-                        <button onclick="toggleEditPending('${recordId}')" style="width: 100%; padding: 6px; background: #e3f2fd; color: #1976d2; border: 1px solid #90caf9; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600; margin-bottom: 8px;">✎ Edit Scores & Notes</button>
+                            <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; padding: 10px; margin: 10px 0; font-size: 12px;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                                    <div><strong>Gallery #1 Score:</strong> ${g1Score} / 16${g1LinkHtml}</div>
+                                    <div><strong>Gallery #2 Score:</strong> ${g2Score} / 16${g2LinkHtml}</div>
+                                    <div style="color:#555;">G1 Core Skills: ${record['Core Skills (1)'] || '-'}</div>
+                                    <div style="color:#555;">G2 Core Skills: ${record['Core Skills (2)'] || '-'}</div>
+                                    <div style="color:#555;">G1 Subject/Posing: ${record['Subject and Posing (1)'] || '-'}</div>
+                                    <div style="color:#555;">G2 Subject/Posing: ${record['Subject and Posing (2)'] || '-'}</div>
+                                    <div style="color:#555;">G1 Gallery Experience: ${record['Gallery Experience (1)'] || '-'}</div>
+                                    <div style="color:#555;">G2 Gallery Experience: ${record['Gallery Experience (2)'] || '-'}</div>
+                                    <div style="color:#555;">G1 Editing: ${record['Editing / Bella Baby Standards (1)'] || '-'}</div>
+                                    <div style="color:#555;">G2 Editing: ${record['Editing / Bella Baby Standards (2)'] || '-'}</div>
+                                </div>
+                                ${record['Gallery #1 Feedback:'] ? `<div style="margin-top:6px;padding-top:6px;border-top:1px solid #f0f0f0;font-size:11px;color:#555;"><strong>G1 Feedback:</strong> ${record['Gallery #1 Feedback:']}</div>` : ''}
+                                ${record['Gallery #2 Feedback:'] ? `<div style="margin-top:4px;font-size:11px;color:#555;"><strong>G2 Feedback:</strong> ${record['Gallery #2 Feedback:']}</div>` : ''}
+                                ${record['Delivery Notes:'] ? `<div style="margin-top:6px;padding-top:6px;border-top:1px solid #f0f0f0;font-size:11px;color:#c92a2a;"><strong>⚠️ Delivery Notes:</strong> ${record['Delivery Notes:']}</div>` : ''}
+                            </div>
+
+                            ${record.admin_notes ? `<div style="background:#fff8e1;border:1px solid #ffe082;border-radius:3px;padding:8px 10px;margin-bottom:8px;font-size:12px;"><strong style="color:#b45309;">🔒 Internal Notes:</strong> <span style="color:#555;">${record.admin_notes}</span></div>` : ''}
+                            <button onclick="toggleEditPending('${recordId}')" style="width: 100%; padding: 6px; background: #e3f2fd; color: #1976d2; border: 1px solid #90caf9; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 600; margin-bottom: 8px;">✎ Edit Scores & Notes</button>
 
                         <div id="${editId}" style="display: none; background: white; border: 1px solid #e0e0e0; border-radius: 3px; padding: 12px; margin-bottom: 8px; font-size: 12px;">
                             <p style="font-weight:700;color:#4ba8a8;margin:0 0 8px 0;font-size:13px;border-bottom:1px solid #e8f5f5;padding-bottom:6px;">Gallery #1</p>
