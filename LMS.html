@@ -970,27 +970,20 @@ async function init() {
     }
 
     const { data: { session } } = await sb.auth.getSession();
-    
-    if (session) {
-        currentUser = session.user;
-        await showDashboard();
-    } else {
-        showAuth();
+
+    if (!session) {
+        // No session — send them to index.html to log in
+        window.location.href = 'index.html';
+        return;
     }
 
-    sb.auth.onAuthStateChange((event, session) => {
-        // Only handle initial SIGNED_IN and SIGNED_OUT — ignore TOKEN_REFRESHED etc.
-        if (event === 'SIGNED_IN' && _handlingAuth) return;
-        if (event === 'TOKEN_REFRESHED') return; // ignore token refreshes
-        if (event === 'SIGNED_IN' && session && session.user) {
-            currentUser = session.user;
-            if (!_handlingAuth) {
-                showDashboard();
-            }
-        } else if (event === 'SIGNED_OUT') {
-            currentUser = null;
-            _handlingAuth = false;
-            showAuth();
+    currentUser = session.user;
+    await showDashboard();
+
+    // Watch only for sign-out while on this page
+    sb.auth.onAuthStateChange((event) => {
+        if (event === 'SIGNED_OUT') {
+            window.location.href = 'index.html';
         }
     });
 }
@@ -1023,8 +1016,7 @@ async function loadRoles() {
 // SHOW / HIDE
 // ══════════════════════════════════════════════
 function showAuth() {
-    document.getElementById('authContainer').style.display = 'flex !important';
-    document.getElementById('dashboard').classList.remove('active');
+    window.location.href = 'index.html';
 }
 
 async function showDashboard() {
@@ -3233,7 +3225,10 @@ async function handleLogin(e) {
     const { error } = await sb.auth.signInWithPassword({ email, password: pw });
     if (error) { errEl.textContent = error.message; errEl.classList.add('show'); }
 }
-async function handleLogout() { await sb.auth.signOut(); }
+async function handleLogout() {
+    await sb.auth.signOut();
+    window.location.href = 'index.html';
+}
 
 function openForgotPW() { document.getElementById('forgotPWModal').classList.add('active'); document.getElementById('forgotPWMsg').innerHTML = ''; }
 function closeForgotPW() { document.getElementById('forgotPWModal').classList.remove('active'); }
