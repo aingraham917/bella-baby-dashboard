@@ -975,13 +975,12 @@ async function init() {
         if (session && session.user) {
             currentUser = session.user;
             await boot();
-            return; // Already authenticated — skip the auth state listener setup below
         }
     } catch(e) {
         console.warn('getSession error', e);
     }
 
-    // No existing session — watch for auth changes (handles login on this page)
+    // Always watch for auth changes (handles logout and login on this page)
     sb.auth.onAuthStateChange(async (_e, session) => {
         if (session && session.user) {
             currentUser = session.user;
@@ -992,8 +991,10 @@ async function init() {
         }
     });
 
-    // Show login screen since no session found
-    showAuth();
+    // If no session found initially, show login
+    if (!currentUser) {
+        showAuth();
+    }
 }
 
 async function boot() {
