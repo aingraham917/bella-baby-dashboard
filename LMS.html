@@ -941,6 +941,7 @@ let progressMap   = {};         // module_id → progress row
 let allModules    = [];         // full module catalog
 let allPaths      = [];
 let previousView  = null;
+let _initComplete = false;      // flag to prevent duplicate auth handling during init
 
 // ══════════════════════════════════════════════
 // ROLE HELPERS
@@ -982,6 +983,9 @@ async function init() {
 
     // Always watch for auth changes (handles logout and login on this page)
     sb.auth.onAuthStateChange(async (_e, session) => {
+        // Skip if we just completed init (prevents duplicate handling)
+        if (_initComplete && _e !== 'SIGNED_OUT') return;
+        
         if (session && session.user) {
             currentUser = session.user;
             await boot();
@@ -990,6 +994,9 @@ async function init() {
             showAuth();
         }
     });
+
+    // Mark init as complete
+    _initComplete = true;
 
     // If no session found initially, show login
     if (!currentUser) {
