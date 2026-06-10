@@ -37,7 +37,7 @@
         /* Login Screen */
         .auth-container {
             width: 100%;
-            display: flex;
+            display: none !important;
             justify-content: center;
             align-items: center;
             background: #f7f7f8;
@@ -5196,7 +5196,7 @@
         }
 
         function showAuth() {
-            authContainer.style.display = 'flex';
+            authContainer.style.setProperty('display', 'flex', 'important');
             dashboard.classList.remove('active');
             const drawer = document.getElementById('qcDrawer');
             if (drawer) drawer.style.display = 'none';
