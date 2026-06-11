@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>11.3 Dashboard</title>
+    <title> PE 2.4 Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -1391,6 +1391,19 @@
             color: #ffffff;
             text-decoration: underline;
         }
+        /* ── PHOTOGRAPHER HOME PAGE ────────────────────────── */
+        .level-pre-foundation  { background:#f3e8ff; color:#6b21a8; }
+        .level-foundation      { background:#dbeafe; color:#1e40af; }
+        .level-ambassador      { background:#d1fae5; color:#065f46; }
+        .level-advanced        { background:#fef3c7; color:#92400e; }
+        .next-level-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f5f5f5; }
+        .next-level-row:last-child { border-bottom:none; }
+        .next-level-label { font-size:13px; color:#444; font-weight:500; min-width:160px; }
+        .next-level-bar-wrap { flex:1; margin:0 14px; height:6px; background:#f0f0f0; border-radius:3px; overflow:hidden; }
+        .next-level-bar-fill { height:100%; border-radius:3px; transition:width 0.6s ease; }
+        .next-level-score { font-size:13px; font-weight:600; color:#333; min-width:30px; text-align:right; }
+        .next-level-delta { font-size:11px; padding:2px 7px; border-radius:10px; margin-left:8px; font-weight:600; white-space:nowrap; }
+
     </style>
 </head>
 <body>
@@ -1437,6 +1450,9 @@
             <div class="top-bar">
                 <div class="top-bar-left" style="display: flex; align-items: center; gap: 20px;">
                     <span style="font-size: 13px;">Logged in as <strong id="userEmail"></strong></span>
+                    
+                    <!-- HOME BUTTON (photographers only) -->
+                    <button id="homeBtn" onclick="goToDashboard()" style="display: none; padding: 8px 15px; background: #4ba8a8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">🏠 Home</button>
                     
                     <!-- LEARNING DROPDOWN -->
                     <div style="position: relative;">
@@ -1556,7 +1572,83 @@
                     </div><!-- end main-content -->
                 </div>
 
-            <!-- MANAGE ASSESSMENTS PAGE -->
+            <!-- ══════════════════════════════════════════════════════ -->
+            <!-- PHOTOGRAPHER HOME PAGE                                  -->
+            <!-- ══════════════════════════════════════════════════════ -->
+            <div id="photographerHomePage" class="page-container" style="display: none; flex-direction: column;">
+                <div class="main-content">
+
+                    <!-- GREETING + VIEW ASSESSMENTS (top only) -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+                        <div>
+                            <h2 id="photogHomeGreeting" style="margin:0 0 4px 0; font-size:22px; font-weight:600; color:#333;"></h2>
+                            <p id="photogHomeSubtitle" style="margin:0; font-size:14px; color:#999;"></p>
+                        </div>
+                        <button onclick="showPage('dashboardPage'); displayRecords();"
+                                style="padding:10px 22px; background:#4ba8a8; color:white; border:none; border-radius:6px; cursor:pointer; font-size:14px; font-weight:600; white-space:nowrap;">
+                            📋 View My Assessments
+                        </button>
+                    </div>
+
+                    <!-- LEVEL BADGE + TRENDLINE ROW -->
+                    <div style="display:grid; grid-template-columns:1fr 2fr; gap:16px; margin-bottom:20px;">
+
+                        <!-- Low Score Disclaimer (shown if needed) -->
+                        <div id="photogLowScoreAlert" style="display:none; grid-column:1/-1; background:#fef3c7; border:1px solid #fcd34d; border-radius:10px; padding:16px 20px; margin-bottom:12px;">
+                            <div style="display:flex; gap:12px;">
+                                <div style="font-size:20px;">⚠️</div>
+                                <div>
+                                    <div style="font-size:14px; font-weight:600; color:#92400e; margin-bottom:6px;">Focus on the fundamentals</div>
+                                    <p style="margin:0; font-size:13px; color:#92400e; line-height:1.5;">Your recent reviews show opportunity to strengthen your core technical skills — especially <strong>focus, exposure, and white balance</strong>. Check the <strong>Resources Library</strong> and explore your <strong>Recommended For You</strong> section for targeted learning.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Current Level Badge -->
+                        <div id="photogLevelCard" style="background:white; border:1px solid #e0e0e0; border-radius:10px; padding:24px 20px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+                            <div style="font-size:11px; font-weight:600; color:#999; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:10px;">Current Level</div>
+                            <div id="photogLevelBadge" style="font-size:18px; font-weight:700; padding:8px 20px; border-radius:20px; margin-bottom:8px;"></div>
+                            <div id="photogLevelDesc" style="font-size:12px; color:#888; line-height:1.4;"></div>
+                        </div>
+
+                        <!-- Score Trendline -->
+                        <div style="background:white; border:1px solid #e0e0e0; border-radius:10px; padding:20px;">
+                            <div style="font-size:12px; font-weight:600; color:#999; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:12px;">Score over time</div>
+                            <div id="photogTrendChart" style="position:relative; height:100px;">
+                                <canvas id="photogTrendCanvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MOTIVATIONAL QUOTE -->
+                    <div id="photogQuoteBanner" style="margin-bottom:20px;"></div>
+
+                    <!-- NEXT LEVEL BREAKDOWN -->
+                    <div id="photogNextLevelSection" style="background:white; border:1px solid #e0e0e0; border-radius:10px; padding:20px; margin-bottom:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+                            <div>
+                                <div style="font-size:12px; font-weight:600; color:#999; text-transform:uppercase; letter-spacing:0.06em;">What gets me to the next level</div>
+                                <div id="photogNextLevelSubtitle" style="font-size:11px; color:#aaa; margin-top:4px;"></div>
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <button id="nextLevelTabRecent" onclick="switchNextLevelTab('recent')" 
+                                    style="padding:6px 12px; font-size:12px; font-weight:600; border:none; border-bottom:2px solid #4ba8a8; background:none; color:#4ba8a8; cursor:pointer;">
+                                    Most Recent
+                                </button>
+                                <button id="nextLevelTab6m" onclick="switchNextLevelTab('6m')"
+                                    style="padding:6px 12px; font-size:12px; font-weight:600; border:none; color:#aaa; background:none; cursor:pointer;">
+                                    6 Months
+                                </button>
+                            </div>
+                        </div>
+                        <div id="photogNextLevelContent"></div>
+                    </div>
+
+                    <!-- RECOMMENDED RESOURCES -->
+                    <div id="photogHomeCarousel"></div>
+
+                </div>
+            </div>
             <div id="manageAssessmentsPage" class="page-container" style="display: none; flex-direction: column;">
                 <div class="main-content">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
@@ -4055,7 +4147,381 @@
 
         // PAGE NAVIGATION
         function goToDashboard() {
-            showPage('dashboardPage');
+            if (getCurrentUserRole() === 'user') {
+                showPage('photographerHomePage');
+                loadPhotographerHomePage();
+            } else {
+                showPage('dashboardPage');
+            }
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        // PHOTOGRAPHER HOME PAGE
+        // ══════════════════════════════════════════════════════════════
+
+        let _photogNextLevelData = { recent: null, sixMonth: null, levelOrder: null, currentIdx: null, isTop: null };
+
+        function switchNextLevelTab(tab) {
+            const recentBtn = document.getElementById('nextLevelTabRecent');
+            const sixmBtn = document.getElementById('nextLevelTab6m');
+            const subtitle = document.getElementById('photogNextLevelSubtitle');
+
+            // Update button styles
+            if (tab === 'recent') {
+                recentBtn.style.borderBottom = '2px solid #4ba8a8';
+                recentBtn.style.color = '#4ba8a8';
+                sixmBtn.style.borderBottom = 'none';
+                sixmBtn.style.color = '#aaa';
+                subtitle.textContent = 'Average category score of most recent review (across both galleries)';
+                renderNextLevelData(_photogNextLevelData.recent);
+            } else {
+                recentBtn.style.borderBottom = 'none';
+                recentBtn.style.color = '#aaa';
+                sixmBtn.style.borderBottom = '2px solid #4ba8a8';
+                sixmBtn.style.color = '#4ba8a8';
+                subtitle.textContent = 'Average category score across all reviews in the last 6 months';
+                renderNextLevelData(_photogNextLevelData.sixMonth);
+            }
+        }
+
+        function renderNextLevelData(data) {
+            if (!data) return;
+            const { levelOrder, currentIdx, isTop, latest, allGARecords, email } = data;
+            const nextLevelContent = document.getElementById('photogNextLevelContent');
+
+            if (!latest) {
+                nextLevelContent.innerHTML = '<p style="color:#aaa;font-size:13px;">No assessment data available.</p>';
+                return;
+            }
+
+            const levelOrder_ = levelOrder;
+            const currentIdx_ = currentIdx;
+            const isTop_ = isTop;
+
+            if (isTop_) {
+                nextLevelContent.innerHTML = '<p style="font-size:14px;color:#065f46;font-weight:600;">🏆 You\'ve reached the highest level. Keep setting the standard!</p>';
+                return;
+            }
+
+            const nextLevel = levelOrder_[currentIdx_ + 1] || 'Advanced Ambassador';
+            const cats = [
+                { key: 'Core Skills',               g1: 'Core Skills (1)',                   g2: 'Core Skills (2)',                   target: 4 },
+                { key: 'Subject & Posing',           g1: 'Subject and Posing (1)',             g2: 'Subject and Posing (2)',             target: 3 },
+                { key: 'Gallery Experience',         g1: 'Gallery Experience (1)',             g2: 'Gallery Experience (2)',             target: 3 },
+                { key: 'Editing / Bella Standards',  g1: 'Editing / Bella Baby Standards (1)', g2: 'Editing / Bella Baby Standards (2)', target: 3 },
+            ];
+
+            // Calculate all scores to find the minimum (for contextual messaging)
+            const scores = cats.map(cat => {
+                const s1 = parseInt(latest[cat.g1] || 0);
+                const s2 = parseInt(latest[cat.g2] || 0);
+                return (s1 + s2) / 2;
+            });
+            const minScore = Math.min(...scores);
+
+            let html = `<p style="font-size:13px;color:#666;margin:0 0 14px 0;">Keep building to reach <strong>${nextLevel}</strong>. Here's where you stand:</p>`;
+
+            cats.forEach((cat, idx) => {
+                const s1 = parseFloat(latest[cat.g1] || 0);
+                const s2 = parseFloat(latest[cat.g2] || 0);
+                const avg = (s1 + s2) / 2;
+                
+                // If score is 0 (unrated), show N/A instead
+                if (avg === 0) {
+                    html += `
+                        <div class="next-level-row">
+                            <span class="next-level-label">${cat.key}</span>
+                            <div class="next-level-bar-wrap"><div class="next-level-bar-fill" style="width:0%;background:#e5e5e5;"></div></div>
+                            <span class="next-level-score" style="color:#aaa;">N/A</span>
+                            <span class="next-level-delta" style="background:#f0f0f0;color:#999;">Unrated</span>
+                        </div>`;
+                    return;
+                }
+
+                const pct = Math.min(100, Math.round((avg / 4) * 100));
+                
+                // Green to blue gradient based on 0-4 scale
+                // Green (#22c55e) at 0, Blue (#3b82f6) at 4
+                const normalizedScore = avg / 4; // 0 to 1
+                const greenR = 0x22, greenG = 0xc5, greenB = 0x5e;
+                const blueR = 0x3b, blueG = 0x82, blueB = 0xf6;
+                const r = Math.round(greenR + (blueR - greenR) * normalizedScore);
+                const g = Math.round(greenG + (blueG - greenG) * normalizedScore);
+                const b = Math.round(greenB + (blueB - greenB) * normalizedScore);
+                const color = `rgb(${r}, ${g}, ${b})`;
+
+                // Smart delta message based on score value and context
+                let delta = '';
+                if (avg >= 4) {
+                    delta = `<span class="next-level-delta" style="background:#d1fae5;color:#065f46;">Great job!</span>`;
+                } else if (avg >= 3) {
+                    delta = `<span class="next-level-delta" style="background:#d1fae5;color:#065f46;">✓ On track</span>`;
+                } else if (avg >= 2) {
+                    if (minScore <= 1.5) {
+                        delta = `<span class="next-level-delta" style="background:#fed7aa;color:#92400e;">🎯 Focus here</span>`;
+                    } else {
+                        delta = `<span class="next-level-delta" style="background:#fed7aa;color:#92400e;">🎯 Focus here</span>`;
+                    }
+                } else {
+                    delta = `<span class="next-level-delta" style="background:#fed7aa;color:#92400e;">🎯 Focus here</span>`;
+                }
+
+                html += `
+                    <div class="next-level-row">
+                        <span class="next-level-label">${cat.key}</span>
+                        <div class="next-level-bar-wrap"><div class="next-level-bar-fill" style="width:${pct}%;background:${color};"></div></div>
+                        <span class="next-level-score">${avg.toFixed(1)}/4</span>
+                        ${delta}
+                    </div>`;
+            });
+            nextLevelContent.innerHTML = html;
+        }
+
+        async function loadPhotographerHomePage() {
+            if (!currentUser) return;
+            const email = currentUser.email.toLowerCase().trim();
+
+            // Greeting (show immediately while data loads)
+            const _meta = currentUser.user_metadata || currentUser.raw_user_meta_data || {};
+            const firstName = (_meta.full_name || _meta.name || email.split('@')[0]).split(' ')[0];
+            const hour = new Date().getHours();
+            const timeGreet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+            document.getElementById('photogHomeGreeting').textContent = `${timeGreet}, ${firstName}!`;
+
+            // Show loading state in all sections while fetching
+            document.getElementById('photogLevelBadge').textContent = 'Loading…';
+            document.getElementById('photogLevelBadge').className = '';
+            document.getElementById('photogLevelDesc').textContent = '';
+            document.getElementById('photogNextLevelContent').innerHTML = '<p style="color:#ccc;font-size:13px;">Loading…</p>';
+            document.getElementById('photogTrendChart').innerHTML = '<p style="color:#ccc;font-size:13px;text-align:center;padding-top:30px;">Loading…</p>';
+
+            // Fetch records if not yet loaded
+            if (!allRecords || allRecords.length === 0) {
+                await loadRecords();
+            }
+
+            console.log('📊 Photographer Home Debug:', { email, currentUserRole, allRecordsLength: allRecords.length });
+
+            const myRecords = allRecords
+                .filter(r => (r['Photographer Email'] || '').toLowerCase().trim() === email)
+                .sort((a, b) => new Date(b['Date'] || 0) - new Date(a['Date'] || 0));
+
+            console.log('📋 myRecords (all types):', myRecords.length, myRecords.map(r => ({ type: r.record_type, level: r['Photographer Level'], date: r['Date'] })));
+
+            const gaRecords = myRecords.filter(r => r.record_type === 'growth_assessment');
+
+            console.log('🎯 gaRecords (growth_assessment only):', gaRecords.length, gaRecords.map(r => ({ level: r['Photographer Level'], date: r['Date'], status: r.status })));
+
+            // Subtitle
+            const sub = document.getElementById('photogHomeSubtitle');
+            if (gaRecords.length === 0) {
+                sub.textContent = 'No growth assessments yet — your journey starts here.';
+            } else {
+                const d = gaRecords[0]['Date'] ? new Date(gaRecords[0]['Date']).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
+                sub.textContent = `Last reviewed ${d} · ${gaRecords.length} assessment${gaRecords.length !== 1 ? 's' : ''} on record`;
+            }
+
+            // ── LEVEL BADGE ───────────────────────────────────────────
+            const level = gaRecords.length > 0
+                ? (gaRecords[0]['Photographer Level'] || 'Foundation')
+                : 'Foundation';
+            const levelNorm = level.toString().trim();
+            const levelBadge = document.getElementById('photogLevelBadge');
+            const levelDesc  = document.getElementById('photogLevelDesc');
+            const levelMap = {
+                'Pre-Foundation':     { cls: 'level-pre-foundation', desc: 'Building your foundation' },
+                'Foundation':         { cls: 'level-foundation',     desc: 'Developing core skills' },
+                'Ambassador':         { cls: 'level-ambassador',     desc: 'Consistently strong work' },
+                'Advanced Ambassador':{ cls: 'level-advanced',       desc: 'Exceeding expectations' },
+                'Advanced':           { cls: 'level-advanced',       desc: 'Exceeding expectations' },
+            };
+            const lm = levelMap[levelNorm] || levelMap['Foundation'];
+            levelBadge.textContent = levelNorm;
+            levelBadge.className   = lm.cls;
+            levelDesc.textContent  = lm.desc;
+
+            // ── LOW SCORE DISCLAIMER ───────────────────────────────────
+            const lowScoreAlert = document.getElementById('photogLowScoreAlert');
+            if (gaRecords.length > 0) {
+                // For each category, find the first non-zero score (skip 0s as gating mechanics)
+                const cats = [
+                    { g1: 'Core Skills (1)', g2: 'Core Skills (2)' },
+                    { g1: 'Subject and Posing (1)', g2: 'Subject and Posing (2)' },
+                    { g1: 'Gallery Experience (1)', g2: 'Gallery Experience (2)' },
+                    { g1: 'Editing / Bella Baby Standards (1)', g2: 'Editing / Bella Baby Standards (2)' }
+                ];
+                
+                const allScores = [];
+                cats.forEach(cat => {
+                    let score = null;
+                    
+                    // Try to find non-zero score in this category, starting from most recent
+                    for (let i = 0; i < gaRecords.length; i++) {
+                        const record = gaRecords[i];
+                        const g1 = parseInt(record[cat.g1] || 0);
+                        const g2 = parseInt(record[cat.g2] || 0);
+                        const avg = (g1 + g2) / 2;
+                        
+                        if (avg > 0) {
+                            score = avg;
+                            break;
+                        }
+                    }
+                    
+                    // Only add non-zero scores to the average
+                    if (score && score > 0) {
+                        allScores.push(score);
+                    }
+                });
+                
+                // Average only the non-zero scores
+                const overallAvg = allScores.length > 0 ? allScores.reduce((a,b) => a+b) / allScores.length : 0;
+                
+                if (lowScoreAlert) {
+                    lowScoreAlert.style.display = overallAvg < 2 ? 'block' : 'none';
+                }
+            } else {
+                if (lowScoreAlert) lowScoreAlert.style.display = 'none';
+            }
+
+            // ── TRENDLINE CHART ───────────────────────────────────────
+            const trendRecords = gaRecords.slice(0, 10).reverse();
+            document.getElementById('photogTrendChart').innerHTML = '';
+            const canvas = document.createElement('canvas');
+            canvas.id = 'photogTrendCanvas';
+            canvas.style.height = '100px';
+            document.getElementById('photogTrendChart').appendChild(canvas);
+
+            if (trendRecords.length >= 1) {
+                const trendScores = trendRecords.map(r => {
+                    const g1 = (parseInt(r['Core Skills (1)'] || 0) + parseInt(r['Subject and Posing (1)'] || 0) +
+                                parseInt(r['Gallery Experience (1)'] || 0) + parseInt(r['Editing / Bella Baby Standards (1)'] || 0));
+                    const g2 = (parseInt(r['Core Skills (2)'] || 0) + parseInt(r['Subject and Posing (2)'] || 0) +
+                                parseInt(r['Gallery Experience (2)'] || 0) + parseInt(r['Editing / Bella Baby Standards (2)'] || 0));
+                    return parseFloat(((g1 + g2) / 2).toFixed(1));
+                });
+                const trendLabels = trendRecords.map(r => {
+                    const d = new Date(r['Date'] || '');
+                    return isNaN(d) ? '' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                });
+                if (window._photogTrendChart) { try { window._photogTrendChart.destroy(); } catch(e){} }
+                window._photogTrendChart = new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: trendLabels,
+                        datasets: [{
+                            data: trendScores,
+                            borderColor: '#4ba8a8',
+                            backgroundColor: 'rgba(75,168,168,0.08)',
+                            pointBackgroundColor: '#4ba8a8',
+                            pointRadius: 4,
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { min: 0, max: 16, ticks: { stepSize: 4, font: { size: 11 }, color: '#aaa' }, grid: { color: '#f5f5f5' } },
+                            x: { ticks: { font: { size: 10 }, color: '#aaa' }, grid: { display: false } }
+                        }
+                    }
+                });
+            } else {
+                canvas.outerHTML = '';
+                document.getElementById('photogTrendChart').innerHTML =
+                    '<p style="color:#ccc;font-size:13px;text-align:center;padding-top:30px;">Your score history will appear here after your first review.</p>';
+            }
+
+            // ── NEXT LEVEL BREAKDOWN (with tabs) ───────────────────────
+            const nextLevelContent = document.getElementById('photogNextLevelContent');
+            const nextLevelSubtitle = document.getElementById('photogNextLevelSubtitle');
+            const levelOrder = ['Pre-Foundation', 'Foundation', 'Ambassador', 'Advanced Ambassador'];
+            const normForOrder = levelNorm === 'Advanced' ? 'Advanced Ambassador' : levelNorm;
+            const currentIdx = levelOrder.indexOf(normForOrder);
+            const isTop = currentIdx >= levelOrder.length - 1;
+
+            if (gaRecords.length === 0) {
+                nextLevelContent.innerHTML = '<p style="color:#aaa;font-size:13px;">Complete your first assessment to see your progress breakdown.</p>';
+                nextLevelSubtitle.textContent = '';
+            } else if (isTop) {
+                nextLevelContent.innerHTML = '<p style="font-size:14px;color:#065f46;font-weight:600;">🏆 You\'ve reached the highest level. Keep setting the standard!</p>';
+                nextLevelSubtitle.textContent = '';
+            } else {
+                const recentData = {
+                    latest: gaRecords[0],
+                    levelOrder: levelOrder,
+                    currentIdx: currentIdx,
+                    isTop: isTop,
+                    allGARecords: gaRecords,
+                    email: email
+                };
+
+                const sixMonthsAgo = new Date();
+                sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+                const last6mRecords = gaRecords.filter(r => new Date(r['Date'] || '') >= sixMonthsAgo);
+
+                let sixMonthData = null;
+                if (last6mRecords.length > 0) {
+                    const cats = [
+                        { key: 'Core Skills', g1: 'Core Skills (1)', g2: 'Core Skills (2)', target: 4 },
+                        { key: 'Subject & Posing', g1: 'Subject and Posing (1)', g2: 'Subject and Posing (2)', target: 3 },
+                        { key: 'Gallery Experience', g1: 'Gallery Experience (1)', g2: 'Gallery Experience (2)', target: 3 },
+                        { key: 'Editing / Bella Standards', g1: 'Editing / Bella Baby Standards (1)', g2: 'Editing / Bella Baby Standards (2)', target: 3 },
+                    ];
+                    const averagedRecord = {};
+                    cats.forEach(cat => {
+                        // Collect all non-zero scores across both galleries and all records
+                        const allScores = [];
+                        last6mRecords.forEach(r => {
+                            const g1 = parseInt(r[cat.g1] || 0);
+                            const g2 = parseInt(r[cat.g2] || 0);
+                            if (g1 > 0) allScores.push(g1);
+                            if (g2 > 0) allScores.push(g2);
+                        });
+                        
+                        // Average only non-zero scores; if all are 0, keep as 0
+                        const categoryAvg = allScores.length > 0 ? allScores.reduce((a,b) => a+b) / allScores.length : 0;
+                        
+                        averagedRecord[cat.g1] = categoryAvg.toFixed(1);
+                        averagedRecord[cat.g2] = categoryAvg.toFixed(1);
+                    });
+                    sixMonthData = { latest: averagedRecord, levelOrder, currentIdx, isTop, allGARecords: last6mRecords, email };
+                }
+
+                _photogNextLevelData = { recent: recentData, sixMonth: sixMonthData, levelOrder, currentIdx, isTop };
+                nextLevelSubtitle.textContent = 'Average category score of most recent review (across both galleries)';
+                renderNextLevelData(recentData);
+                
+                const sixmBtn = document.getElementById('nextLevelTab6m');
+                if (sixmBtn) sixmBtn.style.display = sixMonthData ? 'block' : 'none';
+            }
+
+
+
+            // ── MOTIVATIONAL QUOTE ────────────────────────────────────
+            const quotes = [
+                { quote: "Growth is not a destination. It's a direction.", author: "Bella Baby Training" },
+                { quote: "You don't take a photograph, you make it.", author: "Ansel Adams" },
+                { quote: "Every expert was once a beginner. Keep going.", author: "Helen Hayes" },
+                { quote: "The secret to getting ahead is getting started.", author: "Mark Twain" },
+                { quote: "What you capture today shapes how a family remembers forever.", author: "Bella Baby Training" },
+                { quote: "Small improvements compound. Every review is a chance to grow.", author: "Bella Baby Training" },
+                { quote: "Consistency is more important than perfection.", author: "Bella Baby Training" },
+                { quote: "Light makes photography. Embrace light. Admire it. Love it.", author: "George Eastman" },
+            ];
+            const q = quotes[Math.floor(Math.random() * quotes.length)];
+            document.getElementById('photogQuoteBanner').innerHTML = `
+                <div style="background:#f0fafa;border:1px solid #c8e6e6;border-radius:10px;padding:20px 24px;text-align:center;">
+                    <p style="margin:0 0 8px 0;font-size:15px;font-style:italic;color:#2d7d7d;line-height:1.6;">"${q.quote}"</p>
+                    <p style="margin:0;font-size:12px;color:#888;">— ${q.author}</p>
+                </div>`;
+
+            // ── RECOMMENDED RESOURCES CAROUSEL ───────────────────────
+            await loadPhotographerRecommendedResources('photogHomeCarousel');
         }
 
         // ── TRAINING LIBRARY ──────────────────────────────────────────────────────
@@ -4658,7 +5124,7 @@
 
         function showPage(pageId) {
             // Hide all pages
-            const allPages = ['dashboardPage','manageAssessmentsPage','myAssessmentsPage','assessmentFormPage','recordDetailPage','chartsPage','adminReportsPage','changePasswordPage','trainingLibraryPage','resourceViewsPage'];
+            const allPages = ['dashboardPage','photographerHomePage','manageAssessmentsPage','myAssessmentsPage','assessmentFormPage','recordDetailPage','chartsPage','adminReportsPage','changePasswordPage','trainingLibraryPage','resourceViewsPage'];
             allPages.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
 
             // Show selected page
@@ -4667,7 +5133,7 @@
             else console.error('showPage: page not found:', pageId);
 
             // Show breadcrumb for non-dashboard pages
-            document.getElementById('breadcrumbNav').style.display = pageId !== 'dashboardPage' ? 'block' : 'none';
+            document.getElementById('breadcrumbNav').style.display = (pageId !== 'dashboardPage' && pageId !== 'photographerHomePage') ? 'block' : 'none';
 
             // Close options dropdown
             document.getElementById('optionsDropdown').style.display = 'none';
@@ -5248,6 +5714,12 @@
                 trainingTeamWrapper.style.display = currentUserRole !== 'user' ? 'block' : 'none';
             }
 
+            // Home button (photographers only)
+            const homeBtn = document.getElementById('homeBtn');
+            if (homeBtn) {
+                homeBtn.style.display = currentUserRole === 'user' ? 'block' : 'none';
+            }
+
             // Search/filter/sort bar (non-photographer roles only)
             const controlsBar = document.getElementById('dashboardControlsBar');
             if (controlsBar) {
@@ -5301,6 +5773,15 @@
             }
             // Update QC drawer visibility after dashboard renders
             setTimeout(updateQCDrawerVisibility, 100);
+
+            // Photographers go to their home page; all other roles see the records dashboard
+            if (currentUserRole === 'user') {
+                showPage('photographerHomePage');
+                loadPhotographerHomePage();
+            } else {
+                showPage('dashboardPage');
+                displayRecords();
+            }
         }
 
         function showAMViewToggle() {
@@ -9103,8 +9584,8 @@
         // RESOURCES CAROUSEL SYSTEM - Using flag_resources Table
         // ══════════════════════════════════════════════════════════════
 
-        async function loadPhotographerRecommendedResources() {
-            const container = document.getElementById('photographerRecommendedResources');
+        async function loadPhotographerRecommendedResources(containerId = 'photographerRecommendedResources') {
+            const container = document.getElementById(containerId);
             if (!container) return;
 
             try {
