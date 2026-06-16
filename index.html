@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>11.5 Dashboard</title>
+    <title>Bella Baby Professional Development Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -12,10 +15,11 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Open Sans', sans-serif;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: 'Open Sans', sans-serif;
             background: #f5f5f5;
             min-height: 100vh;
         }
@@ -167,8 +171,26 @@
         .top-bar-left {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 2px;
             font-size: 13px;
+        }
+
+        .top-bar-left a,
+        .swap-tab-btn { padding: 10px 16px; background: none; border-top: none; border-left: none; border-right: none; border-bottom: 3px solid transparent; color: #999; font-weight: 600; cursor: pointer; font-size: 12px; margin-bottom: -2px; transition: color 0.2s, border-color 0.2s; }
+        .swap-tab-btn.active { color: #4ba8a8 !important; border-bottom: 3px solid #4ba8a8 !important; }
+
+        /* Normalize all nav dropdown items — override browser link/button defaults */
+        #learningDropdown a, #learningDropdown button,
+        #trainingTeamDropdown a, #trainingTeamDropdown button,
+        #optionsDropdown a, #optionsDropdown button {
+            font-family: 'Open Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            color: #333;
+            text-decoration: none;
+            display: block;
+            width: 100%;
+            text-align: left;
         }
 
         .top-bar-middle {
@@ -677,6 +699,96 @@
             margin-right: auto;
         }
 
+        /* ── ALERT TOASTS ── */
+        #alertToastStack {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 10px;
+            max-width: 340px;
+            width: 100%;
+        }
+
+        .alert-toast {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            padding: 14px 16px;
+            border-left: 4px solid #4ba8a8;
+            animation: toastSlideIn 0.3s ease;
+            position: relative;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .alert-toast.warning { border-left-color: #f59e0b; }
+        .alert-toast.danger  { border-left-color: #ef4444; }
+        .alert-toast.info    { border-left-color: #4ba8a8; }
+
+        .alert-toast-icon {
+            font-size: 15px;
+            margin-right: 6px;
+        }
+
+        .alert-toast-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+        }
+
+        .alert-toast-body {
+            color: #555;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .alert-toast-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .alert-toast-btn {
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: opacity 0.15s;
+        }
+
+        .alert-toast-btn:hover { opacity: 0.8; }
+
+        .alert-toast-btn.dismiss {
+            background: #f0f0f0;
+            color: #555;
+        }
+
+        .alert-toast-btn.snooze {
+            background: #e8f5f5;
+            color: #4ba8a8;
+        }
+
+        @keyframes toastSlideIn {
+            from { transform: translateX(120%); opacity: 0; }
+            to   { transform: translateX(0);    opacity: 1; }
+        }
+
+        @keyframes toastSlideOut {
+            from { transform: translateX(0);    opacity: 1; }
+            to   { transform: translateX(120%); opacity: 0; }
+        }
+
+        .alert-toast.removing {
+            animation: toastSlideOut 0.25s ease forwards;
+        }
+
         /* ── RESOURCES CAROUSEL ── */
         .recommended-for-you {
             margin-top: 50px;
@@ -707,21 +819,32 @@
         .rfy-carousel-wrap {
             position: relative;
             width: 100%;
+            padding: 0 44px; /* space for side arrows */
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .rfy-carousel {
             display: flex;
-            gap: 18px;
-            overflow: hidden;
+            gap: 12px;
+            overflow-x: auto;
+            overflow-y: hidden;
             scroll-behavior: smooth;
             padding: 4px 2px 8px 2px;
+            scrollbar-width: none;
+        }
+
+        .rfy-carousel::-webkit-scrollbar {
+            display: none;
         }
 
         .rfy-resource-card {
-            flex: 0 0 calc(50% - 9px);
+            flex: 0 0 calc(33.333% - 9px);
             background: white;
             border: 1px solid #e0e0e0;
-            border-radius: 12px;
+            border-radius: 10px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -739,7 +862,7 @@
         .rfy-card-thumb {
             position: relative;
             width: 100%;
-            aspect-ratio: 16/9;
+            aspect-ratio: 16/7;
             background: #f0f0f0;
             overflow: hidden;
             flex-shrink: 0;
@@ -767,26 +890,26 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             background: linear-gradient(135deg, #f0f9f9 0%, #e8f4f4 100%);
         }
 
         .rfy-favicon {
-            width: 48px;
-            height: 48px;
-            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
         }
 
         .rfy-domain {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             color: #4ba8a8;
             letter-spacing: 0.3px;
         }
 
         .rfy-complete-btn {
-            padding: 9px 16px;
-            font-size: 12px;
+            padding: 6px 10px;
+            font-size: 10px;
             background: white;
             color: #888;
             border: 1px solid #e0e0e0;
@@ -797,7 +920,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 4px;
         }
 
         .rfy-complete-btn:hover {
@@ -838,20 +961,20 @@
         }
 
         .rfy-play-btn {
-            width: 52px;
-            height: 52px;
+            width: 38px;
+            height: 38px;
             background: rgba(255,255,255,0.95);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 15px;
             color: #c92a2a;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
         .rfy-card-body {
-            padding: 18px 20px 20px 20px;
+            padding: 10px 12px 12px 12px;
             display: flex;
             flex-direction: column;
             gap: 0;
@@ -859,28 +982,28 @@
         }
 
         .rfy-card-category {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
             color: #4ba8a8;
             text-transform: uppercase;
             letter-spacing: 0.8px;
-            margin: 0 0 10px 0;
-            padding-bottom: 10px;
+            margin: 0 0 6px 0;
+            padding-bottom: 6px;
             border-bottom: 1px solid #e8e8e8;
         }
 
         .rfy-card-title {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             color: #333;
-            margin: 0 0 16px 0;
-            line-height: 1.45;
+            margin: 0 0 10px 0;
+            line-height: 1.4;
             flex: 1;
         }
 
         .rfy-btn {
-            padding: 9px 16px;
-            font-size: 12px;
+            padding: 6px 10px;
+            font-size: 10px;
             background: #4ba8a8;
             color: white;
             border: none;
@@ -891,7 +1014,7 @@
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
 
         .rfy-btn:hover {
@@ -900,7 +1023,7 @@
 
         .rfy-button-group {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             align-items: center;
             margin-top: auto;
         }
@@ -911,18 +1034,22 @@
 
         .rfy-controls {
             position: absolute;
-            top: -46px;
-            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            left: 0;
             display: flex;
-            gap: 8px;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none;
         }
 
         .rfy-arrow {
-            width: 34px;
-            height: 34px;
+            width: 36px;
+            height: 36px;
             border: 1px solid #e0e0e0;
             background: white;
-            border-radius: 6px;
+            border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -930,6 +1057,9 @@
             font-size: 15px;
             color: #666;
             transition: all 0.2s;
+            pointer-events: all;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            flex-shrink: 0;
         }
 
         .rfy-arrow:hover {
@@ -952,7 +1082,7 @@
 
         @media (max-width: 768px) {
             .rfy-resource-card {
-                flex: 0 0 85%;
+                flex: 0 0 75%;
             }
         }
 
@@ -1391,6 +1521,19 @@
             color: #ffffff;
             text-decoration: underline;
         }
+        /* ── PHOTOGRAPHER HOME PAGE ────────────────────────── */
+        .level-pre-foundation  { background:#f3e8ff; color:#6b21a8; }
+        .level-foundation      { background:#dbeafe; color:#1e40af; }
+        .level-ambassador      { background:#d1fae5; color:#065f46; }
+        .level-advanced        { background:#fef3c7; color:#92400e; }
+        .next-level-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f5f5f5; }
+        .next-level-row:last-child { border-bottom:none; }
+        .next-level-label { font-size:13px; color:#444; font-weight:500; min-width:160px; }
+        .next-level-bar-wrap { flex:1; margin:0 14px; height:6px; background:#f0f0f0; border-radius:3px; overflow:hidden; }
+        .next-level-bar-fill { height:100%; border-radius:3px; transition:width 0.6s ease; }
+        .next-level-score { font-size:13px; font-weight:600; color:#333; min-width:30px; text-align:right; }
+        .next-level-delta { font-size:11px; padding:2px 7px; border-radius:10px; margin-left:8px; font-weight:600; white-space:nowrap; }
+
     </style>
 </head>
 <body>
@@ -1431,45 +1574,49 @@
             <div class="dashboard-header">
                 <img src="https://hlfoaynyuzfexhqydesl.supabase.co/storage/v1/object/public/admin/Bella%20Baby%20Logo.png" alt="Bella Baby" class="header-logo">
                 <h1>Professional Development Hub</h1>
-                <p id="headerTagline">Review and manage photographer quality assessments</p>
+                <p id="headerTagline" style="visibility:hidden;">Review and manage photographer quality assessments</p>
             </div>
 
             <div class="top-bar">
-                <div class="top-bar-left" style="display: flex; align-items: center; gap: 20px;">
-                    <span style="font-size: 13px;">Logged in as <strong id="userEmail"></strong></span>
+                <div class="top-bar-left" style="display: flex; align-items: center; gap: 4px;">
+                    <span id="navGreeting" style="font-size: 13px; color: #555; padding: 0 12px 0 0; border-right: 1px solid #ddd; margin-right: 8px;">Hello, <strong id="userEmail"></strong></span>
                     
-                    <!-- LEARNING DROPDOWN -->
+                    <!-- HOME -->
+                    <button id="homeBtn" onclick="goToDashboard()" style="padding: 8px 14px; background: none; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.15s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">🏠 Home</button>
+                    
+                    <!-- DEVELOPMENT DROPDOWN -->
                     <div style="position: relative;">
-                        <button id="learningBtn" style="padding: 8px 15px; background: #a8d5a3; color: #1a4d1a; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">Learning</button>
-                        <div id="learningDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; margin-top: 5px;">
-                            <a href="LMS.html" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; display: block; text-decoration: none; color: inherit;">🎓 Courses</a>
-                            <button id="resourceViewsOption" onclick="openResourceViews()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📊 Resource Views</button>
-                            <button id="resourcesLibraryOption" onclick="openResourcesLibrary('videos')" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; transition: background 0.2s;">📚 Resources Library</button>
+                        <button id="learningBtn" style="padding: 8px 14px; background: none; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.15s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">Development ▾</button>
+                        <div id="learningDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 1000; margin-top: 4px; overflow: hidden;">
+                            <a href="LMS.html" style="display: block; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; text-decoration: none; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">🎓 Courses</a>
+                            <button id="resourceViewsOption" onclick="openResourceViews()" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📊 Resource Views</button>
+                            <button id="resourcesLibraryOption" onclick="openResourcesLibrary('videos')" style="width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📚 Resources Library</button>
                         </div>
                     </div>
                     
                     <!-- TRAINING TEAM DROPDOWN -->
                     <div id="trainingTeamWrapper" style="position: relative; display: none;">
-                        <button id="trainingTeamBtn" style="padding: 8px 15px; background: #4ba8a8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">Training</button>
-                        <div id="trainingTeamDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; margin-top: 5px;">
-                            <button id="adminAssessmentsOption" class="options-menu-item" onclick="openAdminAssessments()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📋 Manage Assessments</button>
-                            <button id="assessmentsOption" class="options-menu-item" onclick="openAssessments()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📋 My Assessments</button>
-                            <a id="viewRubricOption" href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view?usp=sharing" target="_blank" class="options-menu-item" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; transition: background 0.2s; text-decoration: none; color: inherit; display: block;">📋 View Rubric</a>
+                        <button id="trainingTeamBtn" style="padding: 8px 14px; background: none; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.15s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">Training ▾</button>
+                        <div id="trainingTeamDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 1000; margin-top: 4px; overflow: hidden;">
+                            <button id="adminAssessmentsOption" class="options-menu-item" onclick="openAdminAssessments()" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 Manage Assessments</button>
+                            <button id="assessmentsOption" class="options-menu-item" onclick="openAssessments()" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 My Assessments</button>
+                            <button id="swapRequestsOption" onclick="initSwapRequestsPage(); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">🔄 Assessment Swaps</button>
+                            <a id="viewRubricOption" href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view?usp=sharing" target="_blank" class="options-menu-item" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; color: #333; text-decoration: none; transition: background 0.15s; display: block;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 View Rubric</a>
                         </div>
                     </div>
                     
                     <!-- OPTIONS DROPDOWN -->
                     <div style="position: relative;">
-                        <button id="optionsBtn" style="padding: 8px 15px; background: #666; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">Options</button>
-                        <div id="optionsDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; margin-top: 5px;">
-                            <button id="adminReportOption" class="options-menu-item" onclick="openAdminReport()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📁 Admin Tools</button>
-                            <button id="chartsOption" class="options-menu-item" onclick="openCharts()" style="display: none; width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">📊 Charts & Analytics</button>
-                            <button id="changePasswordOption" class="options-menu-item" onclick="openChangePasswordPage()" style="width: 100%; text-align: left; padding: 12px 15px; background: none; border: none; cursor: pointer; font-size: 13px; transition: background 0.2s;">👤 Edit Profile</button>
+                        <button id="optionsBtn" style="padding: 8px 14px; background: none; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.15s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">Options ▾</button>
+                        <div id="optionsDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 1000; margin-top: 4px; overflow: hidden;">
+                            <button id="adminReportOption" class="options-menu-item" onclick="openAdminReport()" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📁 Admin Tools</button>
+                            <button id="chartsOption" class="options-menu-item" onclick="openCharts()" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📊 Charts & Analytics</button>
+                            <button id="changePasswordOption" class="options-menu-item" onclick="openChangePasswordPage()" style="width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">👤 Edit Profile</button>
                         </div>
                     </div>
                 </div>
                 <div class="top-bar-right">
-                    <button class="logout-btn" id="logoutBtn" style="background: #9e9e9e; color: white; margin: 0; padding: 6px 14px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer;">Log Out</button>
+                    <button class="logout-btn" id="logoutBtn" style="background: none; color: #999; margin: 0; padding: 8px 14px; font-size: 14px; font-weight: 500; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">Log Out</button>
                 </div>
             </div>
 
@@ -1481,7 +1628,7 @@
             <div class="dashboard-content">
 
                 <!-- DASHBOARD PAGE -->
-                <div id="dashboardPage" class="page-container" style="display: flex; flex-direction: column;">
+                <div id="dashboardPage" class="page-container" style="display: none; flex-direction: column;">
                     <div class="main-content">
 
                     <!-- TOP CONTROLS BAR -->
@@ -1533,7 +1680,7 @@
                         </div>
 
                         <!-- Sort -->
-                        <select id="sortSelect" class="sort-select" style="min-width:150px;padding-top:6px;padding-bottom:6px;">
+                        <select id="sortSelect" class="sort-select" style="min-width:150px;padding-top:6px;padding-bottom:6px;visibility:hidden;">
                             <option value="a-z" selected>Sort: A – Z</option>
                             <option value="z-a">Z – A</option>
                             <option value="score-high">Score High to Low</option>
@@ -1556,7 +1703,93 @@
                     </div><!-- end main-content -->
                 </div>
 
-            <!-- MANAGE ASSESSMENTS PAGE -->
+            <!-- ══════════════════════════════════════════════════════ -->
+            <!-- PHOTOGRAPHER HOME PAGE                                  -->
+            <!-- ══════════════════════════════════════════════════════ -->
+            <div id="photographerHomePage" class="page-container" style="display: none; flex-direction: column;">
+                <div class="main-content">
+
+                    <!-- LOADING SPINNER (shown until content is ready) -->
+                    <div id="photogHomeSpinner" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:80px 0; gap:16px;">
+                        <div style="width:40px; height:40px; border:4px solid #e0e0e0; border-top-color:#4ba8a8; border-radius:50%; animation:spin 0.8s linear infinite;"></div>
+                        <div style="font-size:14px; color:#aaa;">Loading your dashboard...</div>
+                    </div>
+
+                    <!-- MAIN CONTENT (hidden until loaded) -->
+                    <div id="photogHomeContent" style="display:none; opacity:0; transition:opacity 0.3s ease;">
+
+                    <!-- GREETING + VIEW ASSESSMENTS (top only) -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+                        <div>
+                            <h2 id="photogHomeGreeting" style="margin:0 0 4px 0; font-size:22px; font-weight:600; color:#333;"></h2>
+                            <p id="photogHomeSubtitle" style="margin:0; font-size:14px; color:#999;"></p>
+                        </div>
+                        <button onclick="showPage('dashboardPage'); displayRecords();"
+                                style="padding:10px 22px; background:#4ba8a8; color:white; border:none; border-radius:6px; cursor:pointer; font-size:14px; font-weight:600; white-space:nowrap;">
+                            📋 View My Assessments
+                        </button>
+                    </div>
+
+                    <!-- LEVEL BADGE + TRENDLINE ROW -->
+                    <div style="display:grid; grid-template-columns:1fr 2fr; gap:16px; margin-bottom:20px; align-items:stretch;">
+
+                        <!-- Low Score Disclaimer (shown if needed) -->
+                        <div id="photogLowScoreAlert" style="display:none; grid-column:1/-1; background:#fef3c7; border:1px solid #fcd34d; border-radius:10px; padding:16px 20px; margin-bottom:12px;">
+                            <div style="display:flex; gap:12px;">
+                                <div style="font-size:20px;">⚠️</div>
+                                <div>
+                                    <div style="font-size:14px; font-weight:600; color:#92400e; margin-bottom:6px;">Focus on the fundamentals</div>
+                                    <p style="margin:0; font-size:13px; color:#92400e; line-height:1.5;">Your recent reviews show opportunity to strengthen your core technical skills — especially <strong>focus, exposure, and white balance</strong>. Check the <strong>Resources Library</strong> and explore your <strong>Recommended For You</strong> section for targeted learning.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Current Level Badge -->
+                        <div id="photogLevelCard" style="background:white; border:1px solid #e0e0e0; border-radius:10px; padding:24px 20px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+                            <div style="font-size:11px; font-weight:600; color:#999; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:14px;">Current Level</div>
+                            <img id="photogLevelBadgeImg" src="" alt="Level Badge" style="width:200px; height:200px; object-fit:contain; margin-bottom:16px; border-radius:10px;">
+                            <div id="photogLevelDesc" style="font-size:12px; color:#888; line-height:1.4;"></div>
+                        </div>
+
+                        <!-- Score Trendline -->
+                        <div style="background:white; border:1px solid #e0e0e0; border-radius:10px; padding:20px; display:flex; flex-direction:column;">
+                            <div style="font-size:12px; font-weight:600; color:#999; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:12px;">Score over time</div>
+                            <div id="photogTrendChart" style="position:relative; flex:1; min-height:200px;">
+                                <canvas id="photogTrendCanvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MOTIVATIONAL QUOTE -->
+                    <div id="photogQuoteBanner" style="margin-bottom:20px;"></div>
+
+                    <!-- NEXT LEVEL BREAKDOWN -->
+                    <div id="photogNextLevelSection" style="background:white; border:1px solid #e0e0e0; border-radius:10px; padding:20px; margin-bottom:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+                            <div>
+                                <div style="font-size:12px; font-weight:600; color:#999; text-transform:uppercase; letter-spacing:0.06em;">What gets me to the next level</div>
+                                <div id="photogNextLevelSubtitle" style="font-size:11px; color:#aaa; margin-top:4px;"></div>
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <button id="nextLevelTabRecent" onclick="switchNextLevelTab('recent')" 
+                                    style="padding:6px 12px; font-size:12px; font-weight:600; border:none; border-bottom:2px solid #4ba8a8; background:none; color:#4ba8a8; cursor:pointer;">
+                                    Most Recent
+                                </button>
+                                <button id="nextLevelTab6m" onclick="switchNextLevelTab('6m')"
+                                    style="padding:6px 12px; font-size:12px; font-weight:600; border:none; color:#aaa; background:none; cursor:pointer;">
+                                    6 Months
+                                </button>
+                            </div>
+                        </div>
+                        <div id="photogNextLevelContent"></div>
+                    </div>
+
+                    <!-- RECOMMENDED RESOURCES -->
+                    <div id="photogHomeCarousel"></div>
+
+                    </div><!-- end #photogHomeContent -->
+                </div>
+            </div>
             <div id="manageAssessmentsPage" class="page-container" style="display: none; flex-direction: column;">
                 <div class="main-content">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
@@ -1934,6 +2167,71 @@
 
 
             </div><!-- end myAssessmentsPage -->
+
+            <!-- ASSESSMENT SWAP REQUESTS PAGE -->
+            <div id="swapRequestsPage" class="page-container" style="display: none; flex-direction: column;">
+                <div class="main-content">
+                    <h2 style="margin-bottom: 20px; font-size: 18px;">🔄 Assessment Swap Requests</h2>
+                    <p style="color: #666; margin-bottom: 20px; padding: 12px; background: #f0f9f9; border-left: 4px solid #4ba8a8; border-radius: 4px; font-size: 12px;">
+                        <strong>How it works:</strong> Post a request to swap your assigned assessment with a teammate. Once someone picks it up, the assignment transfers to them. If no one claims it, it remains your responsibility. Use Slack for communication while coordinating swaps on this board.
+                    </p>
+                    
+                    <!-- Filters/Tabs -->
+                    <div style="display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
+                        <!-- Super Admin only -->
+                        <button id="swapTabAll" onclick="loadSwapRequests('all')" class="swap-tab-btn" data-filter="all" style="display:none;">All Requests</button>
+                        <!-- Trainer only -->
+                        <button id="swapTabPending" onclick="loadSwapRequests('pending')" class="swap-tab-btn" data-filter="pending" style="display:none;">Pending</button>
+                        <button id="swapTabMy" onclick="loadSwapRequests('my')" class="swap-tab-btn" data-filter="my" style="display:none;">My Requests</button>
+                        <button id="swapTabClaimed" onclick="loadSwapRequests('claimed')" class="swap-tab-btn" data-filter="claimed" style="display:none;">Claimed</button>
+                        <button id="swapTabSwapped" onclick="loadSwapRequests('swapped')" class="swap-tab-btn" data-filter="swapped" style="display:none;">Swapped</button>
+                        <!-- Super Admin only -->
+                        <button id="swapTabClaimedAdmin" onclick="loadSwapRequests('claimed')" class="swap-tab-btn" data-filter="claimed" style="display:none;">Claimed</button>
+                    </div>
+                    
+                    <!-- Requests List -->
+                    <div id="swapRequestsList" style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="text-align: center; color: #999; padding: 40px; font-size: 14px;">Loading requests...</div>
+                    </div>
+                </div>
+            </div><!-- end swapRequestsPage -->
+
+            <!-- ALERT TOAST STACK -->
+            <div id="alertToastStack"></div>
+
+            <!-- SWAP REQUEST MODAL -->
+            <div id="swapRequestModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 2000; align-items: center; justify-content: center;">
+                <div style="background: white; border-radius: 10px; padding: 28px; max-width: 450px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,0.2);">
+                    <h3 style="margin-bottom: 20px;">📋 Request Assessment Swap</h3>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 6px; color: #333;">Photographer</label>
+                        <div id="swapPhotogName" style="padding: 10px; background: #f5f5f5; border-radius: 6px; color: #333;"></div>
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 6px; color: #333;">Reason for Swap</label>
+                        <select id="swapReasonSelect" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            <option value="">-- Select a reason --</option>
+                            <option value="took_on_shift">Took on an extra hospital shift</option>
+                            <option value="unexpected_business">Unexpected business during hospital shift</option>
+                            <option value="out_sick">Out sick</option>
+                            <option value="family_emergency">Family emergency</option>
+                            <option value="other">Other (with notes)</option>
+                        </select>
+                    </div>
+                    
+                    <div id="swapOtherNoteDiv" style="display: none; margin-bottom: 16px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 6px; color: #333;">Additional Details (visible only to you)</label>
+                        <textarea id="swapOtherNote" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: 'Open Sans', sans-serif; min-height: 80px; resize: vertical;"></textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button onclick="closeSwapModal()" style="flex: 1; padding: 10px; background: #f0f0f0; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; color: #333;">Cancel</button>
+                        <button onclick="submitSwapRequest()" style="flex: 1; padding: 10px; background: #4ba8a8; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Post Request</button>
+                    </div>
+                </div>
+            </div>
 
             <!-- ASSESSMENT FORM PAGE (dedicated form page) -->
             <div id="assessmentFormPage" class="page-container" style="display: none; flex-direction: column;">
@@ -2558,6 +2856,12 @@
                 <div class="main-content">
                     <h2 style="margin: 0 0 5px 0;">📊 Resource Views</h2>
                     <p style="color: #999; font-size: 13px; margin-bottom: 25px;">View completed resources by photographer.</p>
+
+                    <!-- AM Team toggle — shown only for AM role -->
+                    <div id="rvTeamToggle" style="display: none; margin-bottom: 16px; gap: 0; border-bottom: 2px solid #e0e0e0; display: none;">
+                        <button onclick="loadResourceViews('team')" class="swap-tab-btn active" id="rvTabTeam" data-rv-filter="team">My Team</button>
+                        <button onclick="loadResourceViews('all')" class="swap-tab-btn" id="rvTabAll" data-rv-filter="all">View All</button>
+                    </div>
                     
                     <!-- Search bar -->
                     <div style="margin-bottom: 20px;">
@@ -3997,6 +4301,10 @@
                 if (startBtn) {
                     const id = startBtn.dataset.id;
                     const a = (window._assignmentMap || {})[id] || {};
+                    
+                    // Auto-cancel any pending swap requests for this assignment
+                    cancelSwapOnStart(id);
+                    
                     try {
                         const { data, error } = await supabaseClient
                             .from('growth_assessments')
@@ -4055,7 +4363,414 @@
 
         // PAGE NAVIGATION
         function goToDashboard() {
-            showPage('dashboardPage');
+            const role = getCurrentUserRole();
+            if (role === 'user' || role === 'trainer') {
+                showPage('photographerHomePage');
+                loadPhotographerHomePage();
+            } else {
+                showPage('dashboardPage');
+                displayRecords();
+            }
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        // PHOTOGRAPHER HOME PAGE
+        // ══════════════════════════════════════════════════════════════
+
+        let _photogNextLevelData = { recent: null, sixMonth: null, levelOrder: null, currentIdx: null, isTop: null };
+
+        function switchNextLevelTab(tab) {
+            const recentBtn = document.getElementById('nextLevelTabRecent');
+            const sixmBtn = document.getElementById('nextLevelTab6m');
+            const subtitle = document.getElementById('photogNextLevelSubtitle');
+
+            // Update button styles
+            if (tab === 'recent') {
+                recentBtn.style.borderBottom = '2px solid #4ba8a8';
+                recentBtn.style.color = '#4ba8a8';
+                sixmBtn.style.borderBottom = 'none';
+                sixmBtn.style.color = '#aaa';
+                subtitle.textContent = 'Average category score of most recent review (across both galleries)';
+                renderNextLevelData(_photogNextLevelData.recent);
+            } else {
+                recentBtn.style.borderBottom = 'none';
+                recentBtn.style.color = '#aaa';
+                sixmBtn.style.borderBottom = '2px solid #4ba8a8';
+                sixmBtn.style.color = '#4ba8a8';
+                subtitle.textContent = 'Average category score across all reviews in the last 6 months';
+                renderNextLevelData(_photogNextLevelData.sixMonth);
+            }
+        }
+
+        function renderNextLevelData(data) {
+            if (!data) return;
+            const { levelOrder, currentIdx, isTop, latest, allGARecords, email } = data;
+            const nextLevelContent = document.getElementById('photogNextLevelContent');
+
+            if (!latest) {
+                nextLevelContent.innerHTML = '<p style="color:#aaa;font-size:13px;">No assessment data available.</p>';
+                return;
+            }
+
+            const levelOrder_ = levelOrder;
+            const currentIdx_ = currentIdx;
+            const isTop_ = isTop;
+
+            if (isTop_) {
+                nextLevelContent.innerHTML = '<p style="font-size:14px;color:#065f46;font-weight:600;">🏆 You\'ve reached the highest level. Keep setting the standard!</p>';
+                return;
+            }
+
+            const nextLevel = levelOrder_[currentIdx_ + 1] || 'Advanced Ambassador';
+            const cats = [
+                { key: 'Core Skills',               g1: 'Core Skills (1)',                   g2: 'Core Skills (2)',                   target: 4 },
+                { key: 'Subject & Posing',           g1: 'Subject and Posing (1)',             g2: 'Subject and Posing (2)',             target: 3 },
+                { key: 'Gallery Experience',         g1: 'Gallery Experience (1)',             g2: 'Gallery Experience (2)',             target: 3 },
+                { key: 'Editing / Bella Standards',  g1: 'Editing / Bella Baby Standards (1)', g2: 'Editing / Bella Baby Standards (2)', target: 3 },
+            ];
+
+            // Calculate all scores to find the minimum (for contextual messaging)
+            const scores = cats.map(cat => {
+                const s1 = parseInt(latest[cat.g1] || 0);
+                const s2 = parseInt(latest[cat.g2] || 0);
+                return (s1 + s2) / 2;
+            });
+            const minScore = Math.min(...scores);
+
+            let html = `<p style="font-size:13px;color:#666;margin:0 0 14px 0;">Keep building your skills and raising your stats to reach <strong>${nextLevel}</strong> Check out your progress below.</p>`;
+
+            cats.forEach((cat, idx) => {
+                const s1 = parseFloat(latest[cat.g1] || 0);
+                const s2 = parseFloat(latest[cat.g2] || 0);
+                const avg = (s1 + s2) / 2;
+                
+                // If score is 0 (unrated), show N/A instead
+                if (avg === 0) {
+                    html += `
+                        <div class="next-level-row">
+                            <span class="next-level-label">${cat.key}</span>
+                            <div class="next-level-bar-wrap"><div class="next-level-bar-fill" style="width:0%;background:#e5e5e5;"></div></div>
+                            <span class="next-level-score" style="color:#aaa;">N/A</span>
+                            <span class="next-level-delta" style="background:#f0f0f0;color:#999;">Unrated</span>
+                        </div>`;
+                    return;
+                }
+
+                const pct = Math.min(100, Math.round((avg / 4) * 100));
+                
+                // Green to blue gradient based on 0-4 scale
+                // Green (#22c55e) at 0, Blue (#3b82f6) at 4
+                const normalizedScore = avg / 4; // 0 to 1
+                const greenR = 0x22, greenG = 0xc5, greenB = 0x5e;
+                const blueR = 0x3b, blueG = 0x82, blueB = 0xf6;
+                const r = Math.round(greenR + (blueR - greenR) * normalizedScore);
+                const g = Math.round(greenG + (blueG - greenG) * normalizedScore);
+                const b = Math.round(greenB + (blueB - greenB) * normalizedScore);
+                const color = `rgb(${r}, ${g}, ${b})`;
+
+                // Smart delta message based on score value and context
+                let delta = '';
+                if (avg >= 4) {
+                    delta = `<span class="next-level-delta" style="background:#d1fae5;color:#065f46;">Great job!</span>`;
+                } else if (avg >= 3) {
+                    delta = `<span class="next-level-delta" style="background:#d1fae5;color:#065f46;">✓ On track</span>`;
+                } else if (avg >= 2) {
+                    if (minScore <= 1.5) {
+                        delta = `<span class="next-level-delta" style="background:#fed7aa;color:#92400e;">🎯 Focus here</span>`;
+                    } else {
+                        delta = `<span class="next-level-delta" style="background:#fed7aa;color:#92400e;">🎯 Focus here</span>`;
+                    }
+                } else {
+                    delta = `<span class="next-level-delta" style="background:#fed7aa;color:#92400e;">🎯 Focus here</span>`;
+                }
+
+                html += `
+                    <div class="next-level-row">
+                        <span class="next-level-label">${cat.key}</span>
+                        <div class="next-level-bar-wrap"><div class="next-level-bar-fill" style="width:${pct}%;background:${color};"></div></div>
+                        <span class="next-level-score">${avg.toFixed(1)}/4</span>
+                        ${delta}
+                    </div>`;
+            });
+            nextLevelContent.innerHTML = html;
+        }
+
+        async function loadPhotographerHomePage() {
+            if (!currentUser) return;
+            const email = currentUser.email.toLowerCase().trim();
+
+            // Show spinner, hide content
+            const spinner = document.getElementById('photogHomeSpinner');
+            const content = document.getElementById('photogHomeContent');
+            if (spinner) spinner.style.display = 'flex';
+            if (content) { content.style.display = 'none'; content.style.opacity = '0'; }
+
+            // Greeting
+            const _meta = currentUser.user_metadata || currentUser.raw_user_meta_data || {};
+            const firstName = (_meta.full_name || _meta.name || email.split('@')[0]).split(' ')[0];
+            const hour = new Date().getHours();
+            const timeGreet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+            document.getElementById('photogHomeGreeting').textContent = `${timeGreet}, ${firstName}!`;
+
+            // Fetch records if not yet loaded
+            if (!allRecords || allRecords.length === 0) {
+                await loadRecords();
+            }
+
+            console.log('📊 Photographer Home Debug:', { email, currentUserRole, allRecordsLength: allRecords.length });
+
+            const myRecords = allRecords
+                .filter(r => (r['Photographer Email'] || '').toLowerCase().trim() === email)
+                .sort((a, b) => new Date(b['Date'] || 0) - new Date(a['Date'] || 0));
+
+            console.log('📋 myRecords (all types):', myRecords.length, myRecords.map(r => ({ type: r.record_type, level: r['Photographer Level'], date: r['Date'] })));
+
+            const gaRecords = myRecords.filter(r => r.record_type === 'growth_assessment');
+
+            console.log('🎯 gaRecords (growth_assessment only):', gaRecords.length, gaRecords.map(r => ({ level: r['Photographer Level'], date: r['Date'], status: r.status })));
+
+            // If no growth assessments, use legacy assessments instead
+            const recordsToUse = gaRecords.length > 0 ? gaRecords : myRecords.filter(r => r.record_type !== 'growth_assessment');
+
+            // Subtitle
+            const sub = document.getElementById('photogHomeSubtitle');
+            if (recordsToUse.length === 0) {
+                sub.textContent = 'No assessments yet — your journey starts here.';
+            } else {
+                const assessmentType = gaRecords.length > 0 ? 'growth assessment' : 'assessment';
+                const d = recordsToUse[0]['Date'] ? new Date(recordsToUse[0]['Date']).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
+                sub.textContent = `Last reviewed ${d} · ${recordsToUse.length} ${assessmentType}${recordsToUse.length !== 1 ? 's' : ''} on record`;
+            }
+
+            // ── LEVEL BADGE ───────────────────────────────────────────
+            const level = recordsToUse.length > 0
+                ? (recordsToUse[0]['Photographer Level'] || 'Foundation')
+                : 'Foundation';
+            const levelNorm = level.toString().trim();
+            const levelDesc  = document.getElementById('photogLevelDesc');
+            const levelMap = {
+                'Pre-Foundation':     { cls: 'level-pre-foundation', desc: 'Building your foundation', img: 'https://hlfoaynyuzfexhqydesl.supabase.co/storage/v1/object/public/admin/badges/prefoundation.png' },
+                'Foundation':         { cls: 'level-foundation',     desc: 'Developing core skills', img: 'https://hlfoaynyuzfexhqydesl.supabase.co/storage/v1/object/public/admin/badges/foundation.png' },
+                'Ambassador':         { cls: 'level-ambassador',     desc: 'Consistently strong work', img: 'https://hlfoaynyuzfexhqydesl.supabase.co/storage/v1/object/public/admin/badges/ambassador.png' },
+                'Advanced Ambassador':{ cls: 'level-advanced',       desc: 'Exceeding expectations', img: 'https://hlfoaynyuzfexhqydesl.supabase.co/storage/v1/object/public/admin/badges/advancedambassador.png' },
+                'Advanced':           { cls: 'level-advanced',       desc: 'Exceeding expectations', img: 'https://hlfoaynyuzfexhqydesl.supabase.co/storage/v1/object/public/admin/badges/advancedambassador.png' },
+            };
+            const lm = levelMap[levelNorm] || levelMap['Foundation'];
+            const levelBadgeImg = document.getElementById('photogLevelBadgeImg');
+            levelDesc.textContent  = lm.desc;
+            if (levelBadgeImg) levelBadgeImg.src = lm.img;
+
+            // ── LOW SCORE DISCLAIMER ───────────────────────────────────
+            const lowScoreAlert = document.getElementById('photogLowScoreAlert');
+            if (recordsToUse.length > 0) {
+                const isLegacy = recordsToUse[0].record_type === 'legacy';
+                
+                if (isLegacy) {
+                    // For legacy records: show alert if Average Gallery Score < 29.5
+                    const mostRecentScore = parseFloat(recordsToUse[0]['Average Gallery Score'] || 0);
+                    if (lowScoreAlert) {
+                        lowScoreAlert.style.display = mostRecentScore < 29.5 ? 'block' : 'none';
+                    }
+                } else {
+                    // For growth assessments: show alert if overall avg < 2 (existing logic)
+                    // For each category, find the first non-zero score (skip 0s as gating mechanics)
+                    const cats = [
+                        { g1: 'Core Skills (1)', g2: 'Core Skills (2)' },
+                        { g1: 'Subject and Posing (1)', g2: 'Subject and Posing (2)' },
+                        { g1: 'Gallery Experience (1)', g2: 'Gallery Experience (2)' },
+                        { g1: 'Editing / Bella Baby Standards (1)', g2: 'Editing / Bella Baby Standards (2)' }
+                    ];
+                    
+                    const allScores = [];
+                    cats.forEach(cat => {
+                        let score = null;
+                        
+                        // Try to find non-zero score in this category, starting from most recent
+                        for (let i = 0; i < recordsToUse.length; i++) {
+                            const record = recordsToUse[i];
+                            const g1 = parseInt(record[cat.g1] || 0);
+                            const g2 = parseInt(record[cat.g2] || 0);
+                            const avg = (g1 + g2) / 2;
+                            
+                            if (avg > 0) {
+                                score = avg;
+                                break;
+                            }
+                        }
+                        
+                        // Only add non-zero scores to the average
+                        if (score && score > 0) {
+                            allScores.push(score);
+                        }
+                    });
+                    
+                    // Average only the non-zero scores
+                    const overallAvg = allScores.length > 0 ? allScores.reduce((a,b) => a+b) / allScores.length : 0;
+                    
+                    if (lowScoreAlert) {
+                        lowScoreAlert.style.display = overallAvg < 2 ? 'block' : 'none';
+                    }
+                }
+            } else {
+                if (lowScoreAlert) lowScoreAlert.style.display = 'none';
+            }
+
+            // ── TRENDLINE CHART ───────────────────────────────────────
+            const trendRecords = recordsToUse.slice(0, 10).reverse();
+            document.getElementById('photogTrendChart').innerHTML = '';
+            const canvas = document.createElement('canvas');
+            canvas.id = 'photogTrendCanvas';
+            document.getElementById('photogTrendChart').appendChild(canvas);
+
+            if (trendRecords.length >= 1) {
+                const isLegacy = trendRecords[0].record_type === 'legacy';
+                const trendScores = trendRecords.map(r => {
+                    if (isLegacy) {
+                        // Legacy QC records: use Average Gallery Score directly (0-40 scale)
+                        return parseFloat(r['Average Gallery Score'] || 0);
+                    } else {
+                        // Growth assessments: sum category scores and average (0-16 scale)
+                        const g1 = (parseInt(r['Core Skills (1)'] || 0) + parseInt(r['Subject and Posing (1)'] || 0) +
+                                    parseInt(r['Gallery Experience (1)'] || 0) + parseInt(r['Editing / Bella Baby Standards (1)'] || 0));
+                        const g2 = (parseInt(r['Core Skills (2)'] || 0) + parseInt(r['Subject and Posing (2)'] || 0) +
+                                    parseInt(r['Gallery Experience (2)'] || 0) + parseInt(r['Editing / Bella Baby Standards (2)'] || 0));
+                        return parseFloat(((g1 + g2) / 2).toFixed(1));
+                    }
+                });
+                const trendLabels = trendRecords.map(r => {
+                    const d = new Date(r['Date'] || '');
+                    return isNaN(d) ? '' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                });
+                const chartMax = isLegacy ? 40 : 16;
+                const stepSize = isLegacy ? 10 : 4;
+                if (window._photogTrendChart) { try { window._photogTrendChart.destroy(); } catch(e){} }
+                window._photogTrendChart = new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: trendLabels,
+                        datasets: [{
+                            data: trendScores,
+                            borderColor: '#4ba8a8',
+                            backgroundColor: 'rgba(75,168,168,0.08)',
+                            pointBackgroundColor: '#4ba8a8',
+                            pointRadius: 4,
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { min: 0, max: chartMax, ticks: { stepSize: stepSize, font: { size: 11 }, color: '#aaa' }, grid: { color: '#f5f5f5' } },
+                            x: { ticks: { font: { size: 10 }, color: '#aaa' }, grid: { display: false } }
+                        }
+                    }
+                });
+            } else {
+                canvas.outerHTML = '';
+                document.getElementById('photogTrendChart').innerHTML =
+                    '<p style="color:#ccc;font-size:13px;text-align:center;padding-top:30px;">Your score history will appear here after your first review.</p>';
+            }
+
+            // ── NEXT LEVEL BREAKDOWN (with tabs) ───────────────────────
+            const nextLevelContent = document.getElementById('photogNextLevelContent');
+            const nextLevelSubtitle = document.getElementById('photogNextLevelSubtitle');
+            const nextLevelSection = document.getElementById('photogNextLevelSection');
+            const levelOrder = ['Pre-Foundation', 'Foundation', 'Ambassador', 'Advanced Ambassador'];
+            const normForOrder = levelNorm === 'Advanced' ? 'Advanced Ambassador' : levelNorm;
+            const currentIdx = levelOrder.indexOf(normForOrder);
+            const isTop = currentIdx >= levelOrder.length - 1;
+
+            if (gaRecords.length === 0) {
+                // Hide entire Next Level section if no growth assessments yet
+                if (nextLevelSection) nextLevelSection.style.display = 'none';
+            } else if (isTop) {
+                if (nextLevelSection) nextLevelSection.style.display = 'block';
+                nextLevelContent.innerHTML = '<p style="font-size:14px;color:#065f46;font-weight:600;">🏆 You\'ve reached the highest level. Keep setting the standard!</p>';
+                nextLevelSubtitle.textContent = '';
+            } else {
+                if (nextLevelSection) nextLevelSection.style.display = 'block';
+                const recentData = {
+                    latest: gaRecords[0],
+                    levelOrder: levelOrder,
+                    currentIdx: currentIdx,
+                    isTop: isTop,
+                    allGARecords: gaRecords,
+                    email: email
+                };
+
+                const sixMonthsAgo = new Date();
+                sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+                const last6mRecords = gaRecords.filter(r => new Date(r['Date'] || '') >= sixMonthsAgo);
+
+                let sixMonthData = null;
+                if (last6mRecords.length > 0) {
+                    const cats = [
+                        { key: 'Core Skills', g1: 'Core Skills (1)', g2: 'Core Skills (2)', target: 4 },
+                        { key: 'Subject & Posing', g1: 'Subject and Posing (1)', g2: 'Subject and Posing (2)', target: 3 },
+                        { key: 'Gallery Experience', g1: 'Gallery Experience (1)', g2: 'Gallery Experience (2)', target: 3 },
+                        { key: 'Editing / Bella Standards', g1: 'Editing / Bella Baby Standards (1)', g2: 'Editing / Bella Baby Standards (2)', target: 3 },
+                    ];
+                    const averagedRecord = {};
+                    cats.forEach(cat => {
+                        // Collect all non-zero scores across both galleries and all records
+                        const allScores = [];
+                        last6mRecords.forEach(r => {
+                            const g1 = parseInt(r[cat.g1] || 0);
+                            const g2 = parseInt(r[cat.g2] || 0);
+                            if (g1 > 0) allScores.push(g1);
+                            if (g2 > 0) allScores.push(g2);
+                        });
+                        
+                        // Average only non-zero scores; if all are 0, keep as 0
+                        const categoryAvg = allScores.length > 0 ? allScores.reduce((a,b) => a+b) / allScores.length : 0;
+                        
+                        averagedRecord[cat.g1] = categoryAvg.toFixed(1);
+                        averagedRecord[cat.g2] = categoryAvg.toFixed(1);
+                    });
+                    sixMonthData = { latest: averagedRecord, levelOrder, currentIdx, isTop, allGARecords: last6mRecords, email };
+                }
+
+                _photogNextLevelData = { recent: recentData, sixMonth: sixMonthData, levelOrder, currentIdx, isTop };
+                nextLevelSubtitle.textContent = 'Average category score of most recent review (across both galleries)';
+                renderNextLevelData(recentData);
+                
+                const sixmBtn = document.getElementById('nextLevelTab6m');
+                if (sixmBtn) sixmBtn.style.display = sixMonthData ? 'block' : 'none';
+            }
+
+
+
+            // ── MOTIVATIONAL QUOTE ────────────────────────────────────
+            const quotes = [
+                { quote: "Growth is not a destination. It's a direction.", author: "Bella Baby Training" },
+                { quote: "You don't take a photograph, you make it.", author: "Ansel Adams" },
+                { quote: "Every expert was once a beginner. Keep going.", author: "Helen Hayes" },
+                { quote: "The secret to getting ahead is getting started.", author: "Mark Twain" },
+                { quote: "What you capture today shapes how a family remembers forever.", author: "Bella Baby Training" },
+                { quote: "Small improvements compound. Every review is a chance to grow.", author: "Bella Baby Training" },
+                { quote: "Consistency is more important than perfection.", author: "Bella Baby Training" },
+                { quote: "Light makes photography. Embrace light. Admire it. Love it.", author: "George Eastman" },
+            ];
+            const q = quotes[Math.floor(Math.random() * quotes.length)];
+            document.getElementById('photogQuoteBanner').innerHTML = `
+                <div style="background:#f0fafa;border:1px solid #c8e6e6;border-radius:10px;padding:20px 24px;text-align:center;">
+                    <p style="margin:0 0 8px 0;font-size:15px;font-style:italic;color:#2d7d7d;line-height:1.6;">"${q.quote}"</p>
+                    <p style="margin:0;font-size:12px;color:#888;">— ${q.author}</p>
+                </div>`;
+
+            // ── RECOMMENDED RESOURCES CAROUSEL ───────────────────────
+            await loadPhotographerRecommendedResources('photogHomeCarousel');
+
+            // Hide spinner and fade in content
+            if (spinner) spinner.style.display = 'none';
+            if (content) {
+                content.style.display = 'block';
+                requestAnimationFrame(() => { content.style.opacity = '1'; });
+            }
         }
 
         // ── TRAINING LIBRARY ──────────────────────────────────────────────────────
@@ -4658,7 +5373,7 @@
 
         function showPage(pageId) {
             // Hide all pages
-            const allPages = ['dashboardPage','manageAssessmentsPage','myAssessmentsPage','assessmentFormPage','recordDetailPage','chartsPage','adminReportsPage','changePasswordPage','trainingLibraryPage','resourceViewsPage'];
+            const allPages = ['dashboardPage','photographerHomePage','manageAssessmentsPage','myAssessmentsPage','assessmentFormPage','recordDetailPage','chartsPage','adminReportsPage','changePasswordPage','trainingLibraryPage','resourceViewsPage','swapRequestsPage'];
             allPages.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
 
             // Show selected page
@@ -4666,8 +5381,11 @@
             if (targetPage) targetPage.style.display = 'flex';
             else console.error('showPage: page not found:', pageId);
 
+            // Store current page in sessionStorage so it persists across tab switches
+            sessionStorage.setItem('currentPage', pageId);
+
             // Show breadcrumb for non-dashboard pages
-            document.getElementById('breadcrumbNav').style.display = pageId !== 'dashboardPage' ? 'block' : 'none';
+            document.getElementById('breadcrumbNav').style.display = (pageId !== 'dashboardPage' && pageId !== 'photographerHomePage') ? 'block' : 'none';
 
             // Close options dropdown
             document.getElementById('optionsDropdown').style.display = 'none';
@@ -4707,7 +5425,13 @@
 
         function openResourceViews() {
             showPage('resourceViewsPage');
-            loadResourceViews();
+
+            const isAMRole = getCurrentUserRole() === 'am';
+            const toggle = document.getElementById('rvTeamToggle');
+            if (toggle) toggle.style.display = isAMRole ? 'flex' : 'none';
+
+            // AMs default to My Team; everyone else sees all
+            loadResourceViews(isAMRole ? 'team' : 'all');
         }
 
         // Admin Reports Page Tab Switching
@@ -5204,6 +5928,9 @@
         }
 
         async function showDashboard() {
+            // Stamp a unique login timestamp so overdue alerts fire once per login
+            sessionStorage.setItem('loginTimestamp', Date.now().toString());
+
             authContainer.style.display = 'none';
             dashboard.classList.add('active');
             // Show display name from metadata, falling back to parsing the email
@@ -5215,6 +5942,12 @@
                 const _nameParts = _emailParts.split(/[._]/).map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase());
                 userEmail.textContent = _nameParts.join(' ') || currentUser.email;
             }
+
+            // Time-based greeting (visibility set after role loads below)
+            const _hour = new Date().getHours();
+            const _greet = _hour < 12 ? 'Good morning' : _hour < 17 ? 'Good afternoon' : 'Good evening';
+            const _navGreeting = document.getElementById('navGreeting');
+            if (_navGreeting) _navGreeting.childNodes[0].textContent = _greet + ', ';
             
             // Reload roles to ensure we have fresh data
             await loadUserRoles();
@@ -5248,6 +5981,12 @@
                 trainingTeamWrapper.style.display = currentUserRole !== 'user' ? 'block' : 'none';
             }
 
+            // Hide nav greeting for roles that have it on their dashboard (photographers + trainers)
+            if (_navGreeting) {
+                const _hideGreeting = ['user', 'trainer'].includes(currentUserRole);
+                _navGreeting.style.display = _hideGreeting ? 'none' : 'inline';
+            }
+
             // Search/filter/sort bar (non-photographer roles only)
             const controlsBar = document.getElementById('dashboardControlsBar');
             if (controlsBar) {
@@ -5278,6 +6017,10 @@
                 if (searchContainer) searchContainer.style.display = 'block';
             }
 
+            // Reveal sort select now that role is known
+            const sortSelect = document.getElementById('sortSelect');
+            if (sortSelect) sortSelect.style.visibility = 'visible';
+
             // Set AM team if user is an AM
             if (isAM()) {
                 currentAMTeam = getAMTeamPhotographers();
@@ -5301,6 +6044,62 @@
             }
             // Update QC drawer visibility after dashboard renders
             setTimeout(updateQCDrawerVisibility, 100);
+
+            // Check and show alerts after roles and records are fully loaded
+            setTimeout(checkAndShowAlerts, 2000);
+
+            // Check for hash-based routing (e.g. coming from LMS)
+            const hash = window.location.hash;
+            if (hash === '#library') {
+                window.location.hash = '';
+                openResourcesLibrary('videos');
+                return;
+            }
+            if (hash === '#assessments') {
+                window.location.hash = '';
+                showPage('dashboardPage');
+                displayRecords();
+                return;
+            }
+
+            // Try to restore to the last page the user was on (sessionStorage persists across tab switches)
+            const lastPage = sessionStorage.getItem('currentPage');
+            const validPages = ['dashboardPage','photographerHomePage','manageAssessmentsPage','myAssessmentsPage','assessmentFormPage','recordDetailPage','chartsPage','adminReportsPage','changePasswordPage','trainingLibraryPage','resourceViewsPage','swapRequestsPage'];
+
+            // Pages trainers/users should never be restored to directly
+            const trainerRestrictedPages = ['dashboardPage', 'manageAssessmentsPage', 'chartsPage', 'adminReportsPage', 'myAssessmentsPage'];
+            const isPhotographerRole = currentUserRole === 'user' || currentUserRole === 'trainer';
+            const pageIsValid = lastPage && validPages.includes(lastPage);
+            const pageIsAllowed = !isPhotographerRole || !trainerRestrictedPages.includes(lastPage);
+
+            if (pageIsValid && pageIsAllowed) {
+                // Restore to the last page they were on
+                showPage(lastPage);
+                
+                // Re-load the appropriate data for that page
+                if (lastPage === 'photographerHomePage') {
+                    loadPhotographerHomePage();
+                } else if (lastPage === 'dashboardPage') {
+                    displayRecords();
+                } else if (lastPage === 'myAssessmentsPage') {
+                    openAssessments();
+                } else if (lastPage === 'manageAssessmentsPage') {
+                    openAdminAssessments();
+                } else if (lastPage === 'swapRequestsPage') {
+                    initSwapRequestsPage();
+                } else if (lastPage === 'chartsPage') {
+                    loadChartsPage();
+                }
+            } else {
+                // No saved page, invalid page, or restricted page for this role — go to role-based default
+                if (isPhotographerRole) {
+                    showPage('photographerHomePage');
+                    loadPhotographerHomePage();
+                } else {
+                    showPage('dashboardPage');
+                    displayRecords();
+                }
+            }
         }
 
         function showAMViewToggle() {
@@ -5410,6 +6209,18 @@
             currentPage = 1;
             trainerViewMode = 'mine';
             loginForm.reset();
+            
+            // Clear stored page on logout so next login goes to default home
+            sessionStorage.removeItem('currentPage');
+
+            // Clear alert session keys so overdue check fires fresh on next login
+            const keysToRemove = [];
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                if (key && key.startsWith('alert_overdue_shown_')) keysToRemove.push(key);
+            }
+            keysToRemove.forEach(k => sessionStorage.removeItem(k));
+            sessionStorage.removeItem('loginTimestamp');
 
             // Reset login button in case it was stuck mid-login
             const loginBtn = loginForm.querySelector('button');
@@ -5530,6 +6341,11 @@
                     resourceViewsOption.style.display = currentUserRole !== 'user' ? 'block' : 'none';
                 }
 
+                const swapRequestsOption = document.getElementById('swapRequestsOption');
+                if (swapRequestsOption) {
+                    swapRequestsOption.style.display = ['trainer', 'super_admin'].includes(currentUserRole) ? 'block' : 'none';
+                }
+
                 // Admin Reports (Super Admin)
                 const adminReportOption = document.getElementById('adminReportOption');
                 if (adminReportOption) {
@@ -5560,6 +6376,7 @@
             };
             
             tagline.textContent = taglines[role] || 'Review and manage photographer quality assessments';
+            tagline.style.visibility = 'visible';
         }
 
         function updateCharts() {
@@ -7421,6 +8238,13 @@
                                     style="width:100%;padding:6px 9px;background:#4ba8a8;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;">
                                     ${assignment.status === 'needs_updated' ? '🔄 Resubmit' : hasDraft ? '✏️ Continue Assessment' : '📝 Start Assessment'}
                                 </button>` : ''}
+                                <button
+                                    onclick="openSwapModal(${assignment.id}, '${assignment.photographer_name.replace(/'/g, "\\'")}', '${assignment.photographer_email}')"
+                                    style="width:100%;padding:6px 9px;background:#f0f0f0;color:#666;border:1px solid #ddd;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;transition:all 0.2s;"
+                                    onmouseover="this.style.background='#e8e8e8'"
+                                    onmouseout="this.style.background='#f0f0f0'">
+                                    🔄 Offer for Swap
+                                </button>
                             </div>
                         </div>
                     `;
@@ -7707,6 +8531,12 @@
             });
 
             return stats;
+        }
+
+        function changePage(newPage) {
+            currentPage = newPage;
+            displayRecords();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function displayRecords() {
@@ -9103,8 +9933,8 @@
         // RESOURCES CAROUSEL SYSTEM - Using flag_resources Table
         // ══════════════════════════════════════════════════════════════
 
-        async function loadPhotographerRecommendedResources() {
-            const container = document.getElementById('photographerRecommendedResources');
+        async function loadPhotographerRecommendedResources(containerId = 'photographerRecommendedResources') {
+            const container = document.getElementById(containerId);
             if (!container) return;
 
             try {
@@ -9240,7 +10070,15 @@
                 const completions = {};
                 (completionRows || []).forEach(r => { completions[r.resource_url] = r.completed_at; });
 
-                renderResourcesCarousel(container, allToDisplay, 'photographer', completions, flaggedResources.length, recommendedOnly.length);
+                // Always sort completed resources to the end
+                allToDisplay.sort((a, b) => {
+                    const aDone = !!completions[a.url];
+                    const bDone = !!completions[b.url];
+                    if (aDone === bDone) return 0;
+                    return aDone ? 1 : -1;
+                });
+
+                renderResourcesCarousel(container, allToDisplay, containerId, completions, flaggedResources.length, recommendedOnly.length);
 
             } catch (err) {
                 console.error('Carousel error:', err);
@@ -9275,22 +10113,23 @@
             return m ? m[1] : null;
         }
 
-        function renderResourcesCarousel(container, resources, context = 'photographer', completions = {}, flaggedCount = 0, recommendedCount = 0) {
+        function renderResourcesCarousel(container, resources, containerId = 'photographerRecommendedResources', completions = {}, flaggedCount = 0, recommendedCount = 0) {
             if (!resources || resources.length === 0) {
                 container.innerHTML = '';
                 return;
             }
             console.log('🎠 renderResourcesCarousel v2 called with', resources.length, 'resources');
 
-            const carouselId = context === 'lms' ? 'lmsCarousel' : 'photogCarousel';
-            const controlsId = context === 'lms' ? 'lmsControls' : 'photogControls';
+            const carouselId = containerId + '_inner';
+            const controlsId = containerId + '_controls';
+            const isLms = containerId === 'lmsCarousel';
 
             // Generate subtitle based on what's being shown
             let subtitle = 'Based on your recent assessment flags';
             if (flaggedCount === 0 && recommendedCount > 0) {
                 subtitle = 'Featured resources to help your growth';
             } else if (flaggedCount > 0 && recommendedCount > 0) {
-                subtitle = 'Resources for your flags, plus featured recommendations';
+                subtitle = 'Resources based on the results of your gallery feedback, plus featured recommendations';
             }
 
             let html = `
@@ -9300,8 +10139,8 @@
                 <p class="rfy-subtitle">${subtitle}</p>
                 <div class="rfy-carousel-wrap">
                     <div class="rfy-controls" id="${controlsId}">
-                        <button class="rfy-arrow" id="${controlsId}Left" onclick="scrollResourceCarousel('${carouselId}', -1)">←</button>
-                        <button class="rfy-arrow" id="${controlsId}Right" onclick="scrollResourceCarousel('${carouselId}', 1)">→</button>
+                        <button class="rfy-arrow" id="${controlsId}_left" onclick="scrollResourceCarousel('${carouselId}', -1)">←</button>
+                        <button class="rfy-arrow" id="${controlsId}_right" onclick="scrollResourceCarousel('${carouselId}', 1)">→</button>
                     </div>
                     <div class="rfy-carousel" id="${carouselId}">
             `;
@@ -9365,13 +10204,13 @@
                 const completion  = completions[resource.url];
                 const isDone      = !!completion;
                 const doneDate    = isDone ? new Date(completion).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
-                const btnId       = 'cmp_' + resource.url.replace(/[^a-zA-Z0-9]/g, '').slice(-12);
+                const btnId = 'cmp_' + containerId.slice(-8) + '_' + resource.url.replace(/[^a-zA-Z0-9]/g, '').slice(-12);
                 const completeBtn = isDone
                     ? `<button id="${btnId}" class="rfy-complete-btn completed" 
                         onmouseover="this.textContent='Mark Incomplete?'" 
                         onmouseout="this.textContent='✓ Completed ${doneDate}'" 
-                        onclick="toggleResourceComplete(event, '${safeUrl}', '${escapeHtml(resource.title)}', '${btnId}')">✓ Completed ${doneDate}</button>`
-                    : `<button id="${btnId}" class="rfy-complete-btn" onclick="toggleResourceComplete(event, '${safeUrl}', '${escapeHtml(resource.title)}', '${btnId}')">○ Mark Complete</button>`;
+                        onclick="toggleResourceComplete(event, '${safeUrl}', '${escapeAttr(resource.title)}', '${btnId}', '${containerId}')">✓ Completed ${doneDate}</button>`
+                    : `<button id="${btnId}" class="rfy-complete-btn" onclick="toggleResourceComplete(event, '${safeUrl}', '${escapeAttr(resource.title)}', '${btnId}', '${containerId}')">○ Mark Complete</button>`;
 
                 html += `
                     <a href="${safeUrl}" target="_blank" class="rfy-resource-card">
@@ -9437,7 +10276,7 @@
             btn.classList.remove('completing');
         }
 
-        async function toggleResourceComplete(event, url, title, btnId) {
+        async function toggleResourceComplete(event, url, title, btnId, containerId = 'photogHomeCarousel') {
             event.preventDefault();
             event.stopPropagation();
             if (!currentUser) return;
@@ -9451,7 +10290,6 @@
 
             try {
                 if (isAlready) {
-                    // Unmark — delete the row
                     await supabaseClient
                         .from('resource_completions')
                         .delete()
@@ -9460,11 +10298,9 @@
 
                     btn.classList.remove('completed');
                     btn.textContent = '○ Mark Complete';
-                    // Clear hover handlers when unmarking
                     btn.onmouseover = null;
-                    btn.onmouseout = null;
+                    btn.onmouseout  = null;
                 } else {
-                    // Mark complete — upsert
                     const now = new Date().toISOString();
                     await supabaseClient
                         .from('resource_completions')
@@ -9474,9 +10310,46 @@
                     const dateStr = new Date(now).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                     btn.classList.add('completed');
                     btn.textContent = `✓ Completed ${dateStr}`;
-                    // Add hover handlers for the hover text change
                     btn.onmouseover = function() { this.textContent = 'Mark Incomplete?'; };
-                    btn.onmouseout = function() { this.textContent = `✓ Completed ${dateStr}`; };
+                    btn.onmouseout  = function() { this.textContent = `✓ Completed ${dateStr}`; };
+
+                    // Move card to end of carousel
+                    const card = btn.closest('.rfy-resource-card');
+                    if (card && card.parentElement) {
+                        const carousel = card.parentElement;
+
+                        // Insert a temporary green placeholder in the card's current position
+                        const placeholder = document.createElement('div');
+                        placeholder.style.cssText = card.style.cssText;
+                        placeholder.className = 'rfy-resource-card';
+                        placeholder.style.cssText = `
+                            flex: 0 0 ${card.offsetWidth}px;
+                            background: #d1fae5;
+                            border: 1px solid #6ee7b7;
+                            border-radius: 12px;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            text-align: center;
+                            padding: 24px 16px;
+                            gap: 8px;
+                            transition: opacity 0.5s ease;
+                            opacity: 1;
+                        `;
+                        placeholder.innerHTML = `
+                            <div style="font-size:28px;">✅</div>
+                            <div style="font-size:13px; font-weight:600; color:#065f46;">Completed! Great job.</div>
+                            <div style="font-size:12px; color:#047857;">This resource has moved to the end of the list.</div>
+                        `;
+
+                        carousel.insertBefore(placeholder, card);
+                        carousel.appendChild(card);
+
+                        // Fade out and remove placeholder
+                        setTimeout(() => { placeholder.style.opacity = '0'; }, 3500);
+                        setTimeout(() => { placeholder.remove(); }, 4000);
+                    }
                 }
             } catch (err) {
                 console.error('Completion toggle error:', err);
@@ -9499,14 +10372,14 @@
             });
 
             // Update arrow states after scroll
-            const controlsId = carouselId.replace('Carousel', 'Controls');
+            const controlsId = carouselId.replace('_inner', '_controls');
             setTimeout(() => updateCarouselArrowState(carouselId, controlsId), 400);
         }
 
         function updateCarouselArrowState(carouselId, controlsId) {
             const carousel = document.getElementById(carouselId);
-            const leftBtn = document.getElementById(controlsId + 'Left');
-            const rightBtn = document.getElementById(controlsId + 'Right');
+            const leftBtn = document.getElementById(controlsId + '_left');
+            const rightBtn = document.getElementById(controlsId + '_right');
 
             if (!carousel || !leftBtn || !rightBtn) return;
 
@@ -9525,13 +10398,34 @@
             return div.innerHTML;
         }
 
+        // Safe for use inside single-quoted onclick attributes — escapes single quotes too
+        function escapeAttr(text) {
+            if (!text) return '';
+            return escapeHtml(text).replace(/'/g, '&#39;');
+        }
+
         // RESOURCE VIEWS PAGE
-        async function loadResourceViews() {
+        async function loadResourceViews(viewMode = 'all') {
             const container = document.getElementById('rvPhotographersList');
             if (!container) return;
             container.innerHTML = '<p style="color: #999;">Loading...</p>';
 
+            // Update tab active state
+            document.querySelectorAll('[data-rv-filter]').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-rv-filter') === viewMode);
+            });
+
             try {
+                // If AM + team view, get their team emails first
+                let teamEmails = null;
+                if (viewMode === 'team' && getCurrentUserRole() === 'am') {
+                    const amEmail = currentUser.email.toLowerCase().trim();
+                    const { data: teamRows } = await supabaseClient
+                        .from('am_photographer_mapping')
+                        .select('"Photographer Email"')
+                        .eq('"AM Email"', amEmail);
+                    teamEmails = (teamRows || []).map(r => (r['Photographer Email'] || '').toLowerCase().trim()).filter(Boolean);
+                }
                 // Get photographers and their names from am_photographer_mapping
                 const { data: photoList, error: photoError } = await supabaseClient
                     .from('am_photographer_mapping')
@@ -9593,7 +10487,12 @@
                     (a.name || a.email).localeCompare(b.name || b.email)
                 );
 
-                if (photographers.length === 0) {
+                // Filter to team if AM is in team view
+                const filteredPhotographers = teamEmails
+                    ? photographers.filter(p => teamEmails.includes((p.email || '').toLowerCase().trim()))
+                    : photographers;
+
+                if (filteredPhotographers.length === 0) {
                     container.innerHTML = '<p style="color: #999;">No photographers found.</p>';
                     return;
                 }
@@ -9623,7 +10522,7 @@
 
                 // Build HTML
                 let html = '';
-                photographers.forEach((photo, idx) => {
+                filteredPhotographers.forEach((photo, idx) => {
                     const email = (photo.email || '').toLowerCase().trim();
                     const displayName = photo.name || email;
                     const completedResources = completionsByEmail[email] || [];
@@ -10168,6 +11067,550 @@
                 const arrow = document.getElementById('qcDrawerArrow');
                 if (panel) panel.style.display = 'none';
                 if (arrow) arrow.textContent = '▲';
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────
+        // ASSESSMENT SWAP REQUESTS
+        // ─────────────────────────────────────────────────────────────
+
+        let swapModalContext = null; // Track which assignment opened the swap modal
+
+        function openSwapModal(assignmentId, photographerName, photographerEmail) {
+            swapModalContext = { assignmentId, photographerName, photographerEmail };
+            document.getElementById('swapPhotogName').textContent = photographerName;
+            document.getElementById('swapReasonSelect').value = '';
+            document.getElementById('swapOtherNote').value = '';
+            document.getElementById('swapOtherNoteDiv').style.display = 'none';
+            document.getElementById('swapRequestModal').style.display = 'flex';
+        }
+
+        function closeSwapModal() {
+            document.getElementById('swapRequestModal').style.display = 'none';
+            swapModalContext = null;
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('swapRequestModal').addEventListener('click', (e) => {
+            if (e.target.id === 'swapRequestModal') {
+                closeSwapModal();
+            }
+        });
+
+        document.getElementById('swapReasonSelect').addEventListener('change', (e) => {
+            const otherDiv = document.getElementById('swapOtherNoteDiv');
+            otherDiv.style.display = e.target.value === 'other' ? 'block' : 'none';
+        });
+
+        async function submitSwapRequest() {
+            const reason = document.getElementById('swapReasonSelect').value;
+            const otherNote = document.getElementById('swapOtherNote').value.trim();
+
+            if (!reason) {
+                alert('Please select a reason');
+                return;
+            }
+
+            if (reason === 'other' && !otherNote) {
+                alert('Please provide additional details for "Other"');
+                return;
+            }
+
+            if (!swapModalContext) return;
+
+            const { assignmentId, photographerName, photographerEmail } = swapModalContext;
+
+            try {
+                const { data, error } = await supabaseClient.from('assessment_swap_requests').insert([{
+                    pss_assignment_id: assignmentId,
+                    photographer_name: photographerName,
+                    photographer_email: photographerEmail,
+                    requested_by_email: currentUser.email,
+                    requested_by_name: document.getElementById('userEmail').textContent || 'Unknown',
+                    reason: reason,
+                    reason_note: reason === 'other' ? otherNote : null,
+                    status: 'pending',
+                    created_at: new Date().toISOString()
+                }]);
+
+                if (error) throw error;
+
+                closeSwapModal();
+                alert('Swap request posted! Your teammates can now pick this up.');
+                loadSwapRequests('pending');
+            } catch (err) {
+                console.error('Error creating swap request:', err);
+                alert('Failed to post swap request');
+            }
+        }
+
+        async function initSwapRequestsPage() {
+            showPage('swapRequestsPage');
+
+            const isSuperAdmin = getCurrentUserRole() === 'super_admin';
+
+            // Super Admin: All Requests | Claimed
+            document.getElementById('swapTabAll').style.display          = isSuperAdmin ? 'inline-block' : 'none';
+            document.getElementById('swapTabClaimedAdmin').style.display = isSuperAdmin ? 'inline-block' : 'none';
+
+            // Trainer: Pending | My Requests | Claimed | Swapped
+            document.getElementById('swapTabPending').style.display = isSuperAdmin ? 'none' : 'inline-block';
+            document.getElementById('swapTabMy').style.display      = isSuperAdmin ? 'none' : 'inline-block';
+            document.getElementById('swapTabClaimed').style.display  = isSuperAdmin ? 'none' : 'inline-block';
+            document.getElementById('swapTabSwapped').style.display  = isSuperAdmin ? 'none' : 'inline-block';
+
+            // Load the right default tab
+            await loadSwapRequests(isSuperAdmin ? 'all' : 'pending');
+        }
+
+        async function loadSwapRequests(filter = 'pending') {
+            try {
+                const userEmail = currentUser.email.toLowerCase();
+                let query = supabaseClient.from('assessment_swap_requests').select('*');
+
+                if (filter === 'pending') {
+                    // All open requests from all trainers
+                    query = query.eq('status', 'pending');
+                } else if (filter === 'my') {
+                    // Only the trainer's own still-pending requests
+                    query = query.eq('requested_by_email', userEmail).eq('status', 'pending');
+                } else if (filter === 'claimed') {
+                    const isSuperAdmin = getCurrentUserRole() === 'super_admin';
+                    if (isSuperAdmin) {
+                        // Super admin: all claimed requests
+                        query = query.eq('status', 'claimed');
+                    } else {
+                        // Trainer: requests THEY picked up from someone else
+                        query = query.eq('claimed_by_email', userEmail).eq('status', 'claimed');
+                    }
+                } else if (filter === 'swapped') {
+                    // Trainer: their own requests that someone else picked up
+                    query = query.eq('requested_by_email', userEmail).eq('status', 'claimed');
+                } else if (filter === 'all') {
+                    // Super admin: all pending requests from all trainers
+                    query = query.eq('status', 'pending');
+                }
+
+                const { data, error } = await query.order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const isSuperAdmin = getCurrentUserRole() === 'super_admin';
+                const container = document.getElementById('swapRequestsList');
+
+                // Update tab styling first — always, regardless of results
+                document.querySelectorAll('.swap-tab-btn').forEach(btn => btn.classList.remove('active'));
+                const activeBtn = document.querySelector(`.swap-tab-btn[data-filter="${filter}"]`);
+                console.log('🔵 Tab update — filter:', filter, '| activeBtn found:', activeBtn, '| classList before:', activeBtn?.className);
+                if (activeBtn) {
+                    activeBtn.classList.add('active');
+                    console.log('🟢 classList after add:', activeBtn.className);
+                }
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; color: #999; padding: 40px;">No requests to display</div>';
+                    return;
+                }
+
+                let html = '';
+                data.forEach(req => {
+                    const isMine = req.requested_by_email === userEmail;
+                    const isAvailable = req.status === 'pending' && !isMine;
+                    const reasonLabel = {
+                        'took_on_shift': 'Took on extra hospital shift',
+                        'unexpected_business': 'Unexpected business during shift',
+                        'out_sick': 'Out sick',
+                        'family_emergency': 'Family emergency',
+                        'other': 'Other'
+                    }[req.reason] || req.reason;
+
+                    let statusBadge = '';
+                    if (req.status === 'pending') statusBadge = '<span style="color: #f59e0b; font-weight: 600;">⏳ Pending</span>';
+                    else if (req.status === 'claimed') {
+                        const claimedByLabel = req.claimed_by_email && req.claimed_by_email.toLowerCase() === userEmail ? 'you' : req.claimed_by_name;
+                        statusBadge = `<span style="color: #10b981; font-weight: 600; font-size: 12px;">✓ Claimed by ${claimedByLabel}</span>`;
+                    }
+                    else if (req.status === 'cancelled') statusBadge = '<span style="color: #6b7280; font-weight: 600;">✕ Cancelled</span>';
+
+                    html += `
+                        <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: #333; margin-bottom: 4px; font-size: 13px;">${req.photographer_name}</div>
+                                <div style="font-size: 12px; color: #666; margin-bottom: 6px;">
+                                    <strong>Requested by:</strong> ${req.requested_by_name}
+                                </div>
+                                <div style="font-size: 12px; color: #666; margin-bottom: 6px;">
+                                    <strong>Reason:</strong> ${reasonLabel}
+                                </div>
+                                ${isSuperAdmin && req.reason_note ? `<div style="font-size: 12px; color: #999; font-style: italic; padding: 6px; background: #f5f5f5; border-radius: 4px; margin-top: 6px;"><strong>Admin Note:</strong> ${req.reason_note}</div>` : ''}
+                                <div style="font-size: 11px; color: #999; margin-top: 6px;">Posted ${new Date(req.created_at).toLocaleDateString()}</div>
+                            </div>
+                            <div style="margin-left: 16px; text-align: right; white-space: nowrap;">
+                                ${statusBadge}
+                                ${isAvailable ? `<button onclick="claimSwapRequest('${req.id}')" style="display: block; margin-top: 10px; padding: 7px 12px; background: #4ba8a8; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 11px;">Pick This Up</button>` : ''}
+                                ${isMine && req.status === 'pending' ? `<button onclick="cancelSwapRequest('${req.id}')" style="display: block; margin-top: 10px; padding: 7px 12px; background: #f0f0f0; color: #666; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 11px;">Cancel</button>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+
+            } catch (err) {
+                console.error('Error loading swap requests:', err);
+            }
+        }
+
+        async function claimSwapRequest(requestId) {
+            if (!confirm('Pick up this assessment? The assignment will transfer to you.')) return;
+
+            try {
+                // Get the request details
+                const { data: request, error: fetchError } = await supabaseClient
+                    .from('assessment_swap_requests')
+                    .select('*')
+                    .eq('id', requestId)
+                    .single();
+
+                if (fetchError) throw fetchError;
+
+                const { pss_assignment_id, requested_by_email, requested_by_name } = request;
+
+                // Update the assignment
+                const { error: updateError } = await supabaseClient
+                    .from('pss_assignments')
+                    .update({
+                        pss_email: currentUser.email,
+                        pss_name: document.getElementById('userEmail').textContent || currentUser.email
+                    })
+                    .eq('id', pss_assignment_id);
+
+                if (updateError) throw updateError;
+
+                // Update the request
+                const { error: claimError } = await supabaseClient
+                    .from('assessment_swap_requests')
+                    .update({
+                        status: 'claimed',
+                        claimed_by_email: currentUser.email,
+                        claimed_by_name: document.getElementById('userEmail').textContent || currentUser.email,
+                        claimed_at: new Date().toISOString()
+                    })
+                    .eq('id', requestId);
+
+                if (claimError) throw claimError;
+
+                alert('Assessment picked up! It\'s now on your list.');
+                loadSwapRequests('pending');
+            } catch (err) {
+                console.error('Error claiming swap request:', err);
+                alert('Failed to claim swap request');
+            }
+        }
+
+        async function cancelSwapRequest(requestId) {
+            if (!confirm('Cancel this swap request?')) return;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('assessment_swap_requests')
+                    .update({ status: 'cancelled' })
+                    .eq('id', requestId);
+
+                if (error) throw error;
+
+                alert('Swap request cancelled.');
+                loadSwapRequests('my');
+            } catch (err) {
+                console.error('Error cancelling swap request:', err);
+                alert('Failed to cancel swap request');
+            }
+        }
+
+        // ── ALERT SYSTEM ────────────────────────────────────────────────
+
+        // Render a toast into the stack
+        function showToast({ id, type = 'info', icon, title, body, canSnooze = false, onDismiss, onSnooze }) {
+            const stack = document.getElementById('alertToastStack');
+            if (!stack) return;
+
+            // Avoid duplicates in the DOM
+            if (document.getElementById('toast_' + id)) return;
+
+            const toast = document.createElement('div');
+            toast.className = `alert-toast ${type}`;
+            toast.id = 'toast_' + id;
+            toast.innerHTML = `
+                <div class="alert-toast-title">
+                    <span class="alert-toast-icon">${icon}</span>${title}
+                </div>
+                ${body ? `<div class="alert-toast-body">${body}</div>` : ''}
+                <div class="alert-toast-actions">
+                    ${canSnooze ? `<button class="alert-toast-btn snooze" onclick="handleToastSnooze('${id}')">Snooze 12hr</button>` : ''}
+                    <button class="alert-toast-btn dismiss" onclick="handleToastDismiss('${id}')">Dismiss</button>
+                </div>
+            `;
+
+            // Store callbacks
+            toast._onDismiss = onDismiss;
+            toast._onSnooze  = onSnooze;
+
+            stack.appendChild(toast);
+        }
+
+        function removeToast(alertId) {
+            const toast = document.getElementById('toast_' + alertId);
+            if (!toast) return;
+            toast.classList.add('removing');
+            setTimeout(() => toast.remove(), 260);
+        }
+
+        async function handleToastDismiss(alertId) {
+            const toast = document.getElementById('toast_' + alertId);
+            if (toast && toast._onDismiss) await toast._onDismiss();
+            removeToast(alertId);
+        }
+
+        async function handleToastSnooze(alertId) {
+            const toast = document.getElementById('toast_' + alertId);
+            if (toast && toast._onSnooze) await toast._onSnooze();
+            removeToast(alertId);
+        }
+
+        // Write a dismissal record to Supabase
+        async function persistDismissal(alertKey, alertType) {
+            const email = currentUser.email.toLowerCase().trim();
+            await supabaseClient.from('user_alert_dismissals').upsert({
+                user_email: email,
+                alert_key: alertKey,
+                alert_type: alertType,
+                dismissed_at: new Date().toISOString(),
+                snoozed_until: null
+            }, { onConflict: 'user_email,alert_key' });
+        }
+
+        // Write a snooze record (12 hours from now)
+        async function persistSnooze(alertKey, alertType) {
+            const email = currentUser.email.toLowerCase().trim();
+            const snoozeUntil = new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString();
+            await supabaseClient.from('user_alert_dismissals').upsert({
+                user_email: email,
+                alert_key: alertKey,
+                alert_type: alertType,
+                snoozed_until: snoozeUntil,
+                dismissed_at: null
+            }, { onConflict: 'user_email,alert_key' });
+        }
+
+        // Main entry point — called after login
+        async function checkAndShowAlerts() {
+            if (!currentUser) return;
+
+            // Use the cached global role — guaranteed set after loadUserRoles() completes
+            const role  = currentUserRole;
+            const email = currentUser.email.toLowerCase().trim();
+
+            // Safety check — if role is still resolving, bail
+            if (!role) return;
+
+            console.log('🔔 checkAndShowAlerts — role:', role, 'email:', email);
+
+            // Fetch existing dismissals/snoozes for this user in one query
+            const { data: dismissals } = await supabaseClient
+                .from('user_alert_dismissals')
+                .select('alert_key, dismissed_at, snoozed_until')
+                .eq('user_email', email);
+
+            const dismissalMap = {};
+            (dismissals || []).forEach(d => { dismissalMap[d.alert_key] = d; });
+
+            const now = new Date();
+
+            function isBlocked(alertKey) {
+                const d = dismissalMap[alertKey];
+                if (!d) return false;
+                if (d.dismissed_at) return true;
+                if (d.snoozed_until && new Date(d.snoozed_until) > now) return true;
+                return false;
+            }
+
+            // ── 1. OVERDUE REVIEWS (Trainer role — session-based, no DB write) ──
+            if (role === 'trainer') {
+                // Key includes login time (set at auth) so it fires once per login, not once per tab
+                const loginTime = sessionStorage.getItem('loginTimestamp') || 'default';
+                const sessionKey = 'alert_overdue_shown_' + email + '_' + loginTime;
+                if (!sessionStorage.getItem(sessionKey)) {
+                    const today = new Date().toISOString().split('T')[0];
+                    console.log('🔍 Checking overdue for trainer:', email, '| today:', today);
+                    const { data: overdue, error: overdueErr } = await supabaseClient
+                        .from('pss_assignments')
+                        .select('id, status, due_date')
+                        .eq('pss_email', email)
+                        .eq('cycle_status', 'active')
+                        .lt('due_date', today)
+                        .not('status', 'in', `(Complete,skipped_no_galleries,skipped_see_notes)`);
+
+                    console.log('📋 Overdue query result:', overdue, '| error:', overdueErr);
+
+                    // Filter in JS as a safety net in case Supabase .not syntax varies
+                    const skipStatuses = ['Complete', 'skipped_no_galleries', 'skipped_see_notes', 'completed'];
+                    const filteredOverdue = (overdue || []).filter(r => !skipStatuses.includes(r.status));
+
+                    console.log('📋 Filtered overdue count:', filteredOverdue.length);
+
+                    if (filteredOverdue.length > 0) {
+                        const count = filteredOverdue.length;
+                        sessionStorage.setItem(sessionKey, '1');
+                        showToast({
+                            id: 'overdue_reviews',
+                            type: 'danger',
+                            icon: '⚠️',
+                            title: `${count} Overdue Review${count > 1 ? 's' : ''}`,
+                            body: `You have ${count} assignment${count > 1 ? 's' : ''} past the due date. Complete ${count > 1 ? 'them' : 'it'} as soon as possible.`,
+                            canSnooze: false,
+                            onDismiss: () => removeToast('overdue_reviews')
+                        });
+                    }
+                }
+            }
+
+            // ── 2. NEW APPROVED REVIEWS (Photographers + Trainers) ──
+            if (role === 'user' || role === 'trainer') {
+                const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+                const { data: newReviews } = await supabaseClient
+                    .from('growth_assessments')
+                    .select('id, created_at, "PSS Reviewer Name"')
+                    .eq('Photographer Email', email)
+                    .eq('status', 'approved')
+                    .gte('created_at', thirtyDaysAgo)
+                    .order('created_at', { ascending: false });
+
+                (newReviews || []).forEach(review => {
+                    const alertKey = `new_review_${review.id}`;
+                    if (isBlocked(alertKey)) return;
+
+                    const reviewDate = new Date(review.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    const reviewer   = review['PSS Reviewer Name'] || 'your reviewer';
+
+                    showToast({
+                        id: alertKey,
+                        type: 'info',
+                        icon: '📋',
+                        title: 'New Review Available',
+                        body: `Your gallery review from ${reviewDate} by ${reviewer} is ready to view.`,
+                        canSnooze: true,
+                        onDismiss: () => persistDismissal(alertKey, 'new_review'),
+                        onSnooze:  () => persistSnooze(alertKey, 'new_review')
+                    });
+                });
+            }
+
+            // ── 3. SCORE-OF-1 ALERTS (AM role) ──
+            if (role === 'am') {
+                // Get AM's team
+                const { data: teamRows } = await supabaseClient
+                    .from('am_photographer_mapping')
+                    .select('"Photographer Email"')
+                    .eq('"AM Email"', email);
+
+                const teamEmails = (teamRows || []).map(r => r['Photographer Email']).filter(Boolean);
+
+                if (teamEmails.length > 0) {
+                    const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString();
+
+                    const scoreColumns = [
+                        'Core Skills (1)', 'Subject and Posing (1)', 'Gallery Experience (1)', 'Editing / Bella Baby Standards (1)',
+                        'Core Skills (2)', 'Subject and Posing (2)', 'Gallery Experience (2)', 'Editing / Bella Baby Standards (2)',
+                        'Gallery #1 Score:', 'Gallery #2 Score:'
+                    ];
+
+                    const { data: recentReviews } = await supabaseClient
+                        .from('growth_assessments')
+                        .select(`id, "Photographer Name", "Photographer Email", created_at, ${scoreColumns.map(c => `"${c}"`).join(', ')}`)
+                        .in('"Photographer Email"', teamEmails)
+                        .eq('status', 'approved')
+                        .gte('created_at', tenDaysAgo);
+
+                    (recentReviews || []).forEach(review => {
+                        const alertKey = `score_one_${review.id}`;
+                        if (isBlocked(alertKey)) return;
+
+                        // Find which categories scored a 1
+                        const flaggedCategories = [];
+                        const categoryLabels = {
+                            'Core Skills (1)': 'Core Skills (G1)',
+                            'Subject and Posing (1)': 'Subject & Posing (G1)',
+                            'Gallery Experience (1)': 'Gallery Experience (G1)',
+                            'Editing / Bella Baby Standards (1)': 'Editing Standards (G1)',
+                            'Core Skills (2)': 'Core Skills (G2)',
+                            'Subject and Posing (2)': 'Subject & Posing (G2)',
+                            'Gallery Experience (2)': 'Gallery Experience (G2)',
+                            'Editing / Bella Baby Standards (2)': 'Editing Standards (G2)',
+                            'Gallery #1 Score:': 'Gallery 1 Overall',
+                            'Gallery #2 Score:': 'Gallery 2 Overall'
+                        };
+
+                        scoreColumns.forEach(col => {
+                            if (review[col] == 1) flaggedCategories.push(categoryLabels[col]);
+                        });
+
+                        if (flaggedCategories.length === 0) return;
+
+                        const photogName = review['Photographer Name'] || review['Photographer Email'];
+                        const reviewDate = new Date(review.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+                        showToast({
+                            id: alertKey,
+                            type: 'warning',
+                            icon: '⚠️',
+                            title: `Score of 1 — ${photogName}`,
+                            body: `Review posted ${reviewDate}.<br><strong>Categories:</strong> ${flaggedCategories.join(', ')}`,
+                            canSnooze: true,
+                            onDismiss: () => persistDismissal(alertKey, 'score_one'),
+                            onSnooze:  () => persistSnooze(alertKey, 'score_one')
+                        });
+                    });
+                }
+            }
+
+            // ── 4. SUPER ADMIN ONE-TIME TEST ALERT ──
+            if (role === 'super_admin') {
+                const alertKey = 'super_admin_alerts_onboarding_v1';
+                if (!isBlocked(alertKey)) {
+                    showToast({
+                        id: alertKey,
+                        type: 'info',
+                        icon: '🔔',
+                        title: 'Alerts Are Live!',
+                        body: 'The alert system is now active. You\'ll see role-based notifications here for your team. Dismiss this to confirm it\'s working.',
+                        canSnooze: true,
+                        onDismiss: () => persistDismissal(alertKey, 'super_admin_onboarding'),
+                        onSnooze:  () => persistSnooze(alertKey, 'super_admin_onboarding')
+                    });
+                }
+            }
+        }
+
+        // ── END ALERT SYSTEM ────────────────────────────────────────────
+
+        // Auto-cancel swap request when assessment starts
+        async function cancelSwapOnStart(assignmentId) {
+            try {
+                const { data: request } = await supabaseClient
+                    .from('assessment_swap_requests')
+                    .select('id')
+                    .eq('pss_assignment_id', assignmentId)
+                    .eq('status', 'pending')
+                    .single();
+
+                if (request) {
+                    await supabaseClient
+                        .from('assessment_swap_requests')
+                        .update({ status: 'started' })
+                        .eq('id', request.id);
+                }
+            } catch (err) {
+                // Request might not exist, which is fine
             }
         }
     </script>
