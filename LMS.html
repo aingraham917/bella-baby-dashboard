@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Bella Baby Professional Development Hub v1.2</title>
+    <title>Bella Baby Professional Development Hub v1.4</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -583,6 +583,7 @@
                 <button id="learningBtn" style="padding: 8px 14px; background: none; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.15s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">Development ▾</button>
                 <div id="learningDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 1000; margin-top: 4px; overflow: hidden;">
                     <a href="index.html#assessments" style="display: block; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; text-decoration: none; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">🏠 Assessments</a>
+                    <button id="ddCoursesEntry" class="options-menu-item" onclick="window.location.href='LMS.html'; closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">🎓 Courses</button>
                     <button id="ddMyTraining" class="options-menu-item" onclick="showView('learner'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📚 My Training</button>
                     <button id="ddBrowse" class="options-menu-item" onclick="showView('browse'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">🎬 Training Library</button>
                     <button id="resourceViewsOption" onclick="openResourceViews()" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📊 Resource Views</button>
@@ -595,6 +596,7 @@
                 <button id="trainingDropdownBtn" style="padding: 8px 14px; background: none; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.15s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">Training ▾</button>
                 <div id="trainingDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 1000; margin-top: 4px; overflow: hidden;">
                     <button id="ddMyCourses" class="options-menu-item" onclick="showView('learner'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📚 My Courses</button>
+                    <button id="ddAssignTraining" class="options-menu-item" onclick="showView('assign'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 Assign Training</button>
                     <button id="ddMyTeamProgress" class="options-menu-item" onclick="showView('am'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">👥 My Team Progress</button>
                 </div>
             </div>
@@ -1070,12 +1072,16 @@ async function showDashboard() {
     if (_navGreeting) _navGreeting.childNodes[0].textContent = _greet + ', ';
 
     // Wire up options menu visibility
-    if (!isPhotog()) document.getElementById('ddBrowse').style.display = 'block';
-    if (isPhotog())  document.getElementById('ddMyTraining').style.display = 'block';
+    document.getElementById('ddBrowse').style.display = 'block';  // Training Library for everyone
+    if (isPhotog()) {
+        document.getElementById('ddMyTraining').style.display = 'block';
+        document.getElementById('ddCoursesEntry').style.display = 'block';  // Courses entry for photographers
+    }
     if (isAM() || isTrainer()) {
         document.getElementById('trainingDropdownWrapper').style.display = 'block';
         document.getElementById('ddMyCourses').style.display = 'block';
         document.getElementById('ddMyTeamProgress').style.display = 'block';
+        document.getElementById('ddAssignTraining').style.display = 'block';
     }
     if (isAdmin() || isTrainer()) document.getElementById('ddAdminView').style.display = 'block';
     if (isStaff())   document.getElementById('ddAssign').style.display = 'block';
