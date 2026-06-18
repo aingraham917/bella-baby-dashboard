@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bella Baby Professional Development Hub v1.4</title>
+    <title>Bella Baby Professional Development Hub v2.0</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -1640,21 +1640,30 @@
                     <div style="position: relative;">
                         <button id="learningBtn" style="padding: 8px 14px; background: none; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.15s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">Development ▾</button>
                         <div id="learningDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 1000; margin-top: 4px; overflow: hidden;">
-                            <a href="LMS.html" style="display: block; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; text-decoration: none; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">🎓 Courses</a>
+                            <a id="coursesLink" href="LMS.html" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; text-decoration: none; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">🎓 Courses</a>
                             <button id="resourceViewsOption" onclick="openResourceViews()" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📊 Resource Views</button>
                             <button id="resourcesLibraryOption" onclick="openResourcesLibrary('videos')" style="width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📚 Resources Library</button>
                         </div>
                     </div>
                     
-                    <!-- TRAINING TEAM DROPDOWN -->
+                    <!-- TRAINING DROPDOWN (for AMs) -->
+                    <div id="trainingDropdownWrapper" style="position: relative; display: none;">
+                        <button id="trainingDropdownBtn" style="padding: 8px 14px; background: none; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.15s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">Training ▾</button>
+                        <div id="trainingDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 1000; margin-top: 4px; overflow: hidden;">
+                            <button id="ddMyCourses" class="options-menu-item" onclick="window.location.href='LMS.html'; closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📚 My Courses</button>
+                            <button id="ddAssignTraining" class="options-menu-item" onclick="window.location.href='LMS.html'; closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 Assign Training</button>
+                            <button id="ddMyTeamProgress" class="options-menu-item" onclick="window.location.href='LMS.html'; closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">👥 My Team Progress</button>
+                            <button id="growthOpportunitiesOption" class="options-menu-item" onclick="initGrowthOpportunitiesPage(); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">🚀 Growth Opportunities</button>
+                            <a id="viewRubricOption" href="https://drive.google.com/file/d/1LyZFSq5b2E41kFfKjuVL4yywqExFO8I8/view?usp=sharing" target="_blank" class="options-menu-item" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; color: #333; text-decoration: none; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 View Rubric</a>
+                        </div>
+                    </div>
+                    
                     <div id="trainingTeamWrapper" style="position: relative; display: none;">
                         <button id="trainingTeamBtn" style="padding: 8px 14px; background: none; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.15s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">Training ▾</button>
                         <div id="trainingTeamDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 1000; margin-top: 4px; overflow: hidden;">
                             <button id="adminAssessmentsOption" class="options-menu-item" onclick="openAdminAssessments()" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 Manage Assessments</button>
                             <button id="assessmentsOption" class="options-menu-item" onclick="openAssessments()" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 My Assessments</button>
                             <button id="swapRequestsOption" onclick="initSwapRequestsPage(); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">🔄 Assessment Swaps</button>
-                            <button id="growthOpportunitiesOption" onclick="initGrowthOpportunitiesPage(); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">🚀 Growth Opportunities</button>
-                            <a id="viewRubricOption" href="https://drive.google.com/file/d/1LyZFSq5b2E41kFfKjuVL4yywqExFO8I8/view?usp=sharing" target="_blank" class="options-menu-item" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; color: #333; text-decoration: none; transition: background 0.15s; display: block;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 View Rubric</a>
                         </div>
                     </div>
                     
@@ -4380,6 +4389,8 @@
                 document.getElementById('optionsDropdown').style.display = 'none';
                 document.getElementById('learningDropdown').style.display = 'none';
                 document.getElementById('trainingTeamDropdown').style.display = 'none';
+                const trainingDropdown = document.getElementById('trainingDropdown');
+                if (trainingDropdown) trainingDropdown.style.display = 'none';
             }
 
             on('optionsBtn', 'click', (e) => {
@@ -4403,6 +4414,16 @@
             on('trainingTeamBtn', 'click', (e) => {
                 e.stopPropagation();
                 const dropdown = document.getElementById('trainingTeamDropdown');
+                const isOpen = dropdown.style.display === 'block';
+                closeAllDropdowns();
+                if (!isOpen) dropdown.style.display = 'block';
+            });
+
+            // Training Dropdown Toggle (for AMs)
+            on('trainingDropdownBtn', 'click', (e) => {
+                e.stopPropagation();
+                const dropdown = document.getElementById('trainingDropdown');
+                if (!dropdown) return;
                 const isOpen = dropdown.style.display === 'block';
                 closeAllDropdowns();
                 if (!isOpen) dropdown.style.display = 'block';
@@ -4580,6 +4601,12 @@
                 loadResourceViews();
             } else if (savedPage === 'dashboardPage') {
                 displayRecords();
+            }
+
+            // Check if navigating from LMS to Growth Opportunities
+            if (sessionStorage.getItem('showGrowthOpp') === 'true') {
+                sessionStorage.removeItem('showGrowthOpp');
+                initGrowthOpportunitiesPage();
             }
         }
 
@@ -7504,10 +7531,36 @@
                 }, 600);
             }
             
-            // Training Team button (non-photographers only)
+            // Training Team button (trainers and admins only - not AMs)
             const trainingTeamWrapper = document.getElementById('trainingTeamWrapper');
             if (trainingTeamWrapper) {
-                trainingTeamWrapper.style.display = currentUserRole !== 'user' ? 'block' : 'none';
+                trainingTeamWrapper.style.display = (currentUserRole === 'trainer' || currentUserRole === 'super_admin' || currentUserRole === 'admin') ? 'block' : 'none';
+            }
+
+            // Training dropdown for AMs
+            const trainingDropdownWrapper = document.getElementById('trainingDropdownWrapper');
+            if (trainingDropdownWrapper) {
+                trainingDropdownWrapper.style.display = (currentUserRole === 'am' || currentUserRole === 'trainer') ? 'block' : 'none';
+            }
+
+            // Courses link visibility - only photographers
+            const coursesLink = document.getElementById('coursesLink');
+            if (coursesLink) {
+                coursesLink.style.display = currentUserRole === 'user' ? 'block' : 'none';
+            }
+
+            // Training dropdown items visibility for AMs
+            if (currentUserRole === 'am' || currentUserRole === 'trainer') {
+                const ddMyCourses = document.getElementById('ddMyCourses');
+                const ddAssignTraining = document.getElementById('ddAssignTraining');
+                const ddMyTeamProgress = document.getElementById('ddMyTeamProgress');
+                const growthOpp = document.getElementById('growthOpportunitiesOption');
+                const rubric = document.getElementById('viewRubricOption');
+                if (ddMyCourses) ddMyCourses.style.display = 'block';
+                if (ddAssignTraining) ddAssignTraining.style.display = 'block';
+                if (ddMyTeamProgress) ddMyTeamProgress.style.display = 'block';
+                if (growthOpp) growthOpp.style.display = 'block';
+                if (rubric) rubric.style.display = 'block';
             }
 
             // Hide nav greeting for roles that have it on their dashboard (photographers + trainers)
@@ -7853,12 +7906,7 @@
                 console.log('Loaded total records:', allRecords.length);
                 
                 // Show/hide options dropdown menu items based on role
-                // View Rubric (non-photographer roles only)
-                const viewRubricOption = document.getElementById('viewRubricOption');
-                if (viewRubricOption) {
-                    viewRubricOption.style.display = currentUserRole !== 'user' ? 'block' : 'none';
-                }
-
+                
                 // Search/filter/sort bar (non-photographer roles only)
                 const controlsBar = document.getElementById('dashboardControlsBar');
                 if (controlsBar) {
@@ -7896,11 +7944,6 @@
                     swapRequestsOption.style.display = ['trainer', 'super_admin'].includes(currentUserRole) ? 'block' : 'none';
                 }
 
-                // Growth Opportunities (Non-photographers)
-                const growthOpportunitiesOption = document.getElementById('growthOpportunitiesOption');
-                if (growthOpportunitiesOption) {
-                    growthOpportunitiesOption.style.display = currentUserRole !== 'user' ? 'block' : 'none';
-                }
 
                 // Admin Reports (Super Admin)
                 const adminReportOption = document.getElementById('adminReportOption');
