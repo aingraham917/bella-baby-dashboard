@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Bella Baby Professional Development Hub v1.1</title>
+    <title>Bella Baby Professional Development Hub v1.2</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -590,6 +590,15 @@
                 </div>
             </div>
             
+            <!-- TRAINING DROPDOWN (for AMs/Trainers) -->
+            <div id="trainingDropdownWrapper" style="position: relative; display: none;">
+                <button id="trainingDropdownBtn" style="padding: 8px 14px; background: none; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.15s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">Training ▾</button>
+                <div id="trainingDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 1000; margin-top: 4px; overflow: hidden;">
+                    <button id="ddMyCourses" class="options-menu-item" onclick="showView('learner'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📚 My Courses</button>
+                    <button id="ddMyTeamProgress" class="options-menu-item" onclick="showView('am'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">👥 My Team Progress</button>
+                </div>
+            </div>
+            
             <!-- TRAINING TEAM DROPDOWN -->
             <div id="trainingTeamWrapper" style="position: relative; display: none;">
                 <button id="trainingTeamBtn" style="padding: 8px 14px; background: none; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.15s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">Training ▾</button>
@@ -607,8 +616,7 @@
                     <button id="ddAssign" class="options-menu-item" onclick="showView('assign'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 Assign Training</button>
                     <button id="changePasswordOption" class="options-menu-item" onclick="openChangePasswordPage(); closeAllDropdowns();" style="width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">👤 Edit Profile</button>
                     <button id="ddAdminView" class="options-menu-item" onclick="showView('admin'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📊 Learner Progress</button>
-                    <button id="ddCurriculum" class="options-menu-item" onclick="showView('curriculum'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">🗂 Manage Curriculum</button>
-                    <button id="ddAMView" class="options-menu-item" onclick="showView('am'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">👥 My Team Progress</button>
+                    <button id="ddCurriculum" class="options-menu-item" onclick="showView('curriculum'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">🗂 Manage Curriculum</button>
                 </div>
             </div>
         </div>
@@ -1064,7 +1072,11 @@ async function showDashboard() {
     // Wire up options menu visibility
     if (!isPhotog()) document.getElementById('ddBrowse').style.display = 'block';
     if (isPhotog())  document.getElementById('ddMyTraining').style.display = 'block';
-    if (isAM())      document.getElementById('ddAMView').style.display = 'block';
+    if (isAM() || isTrainer()) {
+        document.getElementById('trainingDropdownWrapper').style.display = 'block';
+        document.getElementById('ddMyCourses').style.display = 'block';
+        document.getElementById('ddMyTeamProgress').style.display = 'block';
+    }
     if (isAdmin() || isTrainer()) document.getElementById('ddAdminView').style.display = 'block';
     if (isStaff())   document.getElementById('ddAssign').style.display = 'block';
     if (isSuperAdmin()) document.getElementById('ddCurriculum').style.display = 'block';
@@ -3306,6 +3318,14 @@ function closeAllDropdowns() {
 document.getElementById('learningBtn').addEventListener('click', e => {
     e.stopPropagation();
     const dd = document.getElementById('learningDropdown');
+    const isOpen = dd.style.display !== 'none';
+    closeAllDropdowns();
+    if (!isOpen) dd.style.display = 'block';
+});
+
+document.getElementById('trainingDropdownBtn')?.addEventListener('click', e => {
+    e.stopPropagation();
+    const dd = document.getElementById('trainingDropdown');
     const isOpen = dd.style.display !== 'none';
     closeAllDropdowns();
     if (!isOpen) dd.style.display = 'block';
