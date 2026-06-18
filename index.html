@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>11.3 Dashboard</title>
+    <title>649865434</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -9845,9 +9845,10 @@
             const isOpening = editDiv.style.display === 'none';
             editDiv.style.display = isOpening ? 'block' : 'none';
             if (isOpening) {
-                // Get photographer level from record - field name is 'Photographer Level' with capitals
+                // Get photographer level from record - try both field name formats
                 const record = allRecords.find(r => r.id === recordId);
-                const photographerLevel = record ? record['Photographer Level'] : '';
+                // Try 'Photographer Level' first (capitalized), then 'photographer_level' (underscore)
+                const photographerLevel = record ? (record['Photographer Level'] || record.photographer_level || '') : '';
                 console.log(`🔧 toggleEditPending for ${recordId}: photographer level = "${photographerLevel}"`);
                 
                 // Attach Core Skills gating now that the fields are visible
