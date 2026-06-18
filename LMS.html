@@ -2309,6 +2309,8 @@ function onSectionSelectChange() {
 
 // ── Save module form
 async function saveModuleForm() {
+    if (!isSuperAdmin()) { alert('Only Super Admins can add or edit modules.'); return; }
+    
     const btn     = document.getElementById('mfSaveBtn');
     const msgEl   = document.getElementById('mfSaveMsg');
     const editId  = document.getElementById('mfEditId').value;
@@ -2505,6 +2507,8 @@ function clearModuleForm() {
 }
 
 async function editModuleFill(moduleId) {
+    if (!isSuperAdmin()) { alert('Only Super Admins can edit modules.'); return; }
+    
     const { data: mod } = await sb.from('lms_modules').select('*').eq('id', moduleId).single();
     if (!mod) return;
     clearModuleForm();
@@ -2848,6 +2852,8 @@ function onQTypeChange(moduleId) {
 }
 
 async function saveQuizQuestion(moduleId) {
+    if (!isSuperAdmin()) { alert('Only Super Admins can add quiz questions.'); return; }
+    
     const type    = document.getElementById('aqType-' + moduleId).value;
     const qText   = document.getElementById('aqText-' + moduleId).value.trim();
     const msgEl   = document.getElementById('aqMsg-' + moduleId);
