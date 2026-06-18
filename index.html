@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bella Baby Professional Development Hub 2.0</title>
+    <title>Bella Baby Professional Development Hub 2.5</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -4324,6 +4324,11 @@
             }
         }
 
+        // True when this page load came from a "reset your password" email link
+        // (we tag the redirectTo URL with ?type=recovery in handleForgotPassword).
+        // Read once at script load, before showDashboard() cleans up the URL.
+        const _isPasswordRecoveryFlow = new URLSearchParams(window.location.search).get('type') === 'recovery';
+
         async function init() {
             // Load roles first
             await loadUserRoles();
@@ -4342,12 +4347,12 @@
                 // Only handle initial SIGNED_IN and SIGNED_OUT — ignore TOKEN_REFRESHED etc.
                 if (event === 'SIGNED_IN' && _handlingAuth) return;
                 if (event === 'TOKEN_REFRESHED') return; // ignore token refreshes
-                if (event === 'SIGNED_IN' && session && session.user) {
+                if ((event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY') && session && session.user) {
                     currentUser = session.user;
                     if (!_handlingAuth) {
                         showDashboard();
                         loadRecords();
-                        // showDashboard now handles page restoration
+                        // showDashboard now handles page restoration (and forced password reset)
                     }
                 } else if (event === 'SIGNED_OUT') {
                     currentUser = null;
@@ -5557,9 +5562,11 @@
         async function saveProfileName() {
             const first = document.getElementById('profileFirstName').value.trim();
             const last  = document.getElementById('profileLastName').value.trim();
+            const pw    = document.getElementById('profileSetPassword').value;
+            const pwConfirm = document.getElementById('profileConfirmPassword').value;
             const msgDiv = document.getElementById('profileNameModalMsg');
 
-            // Validate both fields
+            // Validate both name fields
             if (!first) {
                 document.getElementById('profileFirstName').style.borderColor = '#c92a2a';
                 msgDiv.innerHTML = '<p style="color:#c92a2a;font-size:13px;margin:0 0 8px 0;">Please enter your first name.</p>';
@@ -5571,21 +5578,39 @@
                 return;
             }
 
+            // Validate password
+            if (!pw || pw.length < 6) {
+                document.getElementById('profileSetPassword').style.borderColor = '#c92a2a';
+                msgDiv.innerHTML = '<p style="color:#c92a2a;font-size:13px;margin:0 0 8px 0;">Password must be at least 6 characters.</p>';
+                return;
+            }
+            if (pw !== pwConfirm) {
+                document.getElementById('profileConfirmPassword').style.borderColor = '#c92a2a';
+                msgDiv.innerHTML = '<p style="color:#c92a2a;font-size:13px;margin:0 0 8px 0;">Passwords do not match.</p>';
+                return;
+            }
+
             const fullName = first + ' ' + last;
             msgDiv.innerHTML = '';
 
             try {
-                const { error } = await supabaseClient.auth.updateUser({ data: { full_name: fullName } });
+                const { error } = await supabaseClient.auth.updateUser({
+                    password: pw,
+                    data: { full_name: fullName, password_set: true }
+                });
                 if (error) throw error;
 
                 // Update local state
-                if (currentUser.user_metadata) currentUser.user_metadata.full_name = fullName;
+                if (currentUser.user_metadata) {
+                    currentUser.user_metadata.full_name = fullName;
+                    currentUser.user_metadata.password_set = true;
+                }
                 userEmail.textContent = fullName;
 
                 // Close modal
                 document.getElementById('profileNameModal').style.display = 'none';
             } catch (err) {
-                msgDiv.innerHTML = `<p style="color:#c92a2a;font-size:13px;margin:0 0 8px 0;">Error saving name: ${err.message}</p>`;
+                msgDiv.innerHTML = `<p style="color:#c92a2a;font-size:13px;margin:0 0 8px 0;">Error saving profile: ${err.message}</p>`;
             }
         }
 
@@ -7525,8 +7550,9 @@
                 }
             }
 
-            // Prompt for name if not yet set
-            if (!_meta.full_name && !_meta.name) {
+            // Prompt for name (and password, for first-time logins) if not yet set.
+            // Skip this during a password-recovery flow — that's an existing user, not a new one.
+            if (!_meta.full_name && !_meta.name && !_isPasswordRecoveryFlow) {
                 setTimeout(() => {
                     const modal = document.getElementById('profileNameModal');
                     if (modal) modal.style.display = 'flex';
@@ -7646,6 +7672,15 @@
                 return;
             }
 
+            // If this login came from a "reset password" email link, don't drop them into
+            // the normal dashboard — send them straight to Edit Profile to set a new password.
+            if (_isPasswordRecoveryFlow) {
+                // Clean the recovery params out of the URL so a refresh doesn't re-trigger this
+                history.replaceState(null, '', window.location.pathname);
+                showForcedPasswordReset();
+                return;
+            }
+
             // Try to restore to the last page the user was on (localStorage persists across refreshes)
             const lastPage = localStorage.getItem('currentPage') || sessionStorage.getItem('currentPage');
             const validPages = ['dashboardPage','photographerHomePage','manageAssessmentsPage','myAssessmentsPage','assessmentFormPage','recordDetailPage','chartsPage','adminReportsPage','changePasswordPage','trainingLibraryPage','resourceViewsPage','growthOpportunitiesPage','swapRequestsPage'];
@@ -7704,6 +7739,19 @@
 
         function showAMViewToggle() {
             // no-op: amViewSelect shown via role-based visibility
+        }
+
+        // Lands a password-recovery session on Edit Profile instead of the normal dashboard,
+        // with a banner explaining why they're here. handleChangePasswordPage() already
+        // routes them to goToDashboard() once they've set a new password.
+        function showForcedPasswordReset() {
+            showPage('changePasswordPage');
+            const msgDiv = document.getElementById('changePasswordPageMessage');
+            if (msgDiv) {
+                msgDiv.innerHTML = '<div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:12px;margin-bottom:15px;font-size:13px;color:#b45309;">🔒 Please set a new password to finish resetting your account.</div>';
+            }
+            const _pssNote = document.getElementById('profileNamePSSNote');
+            if (_pssNote) _pssNote.style.display = ['trainer', 'am'].includes(getCurrentUserRole()) ? 'block' : 'none';
         }
 
         function hideAMViewToggle() {
@@ -13006,7 +13054,7 @@
         <div style="text-align:center;margin-bottom:24px;">
             <img src="https://hlfoaynyuzfexhqydesl.supabase.co/storage/v1/object/public/admin/Bella%20Baby%20Logo.png" alt="Bella Baby" style="height:48px;margin-bottom:16px;">
             <h2 style="margin:0 0 8px 0;font-size:20px;color:#333;">Welcome! Let's set up your profile.</h2>
-            <p style="margin:0;font-size:13px;color:#999;">Your name appears on assessments and throughout the hub. Please enter your full name to continue.</p>
+            <p style="margin:0;font-size:13px;color:#999;">Your name appears on assessments and throughout the hub. Please set your name and a password to continue.</p>
         </div>
         <div id="profileNameModalMsg" style="margin-bottom:12px;"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
@@ -13020,8 +13068,20 @@
                 <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Last Name *</label>
                 <input type="text" id="profileLastName" placeholder="e.g. Nguyen"
                     style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:6px;font-size:14px;box-sizing:border-box;"
-                    oninput="this.style.borderColor='#e0e0e0'; this.value=this.value.replace(/\b\w/g,c=>c.toUpperCase())" onkeydown="if(event.key==='Enter')saveProfileName()">
+                    oninput="this.style.borderColor='#e0e0e0'; this.value=this.value.replace(/\b\w/g,c=>c.toUpperCase())" onkeydown="if(event.key==='Enter')document.getElementById('profileSetPassword').focus()">
             </div>
+        </div>
+        <div style="margin-bottom:16px;">
+            <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Set Password *</label>
+            <input type="password" id="profileSetPassword" placeholder="At least 6 characters"
+                style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:6px;font-size:14px;box-sizing:border-box;"
+                oninput="this.style.borderColor='#e0e0e0'" onkeydown="if(event.key==='Enter')document.getElementById('profileConfirmPassword').focus()">
+        </div>
+        <div style="margin-bottom:16px;">
+            <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Confirm Password *</label>
+            <input type="password" id="profileConfirmPassword" placeholder="Re-enter password"
+                style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:6px;font-size:14px;box-sizing:border-box;"
+                oninput="this.style.borderColor='#e0e0e0'" onkeydown="if(event.key==='Enter')saveProfileName()">
         </div>
         <button onclick="saveProfileName()"
             style="width:100%;padding:12px;background:#4ba8a8;color:white;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;">
