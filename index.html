@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bella Baby Professional Development Hub v2.0</title>
+    <title>11.3 Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -9801,15 +9801,20 @@
         // Ambassadors (including Advanced Ambassador) are always scored on all categories
         function applyCoreSkillsGating(coreInputId, dependentIds, photographerLevel) {
             const coreInput = document.getElementById(coreInputId);
-            if (!coreInput) return;
+            if (!coreInput) {
+                console.log(`❌ applyCoreSkillsGating: core input ${coreInputId} not found`);
+                return;
+            }
 
             // Skip gating for any level with "Ambassador" in it (Ambassador, Advanced Ambassador)
             const skipGating = photographerLevel && photographerLevel.toLowerCase().includes('ambassador');
+            console.log(`🔐 applyCoreSkillsGating for ${coreInputId}: level="${photographerLevel}", skipGating=${skipGating}`);
 
             function update() {
                 clampScoreInput(coreInput);
                 const val = parseInt(coreInput.value);
                 const locked = (val === 1 || val === 2) && !skipGating;
+                console.log(`  → core value=${val}, locked=${locked}`);
                 dependentIds.forEach(id => {
                     const el = document.getElementById(id);
                     if (!el) return;
@@ -9840,9 +9845,10 @@
             const isOpening = editDiv.style.display === 'none';
             editDiv.style.display = isOpening ? 'block' : 'none';
             if (isOpening) {
-                // Get photographer level from record
+                // Get photographer level from record - field name is 'Photographer Level' with capitals
                 const record = allRecords.find(r => r.id === recordId);
-                const photographerLevel = record ? record.photographer_level : '';
+                const photographerLevel = record ? record['Photographer Level'] : '';
+                console.log(`🔧 toggleEditPending for ${recordId}: photographer level = "${photographerLevel}"`);
                 
                 // Attach Core Skills gating now that the fields are visible
                 applyCoreSkillsGating(`edit-g1-core-${recordId}`, [`edit-g1-subj-${recordId}`, `edit-g1-gallery-exp-${recordId}`, `edit-g1-edit-${recordId}`], photographerLevel);
