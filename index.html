@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>649865434</title>
+    <title>98749845131</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -8881,7 +8881,15 @@
             if (!coreEl) return;
             clampScoreInput(coreEl);
             const val = parseInt(coreEl.value);
-            const locked = val === 1 || val === 2;
+            const coreIs1or2 = val === 1 || val === 2;
+
+            // Only grey out / lock the dependent categories for Pre-Foundation and
+            // Foundation photographers. Ambassador and Advanced Ambassador are always
+            // scored on every category regardless of Core Skills score.
+            const levelHidden = container.querySelector('#fPhotogLevelHidden');
+            const photogLevel = levelHidden ? levelHidden.value.trim() : '';
+            const isFoundationTier = photogLevel === 'Pre-Foundation' || photogLevel === 'Foundation';
+            const locked = isFoundationTier && coreIs1or2;
 
             const deps = [
                 { input: 'Subj',       wrap: 'Subj' },
@@ -8907,8 +8915,10 @@
                 }
             });
 
+            // The "which Core Skills issues apply" popup shows whenever Core Skills = 1 or 2,
+            // regardless of tier — it's documenting the issue, not gating other fields.
             const flagWrap = container.querySelector('#fG' + gallery + 'CoreFlagWrap');
-            if (flagWrap) flagWrap.style.display = locked ? 'block' : 'none';
+            if (flagWrap) flagWrap.style.display = coreIs1or2 ? 'block' : 'none';
 
             // When core is locked (1 or 2), hide GE flag wrap and clear its checkboxes
             // When core unlocks (3 or 4), GE flag wrap state is controlled by GalleryExp field
