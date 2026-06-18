@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Bella Baby Professional Development Hub v1.0</title>
+    <title>Bella Baby Professional Development Hub v1.1</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1070,7 +1070,7 @@ async function showDashboard() {
     if (isSuperAdmin()) document.getElementById('ddCurriculum').style.display = 'block';
 
     // Default landing
-    if (isAM())          showView('am');
+    if (isAM())          showView('assign');
     else if (isAdmin() || isTrainer()) showView('admin');
     else                 showView('learner');
 }
