@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bella Baby Professional Development Hub 2.5</title>
+    <title>Bella Baby Professional Development Hub 3.0</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -1650,10 +1650,10 @@
                     <div id="trainingDropdownWrapper" style="position: relative; display: none;">
                         <button id="trainingDropdownBtn" style="padding: 8px 14px; background: none; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.15s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">Training ▾</button>
                         <div id="trainingDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 1000; margin-top: 4px; overflow: hidden;">
-                            <button id="ddMyCourses" class="options-menu-item" onclick="window.location.href='LMS.html'; closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📚 My Courses</button>
                             <button id="ddAssignTraining" class="options-menu-item" onclick="window.location.href='LMS.html'; closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 Assign Training</button>
-                            <button id="ddMyTeamProgress" class="options-menu-item" onclick="window.location.href='LMS.html'; closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">👥 My Team Progress</button>
                             <button id="growthOpportunitiesOption" class="options-menu-item" onclick="initGrowthOpportunitiesPage(); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">🚀 Growth Opportunities</button>
+                            <button id="ddMyCourses" class="options-menu-item" onclick="window.location.href='LMS.html'; closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📚 My Courses</button>
+                            <button id="ddMyTeamProgress" class="options-menu-item" onclick="window.location.href='LMS.html'; closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">👥 My Team Progress</button>
                             <a id="viewRubricOption" href="https://drive.google.com/file/d/1LyZFSq5b2E41kFfKjuVL4yywqExFO8I8/view?usp=sharing" target="_blank" class="options-menu-item" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; color: #333; text-decoration: none; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 View Rubric</a>
                         </div>
                     </div>
@@ -1661,10 +1661,11 @@
                     <div id="trainingTeamWrapper" style="position: relative; display: none;">
                         <button id="trainingTeamBtn" style="padding: 8px 14px; background: none; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.15s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">Training ▾</button>
                         <div id="trainingTeamDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 1000; margin-top: 4px; overflow: hidden;">
-                            <button id="adminAssessmentsOption" class="options-menu-item" onclick="openAdminAssessments()" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 Manage Assessments</button>
-                            <button id="assessmentsOption" class="options-menu-item" onclick="openAssessments()" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 My Assessments</button>
                             <button id="swapRequestsOption" class="options-menu-item" onclick="initSwapRequestsPage(); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">🔄 Assessment Swaps</button>
                             <button id="trainerGrowthOpp" class="options-menu-item" onclick="initGrowthOpportunitiesPage(); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">🚀 Growth Opportunities</button>
+                            <button id="adminAssessmentsOption" class="options-menu-item" onclick="openAdminAssessments()" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 Manage Assessments</button>
+                            <button id="ddManageCurriculum" class="options-menu-item" onclick="window.location.href='LMS.html'; closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">🗂 Manage Curriculum</button>
+                            <button id="assessmentsOption" class="options-menu-item" onclick="openAssessments()" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 My Assessments</button>
                             <a id="trainerViewRubric" href="https://drive.google.com/file/d/1LyZFSq5b2E41kFfKjuVL4yywqExFO8I8/view?usp=sharing" target="_blank" class="options-menu-item" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; font-size: 14px; font-weight: 400; color: #333; text-decoration: none; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 View Rubric</a>
                         </div>
                     </div>
@@ -5594,11 +5595,20 @@
             msgDiv.innerHTML = '';
 
             try {
+                // Update auth user metadata with full_name
                 const { error } = await supabaseClient.auth.updateUser({
                     password: pw,
                     data: { full_name: fullName, password_set: true }
                 });
                 if (error) throw error;
+
+                // Also update display_name in user_roles table
+                if (currentUser && currentUser.email) {
+                    await supabaseClient
+                        .from('user_roles')
+                        .update({ display_name: fullName })
+                        .eq('user_email', currentUser.email);
+                }
 
                 // Update local state
                 if (currentUser.user_metadata) {
@@ -5625,10 +5635,19 @@
             }
 
             try {
+                // Update auth user metadata with full_name
                 const { error } = await supabaseClient.auth.updateUser({
                     data: { full_name: newName }
                 });
                 if (error) throw error;
+
+                // Also update display_name in user_roles table
+                if (currentUser && currentUser.email) {
+                    await supabaseClient
+                        .from('user_roles')
+                        .update({ display_name: newName })
+                        .eq('user_email', currentUser.email);
+                }
 
                 // Update the top bar immediately
                 const userEmailEl = document.getElementById('userEmail');
@@ -6089,18 +6108,34 @@
         }
 
         function renderFlagItem(flag) {
-            return `
-                <div class="go-flag-item" data-flag-id="${flag.id}">
-                    <span class="go-flag-text">${flag.flag_text}</span>
-                    <span class="go-flag-category">${flag.flag_category}</span>
-                    <div class="go-flag-status-toggle">
-                        <button class="go-flag-status-btn go-btn-active ${flag.status === 'active' ? 'active' : ''}" 
-                            onclick="updateFlagStatus(${flag.id}, 'active'); event.stopPropagation();">Active</button>
-                        <button class="go-flag-status-btn go-btn-resolved ${flag.status === 'resolved' ? 'active' : ''}" 
-                            onclick="updateFlagStatus(${flag.id}, 'resolved'); event.stopPropagation();">Resolved</button>
+            const userRole = getCurrentUserRole();
+            const isAdmin = ['admin', 'super_admin'].includes(userRole);
+            
+            if (isAdmin) {
+                // Show toggle buttons for admin/super_admin
+                return `
+                    <div class="go-flag-item" data-flag-id="${flag.id}">
+                        <span class="go-flag-text">${flag.flag_text}</span>
+                        <div class="go-flag-status-toggle">
+                            <button class="go-flag-status-btn go-btn-active ${flag.status === 'active' ? 'active' : ''}" 
+                                onclick="updateFlagStatus(${flag.id}, 'active'); event.stopPropagation();">Active</button>
+                            <button class="go-flag-status-btn go-btn-resolved ${flag.status === 'resolved' ? 'active' : ''}" 
+                                onclick="updateFlagStatus(${flag.id}, 'resolved'); event.stopPropagation();">Resolved</button>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            } else {
+                // Show status text only for non-admin users
+                const isResolved = flag.status === 'resolved';
+                return `
+                    <div class="go-flag-item" data-flag-id="${flag.id}">
+                        <span class="go-flag-text">${flag.flag_text}</span>
+                        <div style="padding: 4px 12px; background: ${isResolved ? '#a8d5a3' : '#f0d957'}; border-radius: 3px; font-size: 11px; font-weight: 600; color: #333; white-space: nowrap;">
+                            ${isResolved ? 'Resolved' : 'Active'}
+                        </div>
+                    </div>
+                `;
+            }
         }
 
         function togglePhotographerExpand(headerEl) {
@@ -6568,6 +6603,19 @@
             document.body.style.overflow = 'auto';
         }
 
+        function toggleFeedback(headerEl) {
+            const feedbackContent = headerEl.nextElementSibling;
+            const arrow = headerEl.querySelector('span:first-child');
+            
+            if (feedbackContent.style.display === 'none') {
+                feedbackContent.style.display = 'block';
+                arrow.style.transform = 'rotate(90deg)';
+            } else {
+                feedbackContent.style.display = 'none';
+                arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+
         function updateSidebarTabs() {
             const tabContainer = document.getElementById('sidebarTabs');
             tabContainer.innerHTML = '';
@@ -6595,6 +6643,59 @@
             // Show loading state
             content.innerHTML = '<p style="color: #999; text-align: center; margin-top: 20px;">Loading record...</p>';
             
+            // Function to generate category score flags for legacy records
+            function generateCategoryScoreFlags(rec) {
+                const scoreFlags = [];
+                const g1Code = rec['Gallery #1 Access Code:'] || 'Gallery #1';
+                const g2Code = rec['Gallery #2 Access Code:'] || 'Gallery #2';
+                
+                const categories = [
+                    { label: 'Theme/Subject', key: 'Theme/Subject' },
+                    { label: 'Exposure', key: 'Exposure' },
+                    { label: 'Focus', key: 'Focus' },
+                    { label: 'White Balance', key: 'White Balance' },
+                    { label: 'Posing', key: 'Posing' },
+                    { label: 'Variety', key: 'Variety' },
+                    { label: 'Environment', key: 'Environment' },
+                    { label: 'Editing', key: 'Editing' },
+                    { label: 'Calming and Soothing', key: 'Calming and soothing' },
+                    { label: 'Composition/Cropping', key: 'Composition/Cropping' }
+                ];
+                
+                categories.forEach(cat => {
+                    const g1Score = rec[`Gallery #1 ${cat.key}`] ? parseInt(rec[`Gallery #1 ${cat.key}`]) : null;
+                    const g2Score = rec[`Gallery #2 ${cat.key}`] ? parseInt(rec[`Gallery #2 ${cat.key}`]) : null;
+                    
+                    let flagText = '';
+                    
+                    // Check for 1/4 scores
+                    if (g1Score === 1) {
+                        flagText += `${g1Code}: Score of 1`;
+                    }
+                    if (g2Score === 1) {
+                        if (flagText) flagText += '\n';
+                        flagText += `${g2Code}: Score of 1`;
+                    }
+                    
+                    // Check for 2/4 both galleries
+                    if (!flagText && g1Score === 2 && g2Score === 2) {
+                        flagText = `${g1Code}: Score of 2\n${g2Code}: Score of 2`;
+                    }
+                    
+                    if (flagText) {
+                        scoreFlags.push({
+                            id: `score_${cat.key.replace(/\s+/g, '_')}`,
+                            flag_category: cat.label,
+                            flag_text: flagText,
+                            status: 'active',
+                            synthetic: true
+                        });
+                    }
+                });
+                
+                return scoreFlags;
+            }
+            
             // Fetch flags for this record
             supabaseClient
                 .from('flag_status')
@@ -6605,6 +6706,12 @@
                     if (error) {
                         console.error('Error fetching flags:', error);
                         flags = [];
+                    }
+                    
+                    // For legacy records, merge with category score flags
+                    if (record.record_type === 'legacy') {
+                        const scoreFlags = generateCategoryScoreFlags(record);
+                        flags = [...flags, ...scoreFlags];
                     }
                     
                     // Build the full content HTML
@@ -6619,42 +6726,111 @@
                     // Add record basic info
                     html += generateRecordHTML(record);
                     
-                    // Add flags section
-                    if (flags && flags.length > 0) {
-                        html += `<div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
-                            <h4 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #333;">Flags (${flags.length})</h4>`;
+                    // BUILD BOTTOM SECTIONS FOR LEGACY RECORDS
+                    if (record.record_type === 'legacy') {
+                        let bottomSections = '';
                         
-                        flags.forEach(flag => {
-                            const isResolved = flag.status === 'resolved';
-                            html += `
-                                <div data-flag-id="${flag.id}" style="margin-bottom: 12px; padding: 10px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid ${isResolved ? '#a8d5a3' : '#f0d957'};">
-                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-                                        <div style="flex: 1;">
-                                            <div style="font-size: 12px; font-weight: 600; color: #999; margin-bottom: 4px;">${flag.flag_category || 'Flag'}</div>
-                                            <div style="font-size: 13px; color: #333;">${flag.flag_text}</div>
-                                        </div>
-                                        <div style="display: flex; gap: 4px; flex-shrink: 0;">
-                                            <button class="go-flag-status-btn ${!isResolved ? 'active go-btn-active' : ''}" 
-                                                onclick="updateFlagStatusFromSidebar(${flag.id}, 'active', event)" 
-                                                style="padding: 4px 8px; font-size: 11px; font-weight: 600; border: none; border-radius: 3px; cursor: pointer; background: ${!isResolved ? '#f0d957' : '#e0e0e0'}; color: #333;">
-                                                Active
-                                            </button>
-                                            <button class="go-flag-status-btn ${isResolved ? 'active go-btn-resolved' : ''}" 
-                                                onclick="updateFlagStatusFromSidebar(${flag.id}, 'resolved', event)" 
-                                                style="padding: 4px 8px; font-size: 11px; font-weight: 600; border: none; border-radius: 3px; cursor: pointer; background: ${isResolved ? '#a8d5a3' : '#e0e0e0'}; color: #333;">
-                                                Resolved
-                                            </button>
+                        // 1. Technical Flags (if exist)
+                        const technicalFlags = record['Technical Flags:'];
+                        if (technicalFlags && technicalFlags !== 'No Technical Flags') {
+                            bottomSections += `<div style="margin-bottom: 14px; padding: 12px; background: #fff5f5; border-left: 3px solid #c92a2a; border-radius: 4px;">
+                                <div style="font-size: 11px; font-weight: 600; color: #c92a2a; text-transform: uppercase; margin-bottom: 6px;">Technical Flags</div>
+                                <div style="font-size: 13px; color: #333;">${technicalFlags}</div>
+                            </div>`;
+                        }
+                        
+                        // 2. Category Flags (from flag_status)
+                        if (flags && flags.length > 0) {
+                            bottomSections += `<div style="margin-bottom: 14px; padding: 12px; background: #fffbf0; border-left: 3px solid #f0d957; border-radius: 4px;">
+                                <div style="font-size: 11px; font-weight: 600; color: #d97706; text-transform: uppercase; margin-bottom: 12px;">Category Flags (${flags.length})</div>`;
+                            
+                            flags.forEach(flag => {
+                                const isResolved = flag.status === 'resolved';
+                                // Don't show toggle buttons for synthetic category score flags
+                                const showToggle = !flag.synthetic;
+                                // Format flag text - preserve newlines
+                                const formattedText = flag.flag_text.split('\n').join('<br>');
+                                
+                                bottomSections += `
+                                    <div data-flag-id="${flag.id}" style="margin-bottom: 12px; padding: 10px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid ${isResolved ? '#a8d5a3' : '#f0d957'};">
+                                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                                            <div style="flex: 1;">
+                                                <div style="font-size: 12px; font-weight: 600; color: #999; margin-bottom: 4px;">${flag.flag_category || 'Flag'}</div>
+                                                <div style="font-size: 13px; color: #333; white-space: pre-wrap; word-break: break-word;">${formattedText}</div>
+                                            </div>
+                                            ${showToggle ? `<div style="display: flex; gap: 4px; flex-shrink: 0;">
+                                                <button class="go-flag-status-btn ${!isResolved ? 'active go-btn-active' : ''}" 
+                                                    onclick="updateFlagStatusFromSidebar(${flag.id}, 'active', event)" 
+                                                    style="padding: 4px 8px; font-size: 11px; font-weight: 600; border: none; border-radius: 3px; cursor: pointer; background: ${!isResolved ? '#f0d957' : '#e0e0e0'}; color: #333;">
+                                                    Active
+                                                </button>
+                                                <button class="go-flag-status-btn ${isResolved ? 'active go-btn-resolved' : ''}" 
+                                                    onclick="updateFlagStatusFromSidebar(${flag.id}, 'resolved', event)" 
+                                                    style="padding: 4px 8px; font-size: 11px; font-weight: 600; border: none; border-radius: 3px; cursor: pointer; background: ${isResolved ? '#a8d5a3' : '#e0e0e0'}; color: #333;">
+                                                    Resolved
+                                                </button>
+                                            </div>` : ''}
                                         </div>
                                     </div>
-                                </div>
-                            `;
-                        });
+                                `;
+                            });
+                            
+                            bottomSections += `</div>`;
+                        } else {
+                            bottomSections += `<div style="margin-bottom: 14px; padding: 12px; background: #f0fdf4; border-left: 3px solid #22c55e; border-radius: 4px;">
+                                <div style="font-size: 11px; font-weight: 600; color: #22c55e; text-transform: uppercase; margin-bottom: 6px;">Category Flags</div>
+                                <p style="margin: 0; font-size: 13px; color: #333;">No category flags</p>
+                            </div>`;
+                        }
                         
-                        html += `</div>`;
-                    } else {
-                        html += `<div style="margin-top: 20px; padding: 16px; background: #f9f9f9; border-radius: 6px; text-align: center; color: #999;">
-                            <p style="margin: 0; font-size: 13px;">No flags for this record</p>
+                        // 3. Average Gallery Score
+                        const avgScore = record['Average Gallery Score'];
+                        bottomSections += `<div style="margin-bottom: 14px; padding: 12px; background: #f0fdf4; border-left: 3px solid #4ba8a8; border-radius: 4px;">
+                            <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #999; margin-bottom: 4px;">Average Gallery Score</div>
+                            <div style="font-size: 18px; font-weight: 700; color: #4ba8a8;">${avgScore || 'N/A'}</div>
                         </div>`;
+                        
+                        // 4. Quality Check Determination
+                        const determination = record['Quality Check Determination'];
+                        if (determination) {
+                            bottomSections += `<div style="margin-bottom: 14px; padding: 12px; background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 4px;">
+                                <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #666; margin-bottom: 4px;">Quality Check Determination</div>
+                                <div style="font-size: 13px; color: #333;">${determination}</div>
+                            </div>`;
+                        }
+                        
+                        html += bottomSections;
+                    } else {
+                        // For non-legacy records, still show flags section
+                        if (flags && flags.length > 0) {
+                            html += `<div style="margin-bottom: 14px; padding: 12px; background: #fffbf0; border-left: 3px solid #f0d957; border-radius: 4px;">
+                                <div style="font-size: 11px; font-weight: 600; color: #d97706; text-transform: uppercase; margin-bottom: 12px;">Category Flags (${flags.length})</div>`;
+                            
+                            flags.forEach(flag => {
+                                const isResolved = flag.status === 'resolved';
+                                // Strip tag prefix (e.g., "delivery_standard: " → just the text after)
+                                const cleanFlagText = flag.flag_text.replace(/^[a-z_]+:\s*/, '');
+                                html += `
+                                    <div data-flag-id="${flag.id}" style="margin-bottom: 12px; padding: 10px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid ${isResolved ? '#a8d5a3' : '#f0d957'};">
+                                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                                            <div style="flex: 1;">
+                                                <div style="font-size: 13px; color: #333;">${cleanFlagText}</div>
+                                            </div>
+                                            <div style="padding: 4px 12px; background: ${isResolved ? '#a8d5a3' : '#f0d957'}; border-radius: 3px; font-size: 11px; font-weight: 600; color: #333; white-space: nowrap;">
+                                                ${isResolved ? 'Resolved' : 'Active'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            
+                            html += `</div>`;
+                        } else {
+                            html += `<div style="margin-bottom: 14px; padding: 12px; background: #f0fdf4; border-left: 3px solid #22c55e; border-radius: 4px;">
+                                <div style="font-size: 11px; font-weight: 600; color: #22c55e; text-transform: uppercase; margin-bottom: 6px;">Category Flags</div>
+                                <p style="margin: 0; font-size: 13px; color: #333;">No category flags</p>
+                            </div>`;
+                        }
                     }
                     
                     content.innerHTML = html;
@@ -6766,7 +6942,6 @@
         }
 
         function generateRecordHTML(record) {
-            // Simple version - show key details in sidebar
             const g1Code = record['Gallery #1 Access Code:'];
             const g2Code = record['Gallery #2 Access Code:'];
             const g1Url = g1Code ? ('https://www.bellababyphotography.com/v2/galleries/' + g1Code.trim()) : null;
@@ -6812,7 +6987,55 @@
                 </div>`;
             }
             
-            // Delivery flags
+            // LEGACY RECORDS: Show all 10 category scores
+            if (record.record_type === 'legacy') {
+                const categories = [
+                    { label: 'Theme/Subject', key: 'Theme/Subject' },
+                    { label: 'Exposure', key: 'Exposure' },
+                    { label: 'Focus', key: 'Focus' },
+                    { label: 'White Balance', key: 'White Balance' },
+                    { label: 'Posing', key: 'Posing' },
+                    { label: 'Variety', key: 'Variety' },
+                    { label: 'Environment', key: 'Environment' },
+                    { label: 'Editing', key: 'Editing' },
+                    { label: 'Calming and Soothing', key: 'Calming and soothing' },
+                    { label: 'Composition/Cropping', key: 'Composition/Cropping' }
+                ];
+                
+                html += `<div style="margin-bottom: 16px; padding: 12px; background: #f9f9f9; border-radius: 6px;">
+                    <div style="font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 10px;">Category Scores</div>`;
+                
+                categories.forEach(cat => {
+                    const g1Score = record[`Gallery #1 ${cat.key}`];
+                    const g2Score = record[`Gallery #2 ${cat.key}`];
+                    const g1Val = g1Score ? parseInt(g1Score) : '';
+                    const g2Val = g2Score ? parseInt(g2Score) : '';
+                    
+                    html += `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e8e8e8;">
+                        <div style="font-size: 12px; color: #333;">${cat.label}</div>
+                        <div style="display: flex; gap: 8px; font-size: 12px; font-weight: 600; color: #4ba8a8;">
+                            Gallery 1 - ${g1Val || '—'}/4 &nbsp;|&nbsp; Gallery 2 - ${g2Val || '—'}/4
+                        </div>
+                    </div>`;
+                });
+                
+                html += `</div>`;
+            }
+            
+            // GROWTH ASSESSMENTS: Show assessment level and gallery score
+            if (record.record_type === 'growth_assessment') {
+                html += `<div style="margin-bottom: 14px; padding: 12px; background: #f0fdf4; border-left: 3px solid #4ba8a8; border-radius: 4px;">
+                    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #999; margin-bottom: 4px;">Assessment Level</div>
+                    <div style="font-size: 14px; font-weight: 600; color: #4ba8a8;">${record['Current Assessment Level'] || 'N/A'}</div>
+                </div>`;
+                
+                html += `<div style="margin-bottom: 14px; padding: 12px; background: #f9f9f9; border-radius: 6px;">
+                    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #666; margin-bottom: 8px;">Average Gallery Score</div>
+                    <div style="font-size: 16px; font-weight: 700; color: #4ba8a8;">${record['Average Gallery Score'] || 'N/A'} / 16</div>
+                </div>`;
+            }
+            
+            // Delivery Flags
             if (record['Delivery Standard Flags:']) {
                 html += `<div style="margin-bottom: 14px; padding: 12px; background: #fff5f5; border-left: 3px solid #c92a2a; border-radius: 4px;">
                     <div style="font-size: 11px; font-weight: 600; color: #c92a2a; text-transform: uppercase; margin-bottom: 6px;">Delivery Flags</div>
@@ -6836,41 +7059,24 @@
                 </div>`;
             }
             
-            // Applied flags
-            if (record['Applied Flags']) {
-                html += `<div style="margin-bottom: 14px; padding: 12px; background: #f0fdf4; border-left: 3px solid #a8d5a3; border-radius: 4px;">
-                    <div style="font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-bottom: 6px;">Category Flags</div>
-                    <div style="font-size: 13px; color: #333;">${record['Applied Flags']}</div>
-                </div>`;
-            }
-            
-            // For Growth Assessments
-            if (record.record_type === 'growth_assessment') {
-                html += `<div style="margin-top: 16px;">
-                    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #999; margin-bottom: 8px;">Assessment Level</div>
-                    <div style="font-size: 14px; font-weight: 600; color: #4ba8a8; padding: 8px 12px; background: #f0fdf4; border-radius: 4px;">
-                        ${record['Current Assessment Level'] || 'N/A'}
-                    </div>
-                </div>`;
-                
-                html += `<div style="margin-top: 14px;">
-                    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #999; margin-bottom: 8px;">Average Score</div>
-                    <div style="font-size: 18px; font-weight: 700; color: #333;">${record['Average Gallery Score'] || 'N/A'}</div>
-                </div>`;
-            }
-            
             // Feedback sections
             if (record['Gallery #1 Feedback:']) {
-                html += `<div style="margin-top: 16px; padding: 12px; background: #f9f9f9; border-radius: 6px;">
-                    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #666; margin-bottom: 6px;">Gallery #1 Feedback</div>
-                    <div style="font-size: 13px; color: #555; line-height: 1.5;">${record['Gallery #1 Feedback:']}</div>
+                html += `<div style="margin-bottom: 12px; padding: 12px; background: #f9f9f9; border-radius: 6px;">
+                    <div onclick="toggleFeedback(this)" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #666; margin-bottom: 0;">
+                        <span style="display: inline-block; transition: transform 0.2s; transform: rotate(0deg);">▶</span>
+                        <span>Gallery #1 Feedback</span>
+                    </div>
+                    <div style="font-size: 13px; color: #555; line-height: 1.5; display: none; margin-top: 12px;">${record['Gallery #1 Feedback:']}</div>
                 </div>`;
             }
             
             if (record['Gallery #2 Feedback:']) {
-                html += `<div style="margin-top: 12px; padding: 12px; background: #f9f9f9; border-radius: 6px;">
-                    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #666; margin-bottom: 6px;">Gallery #2 Feedback</div>
-                    <div style="font-size: 13px; color: #555; line-height: 1.5;">${record['Gallery #2 Feedback:']}</div>
+                html += `<div style="margin-bottom: 12px; padding: 12px; background: #f9f9f9; border-radius: 6px;">
+                    <div onclick="toggleFeedback(this)" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #666; margin-bottom: 0;">
+                        <span style="display: inline-block; transition: transform 0.2s; transform: rotate(0deg);">▶</span>
+                        <span>Gallery #2 Feedback</span>
+                    </div>
+                    <div style="font-size: 13px; color: #555; line-height: 1.5; display: none; margin-top: 12px;">${record['Gallery #2 Feedback:']}</div>
                 </div>`;
             }
             
@@ -8005,6 +8211,11 @@
                     trainerViewRubric.style.display = currentUserRole === 'trainer' ? 'block' : 'none';
                 }
 
+                // Manage Curriculum (Super Admin Only)
+                const ddManageCurriculum = document.getElementById('ddManageCurriculum');
+                if (ddManageCurriculum) {
+                    ddManageCurriculum.style.display = currentUserRole === 'super_admin' ? 'block' : 'none';
+                }
 
                 // Admin Reports (Super Admin)
                 const adminReportOption = document.getElementById('adminReportOption');
