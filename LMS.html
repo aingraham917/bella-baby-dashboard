@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Bella Baby Professional Development Hub v2.0</title>
+    <title>Bella Baby Professional Development Hub 3.0</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -434,6 +434,9 @@
         /* ── CURRICULUM FORM ── */
         .curr-form-panel{background:white;border:1px solid #4ba8a8;border-radius:10px;padding:24px;margin-bottom:24px;}
         .curr-form-panel h3{font-size:16px;font-weight:700;color:#333;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid #e8f5f5;}
+        .curr-form-toggle{width:100%;text-align:left;padding:12px 16px;background:#f8fefe;border:1px solid #d0e8e8;border-radius:6px;cursor:pointer;font-size:16px;font-weight:700;color:#333;display:flex;align-items:center;justify-content:space-between;transition:all 0.2s;}
+        .curr-form-toggle:hover{background:#f0fbfb;border-color:#4ba8a8;}
+        #moduleFormToggleIcon{font-size:12px;transition:transform 0.2s;}
         .cf-row{margin-bottom:16px;}
         .cf-label{display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:6px;}
         .cf-label span{font-weight:400;color:#999;font-size:11px;margin-left:4px;}
@@ -593,25 +596,17 @@
                 </div>
             </div>
             
-            <!-- TRAINING DROPDOWN (for AMs/Trainers) -->
-            <div id="trainingDropdownWrapper" style="position: relative; display: none;">
-                <button id="trainingDropdownBtn" style="padding: 8px 14px; background: none; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.15s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">Training ▾</button>
+            <!-- TRAINING DROPDOWN -->
+            <div style="position: relative;" id="trainingWrapper">
+                <button id="trainingBtn" style="padding: 8px 14px; background: none; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.15s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">Training ▾</button>
                 <div id="trainingDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 1000; margin-top: 4px; overflow: hidden;">
-                    <button id="ddMyCourses" class="options-menu-item" onclick="showView('learner'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📚 My Courses</button>
                     <button id="ddAssignTraining" class="options-menu-item" onclick="showView('assign'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 Assign Training</button>
-                    <button id="ddMyTeamProgress" class="options-menu-item" onclick="showView('am'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">👥 My Team Progress</button>
                     <button id="growthOpportunitiesOption" class="options-menu-item" onclick="sessionStorage.setItem('showGrowthOpp', 'true'); window.location.href='index.html'; closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">🚀 Growth Opportunities</button>
+                    <button id="ddAdminView" class="options-menu-item" onclick="showView('admin'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📊 Learner Progress</button>
+                    <button id="ddCurriculum" class="options-menu-item" onclick="showView('curriculum'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">🗂 Manage Curriculum</button>
+                    <button id="ddMyCourses" class="options-menu-item" onclick="showView('learner'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📚 My Courses</button>
+                    <button id="ddMyTeamProgress" class="options-menu-item" onclick="showView('am'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">👥 My Team Progress</button>
                     <a id="viewRubricOption" href="https://drive.google.com/file/d/1LyZFSq5b2E41kFfKjuVL4yywqExFO8I8/view?usp=sharing" target="_blank" class="options-menu-item" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; color: #333; text-decoration: none; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 View Rubric</a>
-                </div>
-            </div>
-            
-            <!-- TRAINING TEAM DROPDOWN -->
-            <div id="trainingTeamWrapper" style="position: relative; display: none;">
-                <button id="trainingTeamBtn" style="padding: 8px 14px; background: none; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.15s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">Training ▾</button>
-                <div id="trainingTeamDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 1000; margin-top: 4px; overflow: hidden;">
-                    <button id="adminAssessmentsOption" class="options-menu-item" onclick="openAdminAssessments()" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 Manage Assessments</button>
-                    <button id="assessmentsOption" class="options-menu-item" onclick="openAssessments()" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 My Assessments</button>
-                    <a id="viewRubricOption" href="https://drive.google.com/file/d/1GNCcXrlSMRvt0rqGhJIZcMU0gvLrZ4Lb/view?usp=sharing" target="_blank" class="options-menu-item" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; font-size: 14px; font-weight: 400; color: #333; text-decoration: none; transition: background 0.15s; display: block;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 View Rubric</a>
                 </div>
             </div>
             
@@ -621,8 +616,6 @@
                 <div id="optionsDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 1000; margin-top: 4px; overflow: hidden;">
                     <button id="ddAssign" class="options-menu-item" onclick="showView('assign'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📋 Assign Training</button>
                     <button id="changePasswordOption" class="options-menu-item" onclick="openChangePasswordPage(); closeAllDropdowns();" style="width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">👤 Edit Profile</button>
-                    <button id="ddAdminView" class="options-menu-item" onclick="showView('admin'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; border-bottom: 1px solid #f0f0f0; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">📊 Learner Progress</button>
-                    <button id="ddCurriculum" class="options-menu-item" onclick="showView('curriculum'); closeAllDropdowns();" style="display: none; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 400; color: #333; transition: background 0.15s;" onmouseover="this.style.background='#f7f7f7'" onmouseout="this.style.background='none'">🗂 Manage Curriculum</button>
                 </div>
             </div>
         </div>
@@ -739,6 +732,7 @@
                         <input type="text" class="photog-search-input" id="atPhotogSearch"
                                placeholder="Type name or email to search..."
                                oninput="searchPhotographers(this.value)"
+                               onfocus="showAllPhotographers()"
                                autocomplete="off">
                         <div class="photog-results" id="atPhotogResults"></div>
                     </div>
@@ -753,8 +747,8 @@
 
                 <!-- Due date -->
                 <div class="cf-row">
-                    <label class="cf-label">Due Date <span>(optional)</span></label>
-                    <input type="date" class="cf-input" id="atDue" style="max-width:200px;">
+                    <label class="cf-label">Due Date <span style="color:#e74c3c;">*</span></label>
+                    <input type="date" class="cf-input" id="atDue" style="max-width:200px;" required>
                 </div>
 
                 <div class="cf-save-row">
@@ -770,9 +764,13 @@
             <div class="page-title">Manage Curriculum</div>
             <div class="page-sub">Add modules, build learning paths, and manage quiz questions.</div>
 
-            <!-- ══ ADD / EDIT MODULE FORM (always visible) ══ -->
-            <div class="curr-form-panel" id="moduleFormPanel">
-                <h3 id="moduleFormTitle">➕ Add New Module</h3>
+            <!-- ══ ADD / EDIT MODULE FORM (collapsible) ══ -->
+            <div class="curr-form-panel" id="moduleFormPanel" style="display: none;">
+                <button type="button" class="curr-form-toggle" id="moduleFormToggle" onclick="toggleModuleForm()">
+                    <span id="moduleFormTitle">➕ Add New Module</span>
+                    <span id="moduleFormToggleIcon">▶</span>
+                </button>
+                <div id="moduleFormContent" style="display: none; margin-top: 18px;">
                 <input type="hidden" id="mfEditId">
 
                 <!-- Module title -->
@@ -904,6 +902,7 @@
                     <button class="btn-secondary" onclick="clearModuleForm()">Clear</button>
                     <span class="cf-save-msg" id="mfSaveMsg"></span>
                 </div>
+                </div><!-- /moduleFormContent -->
             </div>
 
             <!-- ══ MODULE LIST ══ -->
@@ -1081,8 +1080,8 @@ async function showDashboard() {
         document.getElementById('ddMyTraining').style.display = 'block';
         document.getElementById('ddCoursesEntry').style.display = 'block';  // Courses entry for photographers
     }
-    if (isAM() || isTrainer()) {
-        document.getElementById('trainingDropdownWrapper').style.display = 'block';
+    if (isAM() || isTrainer() || isAdmin() || isSuperAdmin()) {
+        document.getElementById('trainingWrapper').style.display = 'block';
         document.getElementById('ddMyCourses').style.display = 'block';
         document.getElementById('ddMyTeamProgress').style.display = 'block';
         document.getElementById('ddAssignTraining').style.display = 'block';
@@ -2495,6 +2494,15 @@ function showCFMsg(el, type, msg) {
     if (type === 'success') setTimeout(() => { el.textContent = ''; el.className = 'cf-save-msg'; }, 3000);
 }
 
+function toggleModuleForm() {
+    const content = document.getElementById('moduleFormContent');
+    const icon = document.getElementById('moduleFormToggleIcon');
+    const isOpen = content.style.display !== 'none';
+    
+    content.style.display = isOpen ? 'none' : 'block';
+    icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+}
+
 function clearModuleForm() {
     document.getElementById('mfEditId').value = '';
     document.getElementById('mfTitle').value = '';
@@ -2527,6 +2535,11 @@ function clearModuleForm() {
     switchImgTab('module', 'url');
     document.getElementById('moduleFormTitle').textContent = '➕ Add New Module';
     document.getElementById('mfSaveBtn').textContent = 'Save Module';
+    
+    // Collapse the form content
+    document.getElementById('moduleFormContent').style.display = 'none';
+    document.getElementById('moduleFormToggleIcon').style.transform = 'rotate(0deg)';
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -2541,6 +2554,11 @@ async function editModuleFill(moduleId) {
     document.getElementById('mfDesc').value = mod.description || '';
     document.getElementById('moduleFormTitle').textContent = '✏️ Edit Module';
     document.getElementById('mfSaveBtn').textContent = 'Update Module';
+    
+    // Show the form panel and expand the form content
+    document.getElementById('moduleFormPanel').style.display = 'block';
+    document.getElementById('moduleFormContent').style.display = 'block';
+    document.getElementById('moduleFormToggleIcon').style.transform = 'rotate(90deg)';
 
     // Restore content blocks in saved order
     let order = [];
@@ -2620,6 +2638,9 @@ async function editModuleFill(moduleId) {
 }
 
 async function loadCurriculumView() {
+    // Show the form panel (but form content starts collapsed)
+    document.getElementById('moduleFormPanel').style.display = 'block';
+    
     const container = document.getElementById('curriculumContent');
     container.innerHTML = '<div class="loading">Loading...</div>';
     try {
@@ -2972,6 +2993,7 @@ async function deletePath(pathId) {
 let atAssignType = null;       // 'path' or 'module'
 let atSelectedEmail = null;    // chosen photographer email
 let allPhotographers = [];     // full list for search
+let allPhotographerNames = {}; // map of email -> display name
 let atShowAllPhotogs = false;
 
 async function loadAssignView() {
@@ -3001,14 +3023,39 @@ async function loadAssignView() {
 
 async function loadPhotographerList() {
     try {
-        // Get all unique photographer emails from growth_assessments or user_roles
-        const { data } = await sb
+        // Get all unique photographer emails and display names from user_roles
+        const { data, error } = await sb
             .from('user_roles')
-            .select('user_email')
+            .select('user_email, display_name')
             .eq('role', 'user')
             .order('user_email');
 
         let emails = (data || []).map(r => r.user_email.toLowerCase());
+        
+        // Initialize display name mapping
+        allPhotographerNames = {};
+        
+        // First, try to get display_name from user_roles if the column exists
+        if (data && !error) {
+            data.forEach(row => {
+                const email = row.user_email.toLowerCase();
+                // Use display_name from user_roles if it exists and is not null
+                if (row.display_name) {
+                    allPhotographerNames[email] = row.display_name;
+                }
+            });
+        }
+        
+        // For emails without a display name, derive from email
+        emails.forEach(email => {
+            if (!allPhotographerNames[email]) {
+                const namePart = email.split('@')[0];
+                const nameWords = namePart.split(/[._-]/).map(word => 
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                );
+                allPhotographerNames[email] = nameWords.join(' ');
+            }
+        });
 
         // If AM and not showing all, filter to team only
         if (isAM() && !atShowAllPhotogs && amTeam.length) {
@@ -3016,9 +3063,11 @@ async function loadPhotographerList() {
         }
 
         allPhotographers = emails;
+        console.log('Photographer names loaded:', allPhotographerNames);
     } catch(e) {
-        console.warn('loadPhotographerList', e);
+        console.warn('loadPhotographerList error:', e);
         allPhotographers = [];
+        allPhotographerNames = {};
     }
 }
 
@@ -3041,24 +3090,44 @@ function searchPhotographers(query) {
     const results = document.getElementById('atPhotogResults');
     if (!query.trim()) { results.style.display = 'none'; return; }
     const q = query.toLowerCase();
-    const matches = allPhotographers.filter(e => e.includes(q)).slice(0, 12);
+    // Search by both email and name
+    const matches = allPhotographers.filter(email => {
+        const name = allPhotographerNames[email] || email;
+        return email.includes(q) || name.toLowerCase().includes(q);
+    }).slice(0, 12);
+    
     if (!matches.length) {
         results.innerHTML = '<div class="photog-result-item" style="color:#999;">No matches found</div>';
         results.style.display = 'block';
         return;
     }
-    results.innerHTML = matches.map(e =>
-        `<div class="photog-result-item" onclick="selectPhotographer('${esc(e)}')">${esc(e)}</div>`
-    ).join('');
+    results.innerHTML = matches.map(email => {
+        const name = allPhotographerNames[email] || email;
+        const displayText = `${name} (${email})`;
+        return `<div class="photog-result-item" onclick="selectPhotographer('${esc(email)}')">${esc(displayText)}</div>`;
+    }).join('');
     results.style.display = 'block';
 }
 
+function showAllPhotographers() {
+    const results = document.getElementById('atPhotogResults');
+    if (!allPhotographers.length) { return; }
+    results.innerHTML = allPhotographers.slice(0, 12).map(email => {
+        const name = allPhotographerNames[email] || email;
+        const displayText = `${name} (${email})`;
+        return `<div class="photog-result-item" onclick="selectPhotographer('${esc(email)}')">${esc(displayText)}</div>`;
+    }).join('');
+    results.style.display = 'block';
+}
+
+
 function selectPhotographer(email) {
     atSelectedEmail = email;
-    document.getElementById('atPhotogSearch').value = email;
+    const name = allPhotographerNames[email] || email;
+    document.getElementById('atPhotogSearch').value = name;  // Show name in input
     document.getElementById('atPhotogResults').style.display = 'none';
     document.getElementById('atPhotogSelected').innerHTML =
-        `<div class="photog-selected-tag">✓ ${esc(email)}
+        `<div class="photog-selected-tag">✓ ${esc(name)}
             <button onclick="clearPhotogSelection()" title="Remove">&times;</button>
         </div>`;
 }
@@ -3090,7 +3159,9 @@ async function submitAssignTraining() {
     if (!atSelectedEmail) { showCFMsg(msgEl, 'error', 'Please select a photographer.'); return; }
 
     const note = document.getElementById('atNote').value.trim() || null;
-    const due  = document.getElementById('atDue').value || null;
+    const due  = document.getElementById('atDue').value;
+    
+    if (!due) { showCFMsg(msgEl, 'error', 'Due date is required.'); return; }
 
     try {
         if (atAssignType === 'path') {
@@ -3324,7 +3395,6 @@ async function handleChangePW() {
 function closeAllDropdowns() {
     document.getElementById('learningDropdown').style.display = 'none';
     document.getElementById('trainingDropdown').style.display = 'none';
-    document.getElementById('trainingTeamDropdown').style.display = 'none';
     document.getElementById('optionsDropdown').style.display = 'none';
 }
 
@@ -3336,17 +3406,9 @@ document.getElementById('learningBtn').addEventListener('click', e => {
     if (!isOpen) dd.style.display = 'block';
 });
 
-document.getElementById('trainingDropdownBtn')?.addEventListener('click', e => {
+document.getElementById('trainingBtn').addEventListener('click', e => {
     e.stopPropagation();
     const dd = document.getElementById('trainingDropdown');
-    const isOpen = dd.style.display !== 'none';
-    closeAllDropdowns();
-    if (!isOpen) dd.style.display = 'block';
-});
-
-document.getElementById('trainingTeamBtn')?.addEventListener('click', e => {
-    e.stopPropagation();
-    const dd = document.getElementById('trainingTeamDropdown');
     const isOpen = dd.style.display !== 'none';
     closeAllDropdowns();
     if (!isOpen) dd.style.display = 'block';
